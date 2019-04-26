@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{A9D20A1C-A32E-49E9-8577-87C83A47B87F}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="PanamahSDK.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="PanamahSDK">
+        <MSBuild Projects="PanamahSDK.dproj"/>
+    </Target>
+    <Target Name="PanamahSDK:Clean">
+        <MSBuild Projects="PanamahSDK.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="PanamahSDK:Make">
+        <MSBuild Projects="PanamahSDK.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="PanamahSDK"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="PanamahSDK:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="PanamahSDK:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
