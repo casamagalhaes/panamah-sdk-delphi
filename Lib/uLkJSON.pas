@@ -1,3 +1,5 @@
+{$Warnings Off}
+{$Hints Off}
 {
   LkJSON v1.07
 
@@ -2623,4 +2625,3 @@ initialization
 {$ENDIF USE_HASH}
 {$ENDIF THREADSAFE}
 end.
-

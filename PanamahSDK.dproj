@@ -82,6 +82,7 @@
         <DCCReference Include="Models\PanamahSDK.Models.PanamahProduto.pas"/>
         <DCCReference Include="PanamahSDK.Types.pas"/>
         <DCCReference Include="Lib\uLkJSON.pas"/>
+        <DCCReference Include="PanamahSDK.Utils.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -9,8 +9,8 @@ type
 
   IJSONSerializable = interface
     ['{AEE55D86-3A0E-46D0-9BCF-AEC0CFA1D71A}']
-    function ToJSON: string;
-    procedure FromJSON(const AJSON: string);
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
   end;
 
   IModel = interface(IJSONSerializable)

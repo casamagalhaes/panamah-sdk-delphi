@@ -4,7 +4,7 @@ unit PanamahSDK.Models.PanamahProduto;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   IPanamahProdutoComposicaoItem = interface(IModel)
@@ -39,12 +39,18 @@ type
     function GetDescricao: string;
     function GetFinalidade: Variant;
     function GetId: Variant;
+    function GetComposicao: IPanamahProdutoComposicao;
+    function GetTipo: TTipoEventoCaixa;
     procedure SetDescricao(const ADescricao: string);
     procedure SetFinalidade(const AFinalidade: Variant);
     procedure SetId(const AId: Variant);
+    procedure SetComposicao(AComposicao: IPanamahProdutoComposicao);
+    procedure SetTipo(ATipo: TTipoEventoCaixa);
     property Descricao: string read GetDescricao write SetDescricao;
     property Finalidade: Variant read GetFinalidade write SetFinalidade;
     property Id: Variant read GetId write SetId;
+    property Composicao: IPanamahProdutoComposicao read GetComposicao write SetComposicao;
+    property Tipo: TTipoEventoCaixa read GetTipo write SetTipo;
   end;
 
   TPanamahProdutoComposicaoItem = class(TInterfacedObject, IPanamahProdutoComposicaoItem)
@@ -53,8 +59,8 @@ type
     function GetProdutoId: Variant;
     procedure SetProdutoId(const AProdutoId: Variant);
   public
-    function ToJSON: string;
-    procedure FromJSON(const AJSON: string);
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
   published
     property ProdutoId: Variant read GetProdutoId write SetProdutoId;
   end;
@@ -66,8 +72,9 @@ type
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicaoItem);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
-    function ToJSON: string;
-    procedure FromJSON(const AJSON: string);
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
+    class function FromJSON(const AJSON: string): IPanamahProdutoComposicaoItemList;
     constructor Create;
     procedure Add(const AItem: IPanamahProdutoComposicaoItem);
     procedure Clear;
@@ -85,8 +92,9 @@ type
     procedure SetItens(AItens: IPanamahProdutoComposicaoItemList);
     procedure SetQuantidade(AQuantidade: Double);
   public
-    function ToJSON: string;
-    procedure FromJSON(const AJSON: string);
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
+    class function FromJSON(const AJSON: string): IPanamahProdutoComposicao;
   published
     property Quantidade: Double read GetQuantidade write SetQuantidade;
     property Itens: IPanamahProdutoComposicaoItemList read GetItens write SetItens;
@@ -96,24 +104,29 @@ type
   private
     FComposicao: IPanamahProdutoComposicao;
     FDescricao: string;
-    FFinalidade: string;
+    FFinalidade: Variant;
     FId: Variant;
+    FTipo: TTipoEventoCaixa;
     function GetComposicao: IPanamahProdutoComposicao;
     function GetDescricao: string;
     function GetFinalidade: Variant;
     function GetId: Variant;
+    function GetTipo: TTipoEventoCaixa;
     procedure SetComposicao(AComposicao: IPanamahProdutoComposicao);
     procedure SetDescricao(const ADescricao: string);
     procedure SetFinalidade(const AFinalidade: Variant);
     procedure SetId(const AId: Variant);
+    procedure SetTipo(ATipo: TTipoEventoCaixa);
   public
-    function ToJSON: string;
-    procedure FromJSON(const AJSON: string);
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
+    class function FromJSON(const AJSON: string): IPanamahProduto;
   published
     property Composicao: IPanamahProdutoComposicao read GetComposicao write SetComposicao;
     property Descricao: string read GetDescricao write SetDescricao;
     property Finalidade: Variant read GetFinalidade write SetFinalidade;
     property Id: Variant read GetId write SetId;
+    property Tipo: TTipoEventoCaixa read GetTipo write SetTipo;
   end;
 
 implementation
@@ -130,31 +143,28 @@ begin
   FProdutoId := AProdutoId;
 end;
 
-procedure TPanamahProdutoComposicaoItem.FromJSON(const AJSON: string);
+procedure TPanamahProdutoComposicaoItem.DeserializeFromJSON(const AJSON: string);
+var
+  JSONObject: TlkJSONobject;
 begin
-  with TlkJSON.ParseText(AJSON) as TlkJSONobject do
-  begin
-    try
-      FProdutoId := Field['produtoId'].Value;
-    finally
-      Free;
-    end;
+  JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
+  try
+    FProdutoId := JSONObject.Field['produtoId'].Value;
+  finally
+    JSONObject.Free;
   end;
 end;
 
-function TPanamahProdutoComposicaoItem.ToJSON: string;
+function TPanamahProdutoComposicaoItem.SerializeToJSON: string;
 var
-  JSON: TlkJSONobject;
+  JSONObject: TlkJSONobject;
 begin
-  JSON := TlkJSONobject.Create;
-  with JSON do
-  begin
-    try
-      Field['produtoId'].Value := FProdutoId;
-      Result := string(TlkJSON.GenerateText(JSON));
-    finally
-      Free;
-    end;
+  JSONObject := TlkJSONobject.Create;
+  try
+    SetFieldValue(JSONObject, 'produtoId', FProdutoId);
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
   end;
 end;
 
@@ -171,6 +181,12 @@ begin
   inherited;
 end;
 
+class function TPanamahProdutoComposicaoItemList.FromJSON(const AJSON: string): IPanamahProdutoComposicaoItemList;
+begin
+  Result := TPanamahProdutoComposicaoItemList.Create;
+  Result.DeserializeFromJSON(AJSON);
+end;
+
 procedure TPanamahProdutoComposicaoItemList.Add(const AItem: IPanamahProdutoComposicaoItem);
 begin
   FList.Add(AItem);
@@ -182,7 +198,7 @@ var
   Item: IPanamahProdutoComposicaoItem;
 begin
   Item := TPanamahProdutoComposicaoItem.Create;
-  Item.FromJSON(TlkJSON.GenerateText(Elem));
+  Item.DeserializeFromJSON(TlkJSON.GenerateText(Elem));
   FList.Add(Item);
 end;
 
@@ -207,7 +223,7 @@ begin
   FList[AIndex] := Value;
 end;
 
-procedure TPanamahProdutoComposicaoItemList.FromJSON(const AJSON: string);
+procedure TPanamahProdutoComposicaoItemList.DeserializeFromJSON(const AJSON: string);
 begin
   with TlkJSON.ParseText(AJSON) as TlkJSONlist do
   begin
@@ -216,57 +232,55 @@ begin
   end;
 end;
 
-function TPanamahProdutoComposicaoItemList.ToJSON: string;
+function TPanamahProdutoComposicaoItemList.SerializeToJSON: string;
 var
-  JSON: TlkJSONlist;
+  JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSON := TlkJSONlist.Create;
+  JSONObject := TlkJSONlist.Create;
   try
     for I := 0 to FList.Count - 1 do
-      JSON.Add(TlkJSON.ParseText((FList[I] as IPanamahProdutoComposicaoItem).ToJSON));
+      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahProdutoComposicaoItem).SerializeToJSON));
+    Result := TlkJSON.GenerateText(JSONObject);
   finally
-    JSON.Free;
+    JSONObject.Free;
   end;
 end;
 
 { TPanamahProdutoComposicao }
 
-procedure TPanamahProdutoComposicao.FromJSON(const AJSON: string);
+procedure TPanamahProdutoComposicao.DeserializeFromJSON(const AJSON: string);
+var
+  JSONObject: TlkJSONobject;
 begin
-  with TlkJSON.ParseText(AJSON) as TlkJSONobject do
-  begin
-    try
-      if Field['itens'] is TlkJSONlist then
-      begin
-        FItens := TPanamahProdutoComposicaoItemList.Create;
-        FItens.FromJSON(TlkJSON.GenerateText(Field['itens']));
-      end;
-      FQuantidade := Field['quantidade'].Value;
-    finally
-      Free;
-    end;
+  JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
+  try
+    if JSONObject.Field['itens'] is TlkJSONlist then
+      FItens := TPanamahProdutoComposicaoItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
+    FQuantidade := GetFieldValueAsDouble(JSONObject, 'quantidade');
+  finally
+    JSONObject.Free;
   end;
 end;
 
-function TPanamahProdutoComposicao.ToJSON: string;
+function TPanamahProdutoComposicao.SerializeToJSON: string;
 var
-  JSON: TlkJSONobject;
+  JSONObject: TlkJSONobject;
 begin
-  JSON := TlkJSONobject.Create;
-  with JSON do
-  begin
-    try
-      if Assigned(FItens) then
-      begin
-        Field['itens'] := TlkJSON.ParseText(FItens.ToJSON);
-      end;
-      Field['quantidade'].Value := FQuantidade;
-      Result := TlkJSON.GenerateText(JSON);
-    finally
-      Free;
-    end;
+  JSONObject := TlkJSONobject.Create;
+  try
+    SetFieldValue(JSONObject, 'quantidade', FQuantidade);
+    SetFieldValue(JSONObject, 'itens', FItens);
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
   end;
+end;
+
+class function TPanamahProdutoComposicao.FromJSON(const AJSON: string): IPanamahProdutoComposicao;
+begin
+  Result := TPanamahProdutoComposicao.Create;
+  Result.DeserializeFromJSON(AJSON);
 end;
 
 function TPanamahProdutoComposicao.GetItens: IPanamahProdutoComposicaoItemList;
@@ -291,46 +305,43 @@ end;
 
 { TPanamahProduto }
 
-procedure TPanamahProduto.FromJSON(const AJSON: string);
+procedure TPanamahProduto.DeserializeFromJSON(const AJSON: string);
+var
+  JSONObject: TlkJSONobject;
 begin
-  with TlkJSON.ParseText(AJSON) as TlkJSONobject do
-  begin
-    try
-      FId := Field['id'].Value;
-      FDescricao := Field['descricao'].Value;
-//      FFinalidade := VarToStr(Field['finalidade'].Value);
-//      if Field['composicao'] is TlkJSONobject then
-//      begin
-//        FComposicao := TPanamahProdutoComposicao.Create;
-//        FComposicao.FromJSON(TlkJSON.GenerateText(Field['itens']));
-//      end;
-    finally
-      Free;
-    end;
+  JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
+  try
+    FId := GetFieldValue(JSONObject, 'id');
+    FDescricao := GetFieldValueAsString(JSONObject, 'descricao');
+    FFinalidade := GetFieldValueAsString(JSONObject, 'finalidade');
+    if JSONObject.Field['composicao'] is TlkJSONobject then
+      FComposicao := TPanamahProdutoComposicao.FromJSON(TlkJSON.GenerateText(JSONObject.Field['composicao']));
+  finally
+    JSONObject.Free;
   end;
 end;
 
-function TPanamahProduto.ToJSON: string;
+function TPanamahProduto.SerializeToJSON: string;
 var
-  JSON: TlkJSONobject;
+  JSONObject: TlkJSONobject;
 begin
-  JSON := TlkJSONobject.Create;
-  with JSON do
-  begin
-    try
-      Add('id', TlkJSONstring.Generate(FId));
-      Add('descricao', TlkJSONstring.Generate(FDescricao));
-//      FDescricao := Field['descricao'].Value;
-//      FFinalidade := Field['finalidade'].Value;
-//      if Assigned(FComposicao) then
-//      begin
-//        Field['composicao'] := TlkJSON.ParseText(FComposicao.ToJSON);
-//      end;
-      Result := TlkJSON.GenerateText(JSON);
-    finally
-      Free;
-    end;
+  JSONObject := TlkJSONobject.Create;
+  try
+    SetFieldValue(JSONObject, 'id', FId);
+    SetFieldValue(JSONObject, 'descricao', FDescricao);
+    SetFieldValue(JSONObject, 'finalidade', FFinalidade);
+    SetFieldValue(JSONObject, 'composicao', FComposicao);
+    SetFieldValue(JSONObject, 'tipo', EnumConverters.Execute('TipoEventoCaixa', Ord(FTipo)));
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
   end;
+end;
+
+class function TPanamahProduto.FromJSON(const AJSON: string): IPanamahProduto;
+begin
+  Result := TPanamahProduto.Create;
+  Result.DeserializeFromJSON(AJSON);
 end;
 
 function TPanamahProduto.GetComposicao: IPanamahProdutoComposicao;
@@ -353,6 +364,11 @@ begin
   Result := FId;
 end;
 
+function TPanamahProduto.GetTipo: TTipoEventoCaixa;
+begin
+  Result := FTipo;
+end;
+
 procedure TPanamahProduto.SetComposicao(AComposicao: IPanamahProdutoComposicao);
 begin
   FComposicao := AComposicao;
@@ -371,6 +387,11 @@ end;
 procedure TPanamahProduto.SetId(const AId: Variant);
 begin
   FId := AId;
+end;
+
+procedure TPanamahProduto.SetTipo(ATipo: TTipoEventoCaixa);
+begin
+  FTipo := ATipo;
 end;
 
 end.
