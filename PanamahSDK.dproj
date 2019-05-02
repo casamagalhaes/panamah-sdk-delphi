@@ -82,7 +82,9 @@
         <DCCReference Include="Models\PanamahSDK.Models.PanamahProduto.pas"/>
         <DCCReference Include="PanamahSDK.Types.pas"/>
         <DCCReference Include="Lib\uLkJSON.pas"/>
-        <DCCReference Include="PanamahSDK.Utils.pas"/>
+        <DCCReference Include="PanamahSDK.JsonUtils.pas"/>
+        <DCCReference Include="PanamahSDK.Enums.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.PanamahAssinante.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
