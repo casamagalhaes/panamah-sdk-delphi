@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahMeta;
+unit PanamahSDK.Models.Meta;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahMeta = interface(IModel)
-    ['{00600FA0-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1D8240-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetMes: Double;
     function GetAno: Double;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahMetaList = interface(IJSONSerializable)
-    ['{00600FA1-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1D8241-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahMeta;
     procedure SetItem(AIndex: Integer; const Value: IPanamahMeta);
     procedure Add(const AItem: IPanamahMeta);

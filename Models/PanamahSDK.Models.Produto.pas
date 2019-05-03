@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahProduto;
+unit PanamahSDK.Models.Produto;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahProdutoFornecedor = interface(IModel)
-    ['{0060ABE9-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E4594-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetPrincipal: Boolean;
     procedure SetId(const AId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahProdutoFornecedorList = interface(IJSONSerializable)
-    ['{0060ABEA-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E4595-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahProdutoFornecedor;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoFornecedor);
     procedure Add(const AItem: IPanamahProdutoFornecedor);
@@ -29,7 +29,7 @@ type
   end;
   
   IPanamahProdutoComposicaoItem = interface(IModel)
-    ['{0060ABE5-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E4590-6DAE-11E9-88EA-EB5361679635}']
     function GetProdutoId: string;
     function GetQuantidade: Double;
     procedure SetProdutoId(const AProdutoId: string);
@@ -39,7 +39,7 @@ type
   end;
   
   IPanamahProdutoComposicaoItemList = interface(IJSONSerializable)
-    ['{0060ABE6-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E4591-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahProdutoComposicaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicaoItem);
     procedure Add(const AItem: IPanamahProdutoComposicaoItem);
@@ -49,7 +49,7 @@ type
   end;
   
   IPanamahProdutoComposicao = interface(IModel)
-    ['{0060ABE1-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E1E8C-6DAE-11E9-88EA-EB5361679635}']
     function GetItens: IPanamahProdutoComposicaoItemList;
     function GetQuantidade: Double;
     procedure SetItens(const AItens: IPanamahProdutoComposicaoItemList);
@@ -59,7 +59,7 @@ type
   end;
   
   IPanamahProdutoComposicaoList = interface(IJSONSerializable)
-    ['{0060ABE2-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E1E8D-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahProdutoComposicao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicao);
     procedure Add(const AItem: IPanamahProdutoComposicao);
@@ -69,7 +69,7 @@ type
   end;
   
   IPanamahProduto = interface(IModel)
-    ['{006084D5-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1DF779-6DAE-11E9-88EA-EB5361679635}']
     function GetComposicao: IPanamahProdutoComposicao;
     function GetTipoComposicao: variant;
     function GetDescricao: string;
@@ -112,7 +112,7 @@ type
   end;
   
   IPanamahProdutoList = interface(IJSONSerializable)
-    ['{006084D6-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1DF77A-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahProduto;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProduto);
     procedure Add(const AItem: IPanamahProduto);

@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahVenda;
+unit PanamahSDK.Models.Venda;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahVendaPagamento = interface(IModel)
-    ['{0061E46F-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1FF352-6DAE-11E9-88EA-EB5361679635}']
     function GetFormaPagamentoId: string;
     function GetSequencial: string;
     function GetValor: Double;
@@ -22,7 +22,7 @@ type
   end;
   
   IPanamahVendaPagamentoList = interface(IJSONSerializable)
-    ['{0061E470-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1FF353-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahVendaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahVendaPagamento);
     procedure Add(const AItem: IPanamahVendaPagamento);
@@ -32,7 +32,7 @@ type
   end;
   
   IPanamahVendaItem = interface(IModel)
-    ['{0061BD5A-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1FF340-6DAE-11E9-88EA-EB5361679635}']
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetEfetivo: Boolean;
@@ -84,7 +84,7 @@ type
   end;
   
   IPanamahVendaItemList = interface(IJSONSerializable)
-    ['{0061BD5B-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1FF341-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahVendaItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahVendaItem);
     procedure Add(const AItem: IPanamahVendaItem);
@@ -94,7 +94,7 @@ type
   end;
   
   IPanamahVenda = interface(IModel)
-    ['{00619640-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1FA520-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetLojaId: string;
     function GetClienteId: variant;
@@ -164,7 +164,7 @@ type
   end;
   
   IPanamahVendaList = interface(IJSONSerializable)
-    ['{00619641-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1FA521-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahVenda;
     procedure SetItem(AIndex: Integer; const Value: IPanamahVenda);
     procedure Add(const AItem: IPanamahVenda);

@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahTituloPagar;
+unit PanamahSDK.Models.TituloReceber;
 
 interface
 
@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahTituloPagarPagamento = interface(IModel)
-    ['{00636B00-6D1F-11E9-BC68-6769AAA11E00}']
+  IPanamahTituloReceberPagamento = interface(IModel)
+    ['{0F20DDAF-6DAE-11E9-88EA-EB5361679635}']
     function GetDataHora: TDateTime;
     function GetValor: Double;
     procedure SetDataHora(const ADataHora: TDateTime);
@@ -18,21 +18,21 @@ type
     property Valor: Double read GetValor write SetValor;
   end;
   
-  IPanamahTituloPagarPagamentoList = interface(IJSONSerializable)
-    ['{00636B01-6D1F-11E9-BC68-6769AAA11E00}']
-    function GetItem(AIndex: Integer): IPanamahTituloPagarPagamento;
-    procedure SetItem(AIndex: Integer; const Value: IPanamahTituloPagarPagamento);
-    procedure Add(const AItem: IPanamahTituloPagarPagamento);
+  IPanamahTituloReceberPagamentoList = interface(IJSONSerializable)
+    ['{0F20DDB0-6DAE-11E9-88EA-EB5361679635}']
+    function GetItem(AIndex: Integer): IPanamahTituloReceberPagamento;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahTituloReceberPagamento);
+    procedure Add(const AItem: IPanamahTituloReceberPagamento);
     procedure Clear;
     function Count: Integer;
-    property Items[AIndex: Integer]: IPanamahTituloPagarPagamento read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: IPanamahTituloReceberPagamento read GetItem write SetItem; default;
   end;
   
-  IPanamahTituloPagar = interface(IModel)
-    ['{006343F5-6D1F-11E9-BC68-6769AAA11E00}']
+  IPanamahTituloReceber = interface(IModel)
+    ['{0F20DDA1-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetLojaId: string;
-    function GetFornecedorId: string;
+    function GetClienteId: string;
     function GetDocumento: string;
     function GetValorNominal: Double;
     function GetValorJuros: Double;
@@ -41,10 +41,10 @@ type
     function GetValorPago: Double;
     function GetDataEmissao: TDateTime;
     function GetDataVencimento: TDateTime;
-    function GetPagamentos: IPanamahTituloPagarPagamentoList;
+    function GetPagamentos: IPanamahTituloReceberPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
-    procedure SetFornecedorId(const AFornecedorId: string);
+    procedure SetClienteId(const AClienteId: string);
     procedure SetDocumento(const ADocumento: string);
     procedure SetValorNominal(const AValorNominal: Double);
     procedure SetValorJuros(const AValorJuros: Double);
@@ -53,10 +53,10 @@ type
     procedure SetValorPago(const AValorPago: Double);
     procedure SetDataEmissao(const ADataEmissao: TDateTime);
     procedure SetDataVencimento(const ADataVencimento: TDateTime);
-    procedure SetPagamentos(const APagamentos: IPanamahTituloPagarPagamentoList);
+    procedure SetPagamentos(const APagamentos: IPanamahTituloReceberPagamentoList);
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
-    property FornecedorId: string read GetFornecedorId write SetFornecedorId;
+    property ClienteId: string read GetClienteId write SetClienteId;
     property Documento: string read GetDocumento write SetDocumento;
     property ValorNominal: Double read GetValorNominal write SetValorNominal;
     property ValorJuros: Double read GetValorJuros write SetValorJuros;
@@ -65,20 +65,20 @@ type
     property ValorPago: Double read GetValorPago write SetValorPago;
     property DataEmissao: TDateTime read GetDataEmissao write SetDataEmissao;
     property DataVencimento: TDateTime read GetDataVencimento write SetDataVencimento;
-    property Pagamentos: IPanamahTituloPagarPagamentoList read GetPagamentos write SetPagamentos;
+    property Pagamentos: IPanamahTituloReceberPagamentoList read GetPagamentos write SetPagamentos;
   end;
   
-  IPanamahTituloPagarList = interface(IJSONSerializable)
-    ['{006343F6-6D1F-11E9-BC68-6769AAA11E00}']
-    function GetItem(AIndex: Integer): IPanamahTituloPagar;
-    procedure SetItem(AIndex: Integer; const Value: IPanamahTituloPagar);
-    procedure Add(const AItem: IPanamahTituloPagar);
+  IPanamahTituloReceberList = interface(IJSONSerializable)
+    ['{0F20DDA2-6DAE-11E9-88EA-EB5361679635}']
+    function GetItem(AIndex: Integer): IPanamahTituloReceber;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahTituloReceber);
+    procedure Add(const AItem: IPanamahTituloReceber);
     procedure Clear;
     function Count: Integer;
-    property Items[AIndex: Integer]: IPanamahTituloPagar read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: IPanamahTituloReceber read GetItem write SetItem; default;
   end;
   
-  TPanamahTituloPagarPagamento = class(TInterfacedObject, IPanamahTituloPagarPagamento)
+  TPanamahTituloReceberPagamento = class(TInterfacedObject, IPanamahTituloReceberPagamento)
   private
     FDataHora: TDateTime;
     FValor: Double;
@@ -89,35 +89,35 @@ type
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahTituloPagarPagamento;
+    class function FromJSON(const AJSON: string): IPanamahTituloReceberPagamento;
   published
     property DataHora: TDateTime read GetDataHora write SetDataHora;
     property Valor: Double read GetValor write SetValor;
   end;
 
-  TPanamahTituloPagarPagamentoList = class(TInterfacedObject, IPanamahTituloPagarPagamentoList)
+  TPanamahTituloReceberPagamentoList = class(TInterfacedObject, IPanamahTituloReceberPagamentoList)
   private
     FList: TInterfaceList;
-    function GetItem(AIndex: Integer): IPanamahTituloPagarPagamento;
-    procedure SetItem(AIndex: Integer; const Value: IPanamahTituloPagarPagamento);
+    function GetItem(AIndex: Integer): IPanamahTituloReceberPagamento;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahTituloReceberPagamento);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahTituloPagarPagamentoList;
+    class function FromJSON(const AJSON: string): IPanamahTituloReceberPagamentoList;
     constructor Create;
-    procedure Add(const AItem: IPanamahTituloPagarPagamento);
+    procedure Add(const AItem: IPanamahTituloReceberPagamento);
     procedure Clear;
     function Count: Integer;
     destructor Destroy; override;
-    property Items[AIndex: Integer]: IPanamahTituloPagarPagamento read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: IPanamahTituloReceberPagamento read GetItem write SetItem; default;
   end;
   
-  TPanamahTituloPagar = class(TInterfacedObject, IPanamahTituloPagar)
+  TPanamahTituloReceber = class(TInterfacedObject, IPanamahTituloReceber)
   private
     FId: string;
     FLojaId: string;
-    FFornecedorId: string;
+    FClienteId: string;
     FDocumento: string;
     FValorNominal: Double;
     FValorJuros: Double;
@@ -126,10 +126,10 @@ type
     FValorPago: Double;
     FDataEmissao: TDateTime;
     FDataVencimento: TDateTime;
-    FPagamentos: IPanamahTituloPagarPagamentoList;
+    FPagamentos: IPanamahTituloReceberPagamentoList;
     function GetId: string;
     function GetLojaId: string;
-    function GetFornecedorId: string;
+    function GetClienteId: string;
     function GetDocumento: string;
     function GetValorNominal: Double;
     function GetValorJuros: Double;
@@ -138,10 +138,10 @@ type
     function GetValorPago: Double;
     function GetDataEmissao: TDateTime;
     function GetDataVencimento: TDateTime;
-    function GetPagamentos: IPanamahTituloPagarPagamentoList;
+    function GetPagamentos: IPanamahTituloReceberPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
-    procedure SetFornecedorId(const AFornecedorId: string);
+    procedure SetClienteId(const AClienteId: string);
     procedure SetDocumento(const ADocumento: string);
     procedure SetValorNominal(const AValorNominal: Double);
     procedure SetValorJuros(const AValorJuros: Double);
@@ -150,15 +150,15 @@ type
     procedure SetValorPago(const AValorPago: Double);
     procedure SetDataEmissao(const ADataEmissao: TDateTime);
     procedure SetDataVencimento(const ADataVencimento: TDateTime);
-    procedure SetPagamentos(const APagamentos: IPanamahTituloPagarPagamentoList);
+    procedure SetPagamentos(const APagamentos: IPanamahTituloReceberPagamentoList);
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahTituloPagar;
+    class function FromJSON(const AJSON: string): IPanamahTituloReceber;
   published
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
-    property FornecedorId: string read GetFornecedorId write SetFornecedorId;
+    property ClienteId: string read GetClienteId write SetClienteId;
     property Documento: string read GetDocumento write SetDocumento;
     property ValorNominal: Double read GetValorNominal write SetValorNominal;
     property ValorJuros: Double read GetValorJuros write SetValorJuros;
@@ -167,52 +167,52 @@ type
     property ValorPago: Double read GetValorPago write SetValorPago;
     property DataEmissao: TDateTime read GetDataEmissao write SetDataEmissao;
     property DataVencimento: TDateTime read GetDataVencimento write SetDataVencimento;
-    property Pagamentos: IPanamahTituloPagarPagamentoList read GetPagamentos write SetPagamentos;
+    property Pagamentos: IPanamahTituloReceberPagamentoList read GetPagamentos write SetPagamentos;
   end;
 
-  TPanamahTituloPagarList = class(TInterfacedObject, IPanamahTituloPagarList)
+  TPanamahTituloReceberList = class(TInterfacedObject, IPanamahTituloReceberList)
   private
     FList: TInterfaceList;
-    function GetItem(AIndex: Integer): IPanamahTituloPagar;
-    procedure SetItem(AIndex: Integer; const Value: IPanamahTituloPagar);
+    function GetItem(AIndex: Integer): IPanamahTituloReceber;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahTituloReceber);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahTituloPagarList;
+    class function FromJSON(const AJSON: string): IPanamahTituloReceberList;
     constructor Create;
-    procedure Add(const AItem: IPanamahTituloPagar);
+    procedure Add(const AItem: IPanamahTituloReceber);
     procedure Clear;
     function Count: Integer;
     destructor Destroy; override;
-    property Items[AIndex: Integer]: IPanamahTituloPagar read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: IPanamahTituloReceber read GetItem write SetItem; default;
   end;
   
 implementation
 
-{ TPanamahTituloPagarPagamento }
+{ TPanamahTituloReceberPagamento }
 
-function TPanamahTituloPagarPagamento.GetDataHora: TDateTime;
+function TPanamahTituloReceberPagamento.GetDataHora: TDateTime;
 begin
   Result := FDataHora;
 end;
 
-procedure TPanamahTituloPagarPagamento.SetDataHora(const ADataHora: TDateTime);
+procedure TPanamahTituloReceberPagamento.SetDataHora(const ADataHora: TDateTime);
 begin
   FDataHora := ADataHora;
 end;
 
-function TPanamahTituloPagarPagamento.GetValor: Double;
+function TPanamahTituloReceberPagamento.GetValor: Double;
 begin
   Result := FValor;
 end;
 
-procedure TPanamahTituloPagarPagamento.SetValor(const AValor: Double);
+procedure TPanamahTituloReceberPagamento.SetValor(const AValor: Double);
 begin
   FValor := AValor;
 end;
 
-procedure TPanamahTituloPagarPagamento.DeserializeFromJSON(const AJSON: string);
+procedure TPanamahTituloReceberPagamento.DeserializeFromJSON(const AJSON: string);
 var
   JSONObject: TlkJSONobject;
 begin
@@ -225,7 +225,7 @@ begin
   end;
 end;
 
-function TPanamahTituloPagarPagamento.SerializeToJSON: string;
+function TPanamahTituloReceberPagamento.SerializeToJSON: string;
 var
   JSONObject: TlkJSONobject;
 begin
@@ -239,68 +239,68 @@ begin
   end;
 end;
 
-class function TPanamahTituloPagarPagamento.FromJSON(const AJSON: string): IPanamahTituloPagarPagamento;
+class function TPanamahTituloReceberPagamento.FromJSON(const AJSON: string): IPanamahTituloReceberPagamento;
 begin
-  Result := TPanamahTituloPagarPagamento.Create;
+  Result := TPanamahTituloReceberPagamento.Create;
   Result.DeserializeFromJSON(AJSON);
 end;
 
-{ TPanamahTituloPagarPagamentoList }
+{ TPanamahTituloReceberPagamentoList }
 
-constructor TPanamahTituloPagarPagamentoList.Create;
+constructor TPanamahTituloReceberPagamentoList.Create;
 begin
   FList := TInterfaceList.Create;
 end;
 
-destructor TPanamahTituloPagarPagamentoList.Destroy;
+destructor TPanamahTituloReceberPagamentoList.Destroy;
 begin
   FreeAndNil(FList);
   inherited;
 end;
 
-class function TPanamahTituloPagarPagamentoList.FromJSON(const AJSON: string): IPanamahTituloPagarPagamentoList;
+class function TPanamahTituloReceberPagamentoList.FromJSON(const AJSON: string): IPanamahTituloReceberPagamentoList;
 begin
-  Result := TPanamahTituloPagarPagamentoList.Create;
+  Result := TPanamahTituloReceberPagamentoList.Create;
   Result.DeserializeFromJSON(AJSON);
 end;
 
-procedure TPanamahTituloPagarPagamentoList.Add(const AItem: IPanamahTituloPagarPagamento);
+procedure TPanamahTituloReceberPagamentoList.Add(const AItem: IPanamahTituloReceberPagamento);
 begin
   FList.Add(AItem);
 end;
 
-procedure TPanamahTituloPagarPagamentoList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
+procedure TPanamahTituloReceberPagamentoList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
   var Continue: Boolean);
 var
-  Item: IPanamahTituloPagarPagamento;
+  Item: IPanamahTituloReceberPagamento;
 begin
-  Item := TPanamahTituloPagarPagamento.Create;
+  Item := TPanamahTituloReceberPagamento.Create;
   Item.DeserializeFromJSON(TlkJSON.GenerateText(Elem));
   FList.Add(Item);
 end;
 
-procedure TPanamahTituloPagarPagamentoList.Clear;
+procedure TPanamahTituloReceberPagamentoList.Clear;
 begin
   FList.Clear;
 end;
 
-function TPanamahTituloPagarPagamentoList.Count: Integer;
+function TPanamahTituloReceberPagamentoList.Count: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TPanamahTituloPagarPagamentoList.GetItem(AIndex: Integer): IPanamahTituloPagarPagamento;
+function TPanamahTituloReceberPagamentoList.GetItem(AIndex: Integer): IPanamahTituloReceberPagamento;
 begin
-  Result := FList.Items[AIndex] as IPanamahTituloPagarPagamento;
+  Result := FList.Items[AIndex] as IPanamahTituloReceberPagamento;
 end;
 
-procedure TPanamahTituloPagarPagamentoList.SetItem(AIndex: Integer;
-  const Value: IPanamahTituloPagarPagamento);
+procedure TPanamahTituloReceberPagamentoList.SetItem(AIndex: Integer;
+  const Value: IPanamahTituloReceberPagamento);
 begin
   FList[AIndex] := Value;
 end;
 
-procedure TPanamahTituloPagarPagamentoList.DeserializeFromJSON(const AJSON: string);
+procedure TPanamahTituloReceberPagamentoList.DeserializeFromJSON(const AJSON: string);
 begin
   with TlkJSON.ParseText(AJSON) as TlkJSONlist do
   begin
@@ -309,7 +309,7 @@ begin
   end;
 end;
 
-function TPanamahTituloPagarPagamentoList.SerializeToJSON: string;
+function TPanamahTituloReceberPagamentoList.SerializeToJSON: string;
 var
   JSONObject: TlkJSONlist;
   I: Integer;
@@ -317,136 +317,136 @@ begin
   JSONObject := TlkJSONlist.Create;
   try
     for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTituloPagarPagamento).SerializeToJSON));
+      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTituloReceberPagamento).SerializeToJSON));
     Result := TlkJSON.GenerateText(JSONObject);
   finally
     JSONObject.Free;
   end;
 end;
 
-{ TPanamahTituloPagar }
+{ TPanamahTituloReceber }
 
-function TPanamahTituloPagar.GetId: string;
+function TPanamahTituloReceber.GetId: string;
 begin
   Result := FId;
 end;
 
-procedure TPanamahTituloPagar.SetId(const AId: string);
+procedure TPanamahTituloReceber.SetId(const AId: string);
 begin
   FId := AId;
 end;
 
-function TPanamahTituloPagar.GetLojaId: string;
+function TPanamahTituloReceber.GetLojaId: string;
 begin
   Result := FLojaId;
 end;
 
-procedure TPanamahTituloPagar.SetLojaId(const ALojaId: string);
+procedure TPanamahTituloReceber.SetLojaId(const ALojaId: string);
 begin
   FLojaId := ALojaId;
 end;
 
-function TPanamahTituloPagar.GetFornecedorId: string;
+function TPanamahTituloReceber.GetClienteId: string;
 begin
-  Result := FFornecedorId;
+  Result := FClienteId;
 end;
 
-procedure TPanamahTituloPagar.SetFornecedorId(const AFornecedorId: string);
+procedure TPanamahTituloReceber.SetClienteId(const AClienteId: string);
 begin
-  FFornecedorId := AFornecedorId;
+  FClienteId := AClienteId;
 end;
 
-function TPanamahTituloPagar.GetDocumento: string;
+function TPanamahTituloReceber.GetDocumento: string;
 begin
   Result := FDocumento;
 end;
 
-procedure TPanamahTituloPagar.SetDocumento(const ADocumento: string);
+procedure TPanamahTituloReceber.SetDocumento(const ADocumento: string);
 begin
   FDocumento := ADocumento;
 end;
 
-function TPanamahTituloPagar.GetValorNominal: Double;
+function TPanamahTituloReceber.GetValorNominal: Double;
 begin
   Result := FValorNominal;
 end;
 
-procedure TPanamahTituloPagar.SetValorNominal(const AValorNominal: Double);
+procedure TPanamahTituloReceber.SetValorNominal(const AValorNominal: Double);
 begin
   FValorNominal := AValorNominal;
 end;
 
-function TPanamahTituloPagar.GetValorJuros: Double;
+function TPanamahTituloReceber.GetValorJuros: Double;
 begin
   Result := FValorJuros;
 end;
 
-procedure TPanamahTituloPagar.SetValorJuros(const AValorJuros: Double);
+procedure TPanamahTituloReceber.SetValorJuros(const AValorJuros: Double);
 begin
   FValorJuros := AValorJuros;
 end;
 
-function TPanamahTituloPagar.GetValorMulta: Double;
+function TPanamahTituloReceber.GetValorMulta: Double;
 begin
   Result := FValorMulta;
 end;
 
-procedure TPanamahTituloPagar.SetValorMulta(const AValorMulta: Double);
+procedure TPanamahTituloReceber.SetValorMulta(const AValorMulta: Double);
 begin
   FValorMulta := AValorMulta;
 end;
 
-function TPanamahTituloPagar.GetValorDevido: Double;
+function TPanamahTituloReceber.GetValorDevido: Double;
 begin
   Result := FValorDevido;
 end;
 
-procedure TPanamahTituloPagar.SetValorDevido(const AValorDevido: Double);
+procedure TPanamahTituloReceber.SetValorDevido(const AValorDevido: Double);
 begin
   FValorDevido := AValorDevido;
 end;
 
-function TPanamahTituloPagar.GetValorPago: Double;
+function TPanamahTituloReceber.GetValorPago: Double;
 begin
   Result := FValorPago;
 end;
 
-procedure TPanamahTituloPagar.SetValorPago(const AValorPago: Double);
+procedure TPanamahTituloReceber.SetValorPago(const AValorPago: Double);
 begin
   FValorPago := AValorPago;
 end;
 
-function TPanamahTituloPagar.GetDataEmissao: TDateTime;
+function TPanamahTituloReceber.GetDataEmissao: TDateTime;
 begin
   Result := FDataEmissao;
 end;
 
-procedure TPanamahTituloPagar.SetDataEmissao(const ADataEmissao: TDateTime);
+procedure TPanamahTituloReceber.SetDataEmissao(const ADataEmissao: TDateTime);
 begin
   FDataEmissao := ADataEmissao;
 end;
 
-function TPanamahTituloPagar.GetDataVencimento: TDateTime;
+function TPanamahTituloReceber.GetDataVencimento: TDateTime;
 begin
   Result := FDataVencimento;
 end;
 
-procedure TPanamahTituloPagar.SetDataVencimento(const ADataVencimento: TDateTime);
+procedure TPanamahTituloReceber.SetDataVencimento(const ADataVencimento: TDateTime);
 begin
   FDataVencimento := ADataVencimento;
 end;
 
-function TPanamahTituloPagar.GetPagamentos: IPanamahTituloPagarPagamentoList;
+function TPanamahTituloReceber.GetPagamentos: IPanamahTituloReceberPagamentoList;
 begin
   Result := FPagamentos;
 end;
 
-procedure TPanamahTituloPagar.SetPagamentos(const APagamentos: IPanamahTituloPagarPagamentoList);
+procedure TPanamahTituloReceber.SetPagamentos(const APagamentos: IPanamahTituloReceberPagamentoList);
 begin
   FPagamentos := APagamentos;
 end;
 
-procedure TPanamahTituloPagar.DeserializeFromJSON(const AJSON: string);
+procedure TPanamahTituloReceber.DeserializeFromJSON(const AJSON: string);
 var
   JSONObject: TlkJSONobject;
 begin
@@ -454,7 +454,7 @@ begin
   try
     FId := GetFieldValueAsString(JSONObject, 'id');
     FLojaId := GetFieldValueAsString(JSONObject, 'lojaId');
-    FFornecedorId := GetFieldValueAsString(JSONObject, 'fornecedorId');
+    FClienteId := GetFieldValueAsString(JSONObject, 'clienteId');
     FDocumento := GetFieldValueAsString(JSONObject, 'documento');
     FValorNominal := GetFieldValueAsDouble(JSONObject, 'valorNominal');
     FValorJuros := GetFieldValueAsDouble(JSONObject, 'valorJuros');
@@ -464,13 +464,13 @@ begin
     FDataEmissao := GetFieldValueAsDatetime(JSONObject, 'dataEmissao');
     FDataVencimento := GetFieldValueAsDatetime(JSONObject, 'dataVencimento');
     if JSONObject.Field['pagamentos'] is TlkJSONlist then
-      FPagamentos := TPanamahTituloPagarPagamentoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['pagamentos']));
+      FPagamentos := TPanamahTituloReceberPagamentoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['pagamentos']));
   finally
     JSONObject.Free;
   end;
 end;
 
-function TPanamahTituloPagar.SerializeToJSON: string;
+function TPanamahTituloReceber.SerializeToJSON: string;
 var
   JSONObject: TlkJSONobject;
 begin
@@ -478,7 +478,7 @@ begin
   try    
     SetFieldValue(JSONObject, 'id', FId);    
     SetFieldValue(JSONObject, 'lojaId', FLojaId);    
-    SetFieldValue(JSONObject, 'fornecedorId', FFornecedorId);    
+    SetFieldValue(JSONObject, 'clienteId', FClienteId);    
     SetFieldValue(JSONObject, 'documento', FDocumento);    
     SetFieldValue(JSONObject, 'valorNominal', FValorNominal);    
     SetFieldValue(JSONObject, 'valorJuros', FValorJuros);    
@@ -494,68 +494,68 @@ begin
   end;
 end;
 
-class function TPanamahTituloPagar.FromJSON(const AJSON: string): IPanamahTituloPagar;
+class function TPanamahTituloReceber.FromJSON(const AJSON: string): IPanamahTituloReceber;
 begin
-  Result := TPanamahTituloPagar.Create;
+  Result := TPanamahTituloReceber.Create;
   Result.DeserializeFromJSON(AJSON);
 end;
 
-{ TPanamahTituloPagarList }
+{ TPanamahTituloReceberList }
 
-constructor TPanamahTituloPagarList.Create;
+constructor TPanamahTituloReceberList.Create;
 begin
   FList := TInterfaceList.Create;
 end;
 
-destructor TPanamahTituloPagarList.Destroy;
+destructor TPanamahTituloReceberList.Destroy;
 begin
   FreeAndNil(FList);
   inherited;
 end;
 
-class function TPanamahTituloPagarList.FromJSON(const AJSON: string): IPanamahTituloPagarList;
+class function TPanamahTituloReceberList.FromJSON(const AJSON: string): IPanamahTituloReceberList;
 begin
-  Result := TPanamahTituloPagarList.Create;
+  Result := TPanamahTituloReceberList.Create;
   Result.DeserializeFromJSON(AJSON);
 end;
 
-procedure TPanamahTituloPagarList.Add(const AItem: IPanamahTituloPagar);
+procedure TPanamahTituloReceberList.Add(const AItem: IPanamahTituloReceber);
 begin
   FList.Add(AItem);
 end;
 
-procedure TPanamahTituloPagarList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
+procedure TPanamahTituloReceberList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
   var Continue: Boolean);
 var
-  Item: IPanamahTituloPagar;
+  Item: IPanamahTituloReceber;
 begin
-  Item := TPanamahTituloPagar.Create;
+  Item := TPanamahTituloReceber.Create;
   Item.DeserializeFromJSON(TlkJSON.GenerateText(Elem));
   FList.Add(Item);
 end;
 
-procedure TPanamahTituloPagarList.Clear;
+procedure TPanamahTituloReceberList.Clear;
 begin
   FList.Clear;
 end;
 
-function TPanamahTituloPagarList.Count: Integer;
+function TPanamahTituloReceberList.Count: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TPanamahTituloPagarList.GetItem(AIndex: Integer): IPanamahTituloPagar;
+function TPanamahTituloReceberList.GetItem(AIndex: Integer): IPanamahTituloReceber;
 begin
-  Result := FList.Items[AIndex] as IPanamahTituloPagar;
+  Result := FList.Items[AIndex] as IPanamahTituloReceber;
 end;
 
-procedure TPanamahTituloPagarList.SetItem(AIndex: Integer;
-  const Value: IPanamahTituloPagar);
+procedure TPanamahTituloReceberList.SetItem(AIndex: Integer;
+  const Value: IPanamahTituloReceber);
 begin
   FList[AIndex] := Value;
 end;
 
-procedure TPanamahTituloPagarList.DeserializeFromJSON(const AJSON: string);
+procedure TPanamahTituloReceberList.DeserializeFromJSON(const AJSON: string);
 begin
   with TlkJSON.ParseText(AJSON) as TlkJSONlist do
   begin
@@ -564,7 +564,7 @@ begin
   end;
 end;
 
-function TPanamahTituloPagarList.SerializeToJSON: string;
+function TPanamahTituloReceberList.SerializeToJSON: string;
 var
   JSONObject: TlkJSONlist;
   I: Integer;
@@ -572,7 +572,7 @@ begin
   JSONObject := TlkJSONlist.Create;
   try
     for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTituloPagar).SerializeToJSON));
+      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTituloReceber).SerializeToJSON));
     Result := TlkJSON.GenerateText(JSONObject);
   finally
     JSONObject.Free;

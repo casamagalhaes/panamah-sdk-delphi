@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahEan;
+unit PanamahSDK.Models.Ean;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahEan = interface(IModel)
-    ['{0060D2F0-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E4598-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetProdutoId: string;
     function GetTributado: Boolean;
@@ -22,7 +22,7 @@ type
   end;
   
   IPanamahEanList = interface(IJSONSerializable)
-    ['{0060D2F1-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E4599-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahEan;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEan);
     procedure Add(const AItem: IPanamahEan);

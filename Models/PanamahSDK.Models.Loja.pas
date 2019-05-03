@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahLoja;
+unit PanamahSDK.Models.Loja;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahLoja = interface(IModel)
-    ['{005FC18B-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1D3425-6DAE-11E9-88EA-EB5361679635}']
     function GetAtiva: Boolean;
     function GetId: string;
     function GetDescricao: string;
@@ -70,7 +70,7 @@ type
   end;
   
   IPanamahLojaList = interface(IJSONSerializable)
-    ['{005FC18C-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1D3426-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahLoja;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLoja);
     procedure Add(const AItem: IPanamahLoja);

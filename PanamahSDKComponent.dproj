@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{279E7C93-A915-4A27-A1A9-437D093D9471}</ProjectGuid>
-        <MainSource>PanamahSDK.dpk</MainSource>
+        <MainSource>PanamahSDKComponent.dpk</MainSource>
         <ProjectVersion>16.1</ProjectVersion>
         <FrameworkType>None</FrameworkType>
         <Base>True</Base>
@@ -15,6 +15,11 @@
     </PropertyGroup>
     <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
         <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
+        <Base_Win64>true</Base_Win64>
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
@@ -35,12 +40,17 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <SanitizedProjectName>PanamahSDK</SanitizedProjectName>
+        <DCC_DcpOutput>.\$(Platform)\$(Config)\dcp</DCC_DcpOutput>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <DCC_BplOutput>.\$(Platform)\$(Config)\pkg</DCC_BplOutput>
+        <DCC_UnitSearchPath>.\Lib;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <SanitizedProjectName>PanamahSDKComponent</SanitizedProjectName>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
         <DCC_CBuilderOutput>All</DCC_CBuilderOutput>
         <GenPackage>true</GenPackage>
         <GenDll>true</GenDll>
-        <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
+        <DCC_DcuOutput>.\$(Platform)\$(Config)\dcu</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
         <DCC_E>false</DCC_E>
         <DCC_N>false</DCC_N>
@@ -49,10 +59,14 @@
         <DCC_K>false</DCC_K>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <DCC_UsePackage>rtl;vcl;frxTee21;CodeSiteExpressPkg;bindengine;CustomIPTransport;vcldb;dbexpress;dbxcds;DbxClientDriver;DataSnapCommon;vclx;tethering;vclactnband;dbrtl;adortl;inet;DbxCommonDriver;CloudService;xmlrtl;DataSnapClient;DatasnapConnectorsFreePascal;DataSnapConnectors;vclimg;dsnap;dsnapcon;DataSnapFireDAC;DataSnapServer;DataSnapNativeClient;DataSnapServerMidas;DataSnapProviderClient;DataSnapIndy10ServerTransport;vclie;emsclient;emsclientfiredac;FireDACCommon;FireDACInfxDriver;FireDACDb2Driver;FireDACMSSQLDriver;FireDACOracleDriver;FireDACODBCDriver;FireDACCommonDriver;vclFireDAC;FireDAC;FireDACSqliteDriver;FireDACPgDriver;FireDACASADriver;FireDACMSAccDriver;FireDACIBDriver;FireDACMySQLDriver;FireDACADSDriver;FireDACDBXDriver;FireDACDSDriver;fmxFireDAC;vclib;ibxpress;inetdbxpress;inetdb;bindcomp;bindcompvcl;MetropolisUILiveTile;vcldsnap;RESTBackendComponents;VCLRESTComponents;RESTComponents;vclribbon;VclSmp;soaprtl;soapmidas;soapserver;vcltouch;dsnapxml;frx21;frxe21;frxDB21;TeeUI;TeeDB;Tee;fmx;FmxTeeUI;FMXTee;bindcompdbx;Intraweb;IndyIPClient;IndyIPCommon;IndySystem;IndyProtocols;IndyCore;IndyIPServer;$(DCC_UsePackage)</DCC_UsePackage>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <DCC_UsePackage>rtl;vcl;bindengine;CustomIPTransport;vcldb;dbexpress;dbxcds;DbxClientDriver;DataSnapCommon;vclx;tethering;vclactnband;dbrtl;adortl;inet;DbxCommonDriver;CloudService;xmlrtl;DataSnapClient;DatasnapConnectorsFreePascal;DataSnapConnectors;vclimg;dsnap;dsnapcon;DataSnapFireDAC;DataSnapServer;DataSnapNativeClient;DataSnapServerMidas;DataSnapProviderClient;DataSnapIndy10ServerTransport;vclie;emsclient;emsclientfiredac;FireDACCommon;FireDACInfxDriver;FireDACDb2Driver;FireDACMSSQLDriver;FireDACOracleDriver;FireDACODBCDriver;FireDACCommonDriver;vclFireDAC;FireDAC;FireDACSqliteDriver;FireDACPgDriver;FireDACASADriver;FireDACMSAccDriver;FireDACIBDriver;FireDACMySQLDriver;FireDACADSDriver;FireDACDBXDriver;FireDACDSDriver;fmxFireDAC;vclib;ibxpress;inetdbxpress;inetdb;bindcomp;bindcompvcl;MetropolisUILiveTile;vcldsnap;RESTBackendComponents;VCLRESTComponents;RESTComponents;vclribbon;VclSmp;soaprtl;soapmidas;soapserver;vcltouch;dsnapxml;TeeUI;TeeDB;Tee;fmx;FmxTeeUI;FMXTee;bindcompdbx;Intraweb;IndyIPClient;IndyIPCommon;IndySystem;IndyProtocols;IndyCore;IndyIPServer;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
@@ -63,7 +77,6 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <DCC_UnitSearchPath>.\Lib;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
@@ -79,12 +92,40 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="rtl.dcp"/>
-        <DCCReference Include="Models\PanamahSDK.Models.PanamahProduto.pas"/>
-        <DCCReference Include="PanamahSDK.Types.pas"/>
+        <DCCReference Include="IndySystem.dcp"/>
+        <DCCReference Include="IndyProtocols.dcp"/>
+        <DCCReference Include="IndyCore.dcp"/>
         <DCCReference Include="Lib\uLkJSON.pas"/>
+        <DCCReference Include="PanamahSDK.Types.pas"/>
         <DCCReference Include="PanamahSDK.JsonUtils.pas"/>
         <DCCReference Include="PanamahSDK.Enums.pas"/>
-        <DCCReference Include="Models\PanamahSDK.Models.PanamahAssinante.pas"/>
+        <DCCReference Include="PanamahSDK.Client.pas"/>
+        <DCCReference Include="PanamahSDK.Batch.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Acesso.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Assinante.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Cliente.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Compra.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Ean.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.EstoqueMovimentacao.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.EventoCaixa.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.FormaPagamento.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Fornecedor.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Funcionario.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Grupo.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Holding.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.LocalEstoque.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Loja.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Meta.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Produto.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Revenda.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Secao.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Subgrupo.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.TituloPagar.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.TituloReceber.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.TrocaDevolucao.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.TrocaFormaPagamento.pas"/>
+        <DCCReference Include="Models\PanamahSDK.Models.Venda.pas"/>
+        <DCCReference Include="PanamahSDK.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -103,17 +144,27 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">PanamahSDK.dpk</Source>
+                    <Source Name="MainSource">PanamahSDKComponent.dpk</Source>
                 </Source>
                 <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclIndyCore210.bpl">Indy 10 Core Design Time</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclfmxstd210.bpl">Embarcadero FMX Standard Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclbindcompfmx210.bpl">Embarcadero LiveBindings Components FireMonkey</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclIndyProtocols210.bpl">Indy 10 Protocols Design Time</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k210.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp210.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment>
-                <DeployFile LocalName="..\..\..\..\..\Public\Documents\Embarcadero\Studio\15.0\Bpl\PanamahSDK.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="Win32\Debug\pkg\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>PanamahSDK.bpl</RemoteName>
+                        <RemoteName>PanamahSDKComponent.bpl</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Pkg\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>PanamahSDKComponent.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -125,9 +176,15 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\..\..\..\Public\Documents\Embarcadero\Studio\15.0\Bpl\PanamahSDK.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\..\..\..\Public\Documents\Embarcadero\Studio\15.0\Bpl\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>PanamahSDK.bpl</RemoteName>
+                        <RemoteName>PanamahSDKComponent.bpl</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\..\..\..\..\Public\Documents\Embarcadero\Studio\15.0\Bpl\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>PanamahSDKComponent.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

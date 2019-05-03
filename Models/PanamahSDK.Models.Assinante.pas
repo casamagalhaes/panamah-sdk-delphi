@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahAssinante;
+unit PanamahSDK.Models.Assinante;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahAssinante = interface(IModel)
-    ['{005E8900-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1BFBA0-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetNome: string;
     function GetFantasia: string;
@@ -49,7 +49,7 @@ type
   end;
   
   IPanamahAssinanteList = interface(IJSONSerializable)
-    ['{005E8901-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1BFBA1-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahAssinante;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAssinante);
     procedure Add(const AItem: IPanamahAssinante);

@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahFuncionario;
+unit PanamahSDK.Models.Funcionario;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahFuncionario = interface(IModel)
-    ['{006036B0-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1D824C-6DAE-11E9-88EA-EB5361679635}']
     function GetDataNascimento: TDateTime;
     function GetId: string;
     function GetLogin: variant;
@@ -37,7 +37,7 @@ type
   end;
   
   IPanamahFuncionarioList = interface(IJSONSerializable)
-    ['{006036B1-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1D824D-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahFuncionario;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFuncionario);
     procedure Add(const AItem: IPanamahFuncionario);

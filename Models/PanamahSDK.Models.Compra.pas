@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahCompra;
+unit PanamahSDK.Models.Compra;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahCompraItem = interface(IModel)
-    ['{00625993-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F206870-6DAE-11E9-88EA-EB5361679635}']
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetProdutoId: string;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahCompraItemList = interface(IJSONSerializable)
-    ['{00625994-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F206871-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahCompraItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompraItem);
     procedure Add(const AItem: IPanamahCompraItem);
@@ -41,7 +41,7 @@ type
   end;
   
   IPanamahCompra = interface(IModel)
-    ['{00623280-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F204160-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetLojaId: string;
     function GetFornecedorId: variant;
@@ -87,7 +87,7 @@ type
   end;
   
   IPanamahCompraList = interface(IJSONSerializable)
-    ['{00623281-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F204161-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahCompra;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompra);
     procedure Add(const AItem: IPanamahCompra);

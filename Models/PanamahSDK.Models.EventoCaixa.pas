@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahEventoCaixa;
+unit PanamahSDK.Models.EventoCaixa;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahEventoCaixaValoresDeclarados = interface(IModel)
-    ['{00616F39-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1F7E19-6DAE-11E9-88EA-EB5361679635}']
     function GetFormaPagamentoId: string;
     function GetValor: Double;
     procedure SetFormaPagamentoId(const AFormaPagamentoId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahEventoCaixaValoresDeclaradosList = interface(IJSONSerializable)
-    ['{00616F3A-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1F7E1A-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixaValoresDeclarados;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixaValoresDeclarados);
     procedure Add(const AItem: IPanamahEventoCaixaValoresDeclarados);
@@ -29,7 +29,7 @@ type
   end;
   
   IPanamahEventoCaixa = interface(IModel)
-    ['{00616F30-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1F7E10-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetLojaId: string;
     function GetNumeroCaixa: string;
@@ -54,7 +54,7 @@ type
   end;
   
   IPanamahEventoCaixaList = interface(IJSONSerializable)
-    ['{00616F31-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1F7E11-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixa;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixa);
     procedure Add(const AItem: IPanamahEventoCaixa);

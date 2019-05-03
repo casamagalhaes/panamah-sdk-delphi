@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahSecao;
+unit PanamahSDK.Models.Secao;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahSecao = interface(IModel)
-    ['{005F4C50-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1C97E8-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -22,7 +22,7 @@ type
   end;
   
   IPanamahSecaoList = interface(IJSONSerializable)
-    ['{005F4C51-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1C97E9-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahSecao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSecao);
     procedure Add(const AItem: IPanamahSecao);

@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahTrocaDevolucao;
+unit PanamahSDK.Models.TrocaDevolucao;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahTrocaDevolucaoItem = interface(IModel)
-    ['{00614822-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1F5700-6DAE-11E9-88EA-EB5361679635}']
     function GetDesconto: Double;
     function GetProdutoId: string;
     function GetQuantidade: Double;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahTrocaDevolucaoItemList = interface(IJSONSerializable)
-    ['{00614823-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1F5701-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucaoItem);
     procedure Add(const AItem: IPanamahTrocaDevolucaoItem);
@@ -41,7 +41,7 @@ type
   end;
   
   IPanamahTrocaDevolucao = interface(IModel)
-    ['{0060FA02-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1EBAC0-6DAE-11E9-88EA-EB5361679635}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetVendaId: variant;
@@ -78,7 +78,7 @@ type
   end;
   
   IPanamahTrocaDevolucaoList = interface(IJSONSerializable)
-    ['{0060FA03-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1EBAC1-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucao);
     procedure Add(const AItem: IPanamahTrocaDevolucao);

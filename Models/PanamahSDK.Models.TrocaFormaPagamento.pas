@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahTrocaFormaPagamento;
+unit PanamahSDK.Models.TrocaFormaPagamento;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahTrocaFormaPagamento = interface(IModel)
-    ['{0060D2F5-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E6CA0-6DAE-11E9-88EA-EB5361679635}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetFormaPagamentoDestinoId: string;
@@ -46,7 +46,7 @@ type
   end;
   
   IPanamahTrocaFormaPagamentoList = interface(IJSONSerializable)
-    ['{0060D2F6-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1E6CA1-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahTrocaFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaFormaPagamento);
     procedure Add(const AItem: IPanamahTrocaFormaPagamento);

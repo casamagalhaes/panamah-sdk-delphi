@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahFornecedor;
+unit PanamahSDK.Models.Cliente;
 
 interface
 
@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahFornecedor = interface(IModel)
-    ['{00605DCD-6D1F-11E9-BC68-6769AAA11E00}']
+  IPanamahCliente = interface(IModel)
+    ['{0F1DD064-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetNome: string;
     function GetNumeroDocumento: string;
@@ -33,17 +33,17 @@ type
     property Bairro: string read GetBairro write SetBairro;
   end;
   
-  IPanamahFornecedorList = interface(IJSONSerializable)
-    ['{00605DCE-6D1F-11E9-BC68-6769AAA11E00}']
-    function GetItem(AIndex: Integer): IPanamahFornecedor;
-    procedure SetItem(AIndex: Integer; const Value: IPanamahFornecedor);
-    procedure Add(const AItem: IPanamahFornecedor);
+  IPanamahClienteList = interface(IJSONSerializable)
+    ['{0F1DD065-6DAE-11E9-88EA-EB5361679635}']
+    function GetItem(AIndex: Integer): IPanamahCliente;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahCliente);
+    procedure Add(const AItem: IPanamahCliente);
     procedure Clear;
     function Count: Integer;
-    property Items[AIndex: Integer]: IPanamahFornecedor read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: IPanamahCliente read GetItem write SetItem; default;
   end;
   
-  TPanamahFornecedor = class(TInterfacedObject, IPanamahFornecedor)
+  TPanamahCliente = class(TInterfacedObject, IPanamahCliente)
   private
     FId: string;
     FNome: string;
@@ -69,7 +69,7 @@ type
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahFornecedor;
+    class function FromJSON(const AJSON: string): IPanamahCliente;
   published
     property Id: string read GetId write SetId;
     property Nome: string read GetNome write SetNome;
@@ -80,99 +80,99 @@ type
     property Bairro: string read GetBairro write SetBairro;
   end;
 
-  TPanamahFornecedorList = class(TInterfacedObject, IPanamahFornecedorList)
+  TPanamahClienteList = class(TInterfacedObject, IPanamahClienteList)
   private
     FList: TInterfaceList;
-    function GetItem(AIndex: Integer): IPanamahFornecedor;
-    procedure SetItem(AIndex: Integer; const Value: IPanamahFornecedor);
+    function GetItem(AIndex: Integer): IPanamahCliente;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahCliente);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahFornecedorList;
+    class function FromJSON(const AJSON: string): IPanamahClienteList;
     constructor Create;
-    procedure Add(const AItem: IPanamahFornecedor);
+    procedure Add(const AItem: IPanamahCliente);
     procedure Clear;
     function Count: Integer;
     destructor Destroy; override;
-    property Items[AIndex: Integer]: IPanamahFornecedor read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: IPanamahCliente read GetItem write SetItem; default;
   end;
   
 implementation
 
-{ TPanamahFornecedor }
+{ TPanamahCliente }
 
-function TPanamahFornecedor.GetId: string;
+function TPanamahCliente.GetId: string;
 begin
   Result := FId;
 end;
 
-procedure TPanamahFornecedor.SetId(const AId: string);
+procedure TPanamahCliente.SetId(const AId: string);
 begin
   FId := AId;
 end;
 
-function TPanamahFornecedor.GetNome: string;
+function TPanamahCliente.GetNome: string;
 begin
   Result := FNome;
 end;
 
-procedure TPanamahFornecedor.SetNome(const ANome: string);
+procedure TPanamahCliente.SetNome(const ANome: string);
 begin
   FNome := ANome;
 end;
 
-function TPanamahFornecedor.GetNumeroDocumento: string;
+function TPanamahCliente.GetNumeroDocumento: string;
 begin
   Result := FNumeroDocumento;
 end;
 
-procedure TPanamahFornecedor.SetNumeroDocumento(const ANumeroDocumento: string);
+procedure TPanamahCliente.SetNumeroDocumento(const ANumeroDocumento: string);
 begin
   FNumeroDocumento := ANumeroDocumento;
 end;
 
-function TPanamahFornecedor.GetRamo: string;
+function TPanamahCliente.GetRamo: string;
 begin
   Result := FRamo;
 end;
 
-procedure TPanamahFornecedor.SetRamo(const ARamo: string);
+procedure TPanamahCliente.SetRamo(const ARamo: string);
 begin
   FRamo := ARamo;
 end;
 
-function TPanamahFornecedor.GetUf: string;
+function TPanamahCliente.GetUf: string;
 begin
   Result := FUf;
 end;
 
-procedure TPanamahFornecedor.SetUf(const AUf: string);
+procedure TPanamahCliente.SetUf(const AUf: string);
 begin
   FUf := AUf;
 end;
 
-function TPanamahFornecedor.GetCidade: string;
+function TPanamahCliente.GetCidade: string;
 begin
   Result := FCidade;
 end;
 
-procedure TPanamahFornecedor.SetCidade(const ACidade: string);
+procedure TPanamahCliente.SetCidade(const ACidade: string);
 begin
   FCidade := ACidade;
 end;
 
-function TPanamahFornecedor.GetBairro: string;
+function TPanamahCliente.GetBairro: string;
 begin
   Result := FBairro;
 end;
 
-procedure TPanamahFornecedor.SetBairro(const ABairro: string);
+procedure TPanamahCliente.SetBairro(const ABairro: string);
 begin
   FBairro := ABairro;
 end;
 
-procedure TPanamahFornecedor.DeserializeFromJSON(const AJSON: string);
+procedure TPanamahCliente.DeserializeFromJSON(const AJSON: string);
 var
   JSONObject: TlkJSONobject;
 begin
@@ -190,7 +190,7 @@ begin
   end;
 end;
 
-function TPanamahFornecedor.SerializeToJSON: string;
+function TPanamahCliente.SerializeToJSON: string;
 var
   JSONObject: TlkJSONobject;
 begin
@@ -209,68 +209,68 @@ begin
   end;
 end;
 
-class function TPanamahFornecedor.FromJSON(const AJSON: string): IPanamahFornecedor;
+class function TPanamahCliente.FromJSON(const AJSON: string): IPanamahCliente;
 begin
-  Result := TPanamahFornecedor.Create;
+  Result := TPanamahCliente.Create;
   Result.DeserializeFromJSON(AJSON);
 end;
 
-{ TPanamahFornecedorList }
+{ TPanamahClienteList }
 
-constructor TPanamahFornecedorList.Create;
+constructor TPanamahClienteList.Create;
 begin
   FList := TInterfaceList.Create;
 end;
 
-destructor TPanamahFornecedorList.Destroy;
+destructor TPanamahClienteList.Destroy;
 begin
   FreeAndNil(FList);
   inherited;
 end;
 
-class function TPanamahFornecedorList.FromJSON(const AJSON: string): IPanamahFornecedorList;
+class function TPanamahClienteList.FromJSON(const AJSON: string): IPanamahClienteList;
 begin
-  Result := TPanamahFornecedorList.Create;
+  Result := TPanamahClienteList.Create;
   Result.DeserializeFromJSON(AJSON);
 end;
 
-procedure TPanamahFornecedorList.Add(const AItem: IPanamahFornecedor);
+procedure TPanamahClienteList.Add(const AItem: IPanamahCliente);
 begin
   FList.Add(AItem);
 end;
 
-procedure TPanamahFornecedorList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
+procedure TPanamahClienteList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
   var Continue: Boolean);
 var
-  Item: IPanamahFornecedor;
+  Item: IPanamahCliente;
 begin
-  Item := TPanamahFornecedor.Create;
+  Item := TPanamahCliente.Create;
   Item.DeserializeFromJSON(TlkJSON.GenerateText(Elem));
   FList.Add(Item);
 end;
 
-procedure TPanamahFornecedorList.Clear;
+procedure TPanamahClienteList.Clear;
 begin
   FList.Clear;
 end;
 
-function TPanamahFornecedorList.Count: Integer;
+function TPanamahClienteList.Count: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TPanamahFornecedorList.GetItem(AIndex: Integer): IPanamahFornecedor;
+function TPanamahClienteList.GetItem(AIndex: Integer): IPanamahCliente;
 begin
-  Result := FList.Items[AIndex] as IPanamahFornecedor;
+  Result := FList.Items[AIndex] as IPanamahCliente;
 end;
 
-procedure TPanamahFornecedorList.SetItem(AIndex: Integer;
-  const Value: IPanamahFornecedor);
+procedure TPanamahClienteList.SetItem(AIndex: Integer;
+  const Value: IPanamahCliente);
 begin
   FList[AIndex] := Value;
 end;
 
-procedure TPanamahFornecedorList.DeserializeFromJSON(const AJSON: string);
+procedure TPanamahClienteList.DeserializeFromJSON(const AJSON: string);
 begin
   with TlkJSON.ParseText(AJSON) as TlkJSONlist do
   begin
@@ -279,7 +279,7 @@ begin
   end;
 end;
 
-function TPanamahFornecedorList.SerializeToJSON: string;
+function TPanamahClienteList.SerializeToJSON: string;
 var
   JSONObject: TlkJSONlist;
   I: Integer;
@@ -287,7 +287,7 @@ begin
   JSONObject := TlkJSONlist.Create;
   try
     for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahFornecedor).SerializeToJSON));
+      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahCliente).SerializeToJSON));
     Result := TlkJSON.GenerateText(JSONObject);
   finally
     JSONObject.Free;

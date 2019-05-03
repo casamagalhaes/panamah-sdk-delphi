@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahLocalEstoque;
+unit PanamahSDK.Models.LocalEstoque;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahLocalEstoque = interface(IModel)
-    ['{00631CE0-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F208F80-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetLojaId: string;
     function GetDescricao: string;
@@ -25,7 +25,7 @@ type
   end;
   
   IPanamahLocalEstoqueList = interface(IJSONSerializable)
-    ['{00631CE1-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F208F81-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahLocalEstoque;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLocalEstoque);
     procedure Add(const AItem: IPanamahLocalEstoque);

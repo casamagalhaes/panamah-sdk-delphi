@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahAcesso;
+unit PanamahSDK.Models.Acesso;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahAcesso = interface(IModel)
-    ['{00605DC0-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1DD060-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetFuncionarioIds: IPanamahStringValueList;
     procedure SetId(const AId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahAcessoList = interface(IJSONSerializable)
-    ['{00605DC1-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1DD061-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahAcesso;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAcesso);
     procedure Add(const AItem: IPanamahAcesso);

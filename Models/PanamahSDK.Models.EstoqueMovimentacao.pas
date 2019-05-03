@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahEstoqueMovimentacao;
+unit PanamahSDK.Models.EstoqueMovimentacao;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahEstoqueMovimentacao = interface(IModel)
-    ['{00631CE6-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F208F86-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetLocalEstoqueId: string;
     function GetDataHora: TDateTime;
@@ -37,7 +37,7 @@ type
   end;
   
   IPanamahEstoqueMovimentacaoList = interface(IJSONSerializable)
-    ['{00631CE7-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F208F87-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahEstoqueMovimentacao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEstoqueMovimentacao);
     procedure Add(const AItem: IPanamahEstoqueMovimentacao);

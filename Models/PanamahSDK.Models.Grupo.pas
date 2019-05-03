@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahGrupo;
+unit PanamahSDK.Models.Grupo;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahGrupo = interface(IModel)
-    ['{005F9A72-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1D0D10-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -25,7 +25,7 @@ type
   end;
   
   IPanamahGrupoList = interface(IJSONSerializable)
-    ['{005F9A73-6D1F-11E9-BC68-6769AAA11E00}']
+    ['{0F1D0D11-6DAE-11E9-88EA-EB5361679635}']
     function GetItem(AIndex: Integer): IPanamahGrupo;
     procedure SetItem(AIndex: Integer; const Value: IPanamahGrupo);
     procedure Add(const AItem: IPanamahGrupo);

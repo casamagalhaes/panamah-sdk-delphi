@@ -1,5 +1,5 @@
 {$M+}
-unit PanamahSDK.Models.PanamahFormaPagamento;
+unit PanamahSDK.Models.Holding;
 
 interface
 
@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahFormaPagamento = interface(IModel)
-    ['{00600FA8-6D1F-11E9-BC68-6769AAA11E00}']
+  IPanamahHolding = interface(IModel)
+    ['{0F1D3421-6DAE-11E9-88EA-EB5361679635}']
     function GetId: string;
     function GetDescricao: string;
     procedure SetId(const AId: string);
@@ -18,17 +18,17 @@ type
     property Descricao: string read GetDescricao write SetDescricao;
   end;
   
-  IPanamahFormaPagamentoList = interface(IJSONSerializable)
-    ['{00600FA9-6D1F-11E9-BC68-6769AAA11E00}']
-    function GetItem(AIndex: Integer): IPanamahFormaPagamento;
-    procedure SetItem(AIndex: Integer; const Value: IPanamahFormaPagamento);
-    procedure Add(const AItem: IPanamahFormaPagamento);
+  IPanamahHoldingList = interface(IJSONSerializable)
+    ['{0F1D3422-6DAE-11E9-88EA-EB5361679635}']
+    function GetItem(AIndex: Integer): IPanamahHolding;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahHolding);
+    procedure Add(const AItem: IPanamahHolding);
     procedure Clear;
     function Count: Integer;
-    property Items[AIndex: Integer]: IPanamahFormaPagamento read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: IPanamahHolding read GetItem write SetItem; default;
   end;
   
-  TPanamahFormaPagamento = class(TInterfacedObject, IPanamahFormaPagamento)
+  TPanamahHolding = class(TInterfacedObject, IPanamahHolding)
   private
     FId: string;
     FDescricao: string;
@@ -39,55 +39,55 @@ type
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahFormaPagamento;
+    class function FromJSON(const AJSON: string): IPanamahHolding;
   published
     property Id: string read GetId write SetId;
     property Descricao: string read GetDescricao write SetDescricao;
   end;
 
-  TPanamahFormaPagamentoList = class(TInterfacedObject, IPanamahFormaPagamentoList)
+  TPanamahHoldingList = class(TInterfacedObject, IPanamahHoldingList)
   private
     FList: TInterfaceList;
-    function GetItem(AIndex: Integer): IPanamahFormaPagamento;
-    procedure SetItem(AIndex: Integer; const Value: IPanamahFormaPagamento);
+    function GetItem(AIndex: Integer): IPanamahHolding;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahHolding);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahFormaPagamentoList;
+    class function FromJSON(const AJSON: string): IPanamahHoldingList;
     constructor Create;
-    procedure Add(const AItem: IPanamahFormaPagamento);
+    procedure Add(const AItem: IPanamahHolding);
     procedure Clear;
     function Count: Integer;
     destructor Destroy; override;
-    property Items[AIndex: Integer]: IPanamahFormaPagamento read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: IPanamahHolding read GetItem write SetItem; default;
   end;
   
 implementation
 
-{ TPanamahFormaPagamento }
+{ TPanamahHolding }
 
-function TPanamahFormaPagamento.GetId: string;
+function TPanamahHolding.GetId: string;
 begin
   Result := FId;
 end;
 
-procedure TPanamahFormaPagamento.SetId(const AId: string);
+procedure TPanamahHolding.SetId(const AId: string);
 begin
   FId := AId;
 end;
 
-function TPanamahFormaPagamento.GetDescricao: string;
+function TPanamahHolding.GetDescricao: string;
 begin
   Result := FDescricao;
 end;
 
-procedure TPanamahFormaPagamento.SetDescricao(const ADescricao: string);
+procedure TPanamahHolding.SetDescricao(const ADescricao: string);
 begin
   FDescricao := ADescricao;
 end;
 
-procedure TPanamahFormaPagamento.DeserializeFromJSON(const AJSON: string);
+procedure TPanamahHolding.DeserializeFromJSON(const AJSON: string);
 var
   JSONObject: TlkJSONobject;
 begin
@@ -100,7 +100,7 @@ begin
   end;
 end;
 
-function TPanamahFormaPagamento.SerializeToJSON: string;
+function TPanamahHolding.SerializeToJSON: string;
 var
   JSONObject: TlkJSONobject;
 begin
@@ -114,68 +114,68 @@ begin
   end;
 end;
 
-class function TPanamahFormaPagamento.FromJSON(const AJSON: string): IPanamahFormaPagamento;
+class function TPanamahHolding.FromJSON(const AJSON: string): IPanamahHolding;
 begin
-  Result := TPanamahFormaPagamento.Create;
+  Result := TPanamahHolding.Create;
   Result.DeserializeFromJSON(AJSON);
 end;
 
-{ TPanamahFormaPagamentoList }
+{ TPanamahHoldingList }
 
-constructor TPanamahFormaPagamentoList.Create;
+constructor TPanamahHoldingList.Create;
 begin
   FList := TInterfaceList.Create;
 end;
 
-destructor TPanamahFormaPagamentoList.Destroy;
+destructor TPanamahHoldingList.Destroy;
 begin
   FreeAndNil(FList);
   inherited;
 end;
 
-class function TPanamahFormaPagamentoList.FromJSON(const AJSON: string): IPanamahFormaPagamentoList;
+class function TPanamahHoldingList.FromJSON(const AJSON: string): IPanamahHoldingList;
 begin
-  Result := TPanamahFormaPagamentoList.Create;
+  Result := TPanamahHoldingList.Create;
   Result.DeserializeFromJSON(AJSON);
 end;
 
-procedure TPanamahFormaPagamentoList.Add(const AItem: IPanamahFormaPagamento);
+procedure TPanamahHoldingList.Add(const AItem: IPanamahHolding);
 begin
   FList.Add(AItem);
 end;
 
-procedure TPanamahFormaPagamentoList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
+procedure TPanamahHoldingList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
   var Continue: Boolean);
 var
-  Item: IPanamahFormaPagamento;
+  Item: IPanamahHolding;
 begin
-  Item := TPanamahFormaPagamento.Create;
+  Item := TPanamahHolding.Create;
   Item.DeserializeFromJSON(TlkJSON.GenerateText(Elem));
   FList.Add(Item);
 end;
 
-procedure TPanamahFormaPagamentoList.Clear;
+procedure TPanamahHoldingList.Clear;
 begin
   FList.Clear;
 end;
 
-function TPanamahFormaPagamentoList.Count: Integer;
+function TPanamahHoldingList.Count: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TPanamahFormaPagamentoList.GetItem(AIndex: Integer): IPanamahFormaPagamento;
+function TPanamahHoldingList.GetItem(AIndex: Integer): IPanamahHolding;
 begin
-  Result := FList.Items[AIndex] as IPanamahFormaPagamento;
+  Result := FList.Items[AIndex] as IPanamahHolding;
 end;
 
-procedure TPanamahFormaPagamentoList.SetItem(AIndex: Integer;
-  const Value: IPanamahFormaPagamento);
+procedure TPanamahHoldingList.SetItem(AIndex: Integer;
+  const Value: IPanamahHolding);
 begin
   FList[AIndex] := Value;
 end;
 
-procedure TPanamahFormaPagamentoList.DeserializeFromJSON(const AJSON: string);
+procedure TPanamahHoldingList.DeserializeFromJSON(const AJSON: string);
 begin
   with TlkJSON.ParseText(AJSON) as TlkJSONlist do
   begin
@@ -184,7 +184,7 @@ begin
   end;
 end;
 
-function TPanamahFormaPagamentoList.SerializeToJSON: string;
+function TPanamahHoldingList.SerializeToJSON: string;
 var
   JSONObject: TlkJSONlist;
   I: Integer;
@@ -192,7 +192,7 @@ begin
   JSONObject := TlkJSONlist.Create;
   try
     for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahFormaPagamento).SerializeToJSON));
+      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahHolding).SerializeToJSON));
     Result := TlkJSON.GenerateText(JSONObject);
   finally
     JSONObject.Free;
