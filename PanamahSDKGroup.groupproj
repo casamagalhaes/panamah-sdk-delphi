@@ -3,7 +3,7 @@
         <ProjectGuid>{A9D20A1C-A32E-49E9-8577-87C83A47B87F}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="PanamahSDK.dproj">
+        <Projects Include="PanamahSDKComponent.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -14,23 +14,23 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="PanamahSDK">
-        <MSBuild Projects="PanamahSDK.dproj"/>
+    <Target Name="PanamahSDKComponent">
+        <MSBuild Projects="PanamahSDKComponent.dproj"/>
     </Target>
-    <Target Name="PanamahSDK:Clean">
-        <MSBuild Projects="PanamahSDK.dproj" Targets="Clean"/>
+    <Target Name="PanamahSDKComponent:Clean">
+        <MSBuild Projects="PanamahSDKComponent.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="PanamahSDK:Make">
-        <MSBuild Projects="PanamahSDK.dproj" Targets="Make"/>
+    <Target Name="PanamahSDKComponent:Make">
+        <MSBuild Projects="PanamahSDKComponent.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="PanamahSDK"/>
+        <CallTarget Targets="PanamahSDKComponent"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="PanamahSDK:Clean"/>
+        <CallTarget Targets="PanamahSDKComponent:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="PanamahSDK:Make"/>
+        <CallTarget Targets="PanamahSDKComponent:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
