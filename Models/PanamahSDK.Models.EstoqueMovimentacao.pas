@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahEstoqueMovimentacao = interface(IModel)
-    ['{0F208F86-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahEstoqueMovimentacao = interface(IPanamahModel)
+    ['{D346E7F0-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetLocalEstoqueId: string;
     function GetDataHora: TDateTime;
@@ -37,7 +37,7 @@ type
   end;
   
   IPanamahEstoqueMovimentacaoList = interface(IJSONSerializable)
-    ['{0F208F87-6DAE-11E9-88EA-EB5361679635}']
+    ['{D346E7F1-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahEstoqueMovimentacao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEstoqueMovimentacao);
     procedure Add(const AItem: IPanamahEstoqueMovimentacao);
@@ -72,9 +72,11 @@ type
     procedure SetCusto(const ACusto: Double);
     procedure SetPreco(const APreco: Double);
     procedure SetMarkup(const AMarkup: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahEstoqueMovimentacao;
   published
     property Id: string read GetId write SetId;
@@ -232,6 +234,16 @@ class function TPanamahEstoqueMovimentacao.FromJSON(const AJSON: string): IPanam
 begin
   Result := TPanamahEstoqueMovimentacao.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahEstoqueMovimentacao.GetModelName: string;
+begin
+  Result := 'PanamahEstoqueMovimentacao';
+end;
+
+function TPanamahEstoqueMovimentacao.Clone: IPanamahModel;
+begin
+  Result := TPanamahEstoqueMovimentacao.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahEstoqueMovimentacaoList }

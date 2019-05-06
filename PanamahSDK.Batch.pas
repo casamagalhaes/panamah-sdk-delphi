@@ -4,7 +4,7 @@ unit PanamahSDK.Batch;
 interface
 
 uses
-  Classes, StrUtils, PanamahSDK.JsonUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.Models.Acesso,
+  Classes, SysUtils, DateUtils, PanamahSDK.JsonUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.Models.Acesso,
   PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente, PanamahSDK.Models.Compra, PanamahSDK.Models.Ean,
   PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa, PanamahSDK.Models.FormaPagamento,
   PanamahSDK.Models.Fornecedor, PanamahSDK.Models.Funcionario, PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding,
@@ -14,6 +14,15 @@ uses
   PanamahSDK.Models.Venda;
 
 type
+
+  TPanamahBatchFilenameRec = record
+  public
+    CreatedAt: TDateTime;
+    Priority: Boolean;
+    class function Create(const AFilename: string): TPanamahBatchFilenameRec; static;
+    class operator Implicit(AFilenameRec: TPanamahBatchFilenameRec): string;
+    class operator Implicit(const AFilename: string): TPanamahBatchFilenameRec;
+  end;
 
   IPanamahBatch = interface(IJSONSerializable)
     ['{97748D13-F5B3-48B8-AA21-19E769790589}']
@@ -41,6 +50,10 @@ type
     procedure SetTrocasDevolucoes(ATrocasDevolucoes: IPanamahTrocaDevolucaoList);
     procedure SetTrocasFormaPagamento(ATrocasFormaPagamento: IPanamahTrocaFormaPagamentoList);
     procedure SetVendas(AVendas: IPanamahVendaList);
+    procedure SetCreatedAt(ACreatedAt: TDateTime);
+    procedure SetPriority(APriority: Boolean);
+    procedure Clear;
+    procedure Reset;
     procedure Add(AAcesso: IPanamahAcesso); overload;
     procedure Add(AAssinante: IPanamahAssinante); overload;
     procedure Add(ACliente: IPanamahCliente); overload;
@@ -65,6 +78,7 @@ type
     procedure Add(ATrocaDevolucao: IPanamahTrocaDevolucao); overload;
     procedure Add(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
     procedure Add(AVenda: IPanamahVenda); overload;
+    procedure Add(AModel: IPanamahModel); overload;
     function GetAcessos: IPanamahAcessoList;
     function GetAssinantes: IPanamahAssinanteList;
     function GetClientes: IPanamahClienteList;
@@ -89,6 +103,11 @@ type
     function GetTrocasDevolucoes: IPanamahTrocaDevolucaoList;
     function GetTrocasFormaPagamento: IPanamahTrocaFormaPagamentoList;
     function GetVendas: IPanamahVendaList;
+    function GetSize: Integer;
+    function GetCreatedAt: TDateTime;
+    function GetPriority: Boolean;
+    function CheckForExpiration(AConfig: IPanamahSDKConfig): Boolean;
+    function SaveToDirectory(const ADirectory: string): string;
     property Acessos: IPanamahAcessoList read GetAcessos write SetAcessos;
     property Assinantes: IPanamahAssinanteList read GetAssinantes write SetAssinantes;
     property Clientes: IPanamahClienteList read GetClientes write SetClientes;
@@ -113,6 +132,19 @@ type
     property TrocasDevolucoes: IPanamahTrocaDevolucaoList read GetTrocasDevolucoes write SetTrocasDevolucoes;
     property TrocasFormaPagamento: IPanamahTrocaFormaPagamentoList read GetTrocasFormaPagamento write SetTrocasFormaPagamento;
     property Vendas: IPanamahVendaList read GetVendas write SetVendas;
+    property CreatedAt: TDateTime read GetCreatedAt write SetCreatedAt;
+    property Size: Integer read GetSize;
+    property Priority: Boolean read GetPriority write SetPriority;
+  end;
+
+  IPanamahBatchList = interface(IJSONSerializable)
+    ['{EDEDDB56-66F5-4501-8798-8DD44B3297D5}']
+    function GetItem(AIndex: Integer): IPanamahBatch;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahBatch);
+    procedure Add(const AItem: IPanamahBatch);
+    procedure Clear;
+    function Count: Integer;
+    property Items[AIndex: Integer]: IPanamahBatch read GetItem write SetItem; default;
   end;
 
   TPanamahBatch = class(TInterfacedObject, IPanamahBatch)
@@ -141,6 +173,8 @@ type
     FTrocasDevolucoes: IPanamahTrocaDevolucaoList;
     FTrocasFormaPagamento: IPanamahTrocaFormaPagamentoList;
     FVendas: IPanamahVendaList;
+    FCreatedAt: TDateTime;
+    FPriority: Boolean;
     procedure SetAcessos(AAcessos: IPanamahAcessoList);
     procedure SetAssinantes(AAssinantes: IPanamahAssinanteList);
     procedure SetClientes(AClientes: IPanamahClienteList);
@@ -165,6 +199,10 @@ type
     procedure SetTrocasDevolucoes(ATrocasDevolucoes: IPanamahTrocaDevolucaoList);
     procedure SetTrocasFormaPagamento(ATrocasFormaPagamento: IPanamahTrocaFormaPagamentoList);
     procedure SetVendas(AVendas: IPanamahVendaList);
+    procedure SetCreatedAt(ACreatedAt: TDateTime);
+    procedure SetPriority(APriority: Boolean);
+    procedure Clear;
+    procedure Reset;
     procedure Add(AAcesso: IPanamahAcesso); overload;
     procedure Add(AAssinante: IPanamahAssinante); overload;
     procedure Add(ACliente: IPanamahCliente); overload;
@@ -189,6 +227,7 @@ type
     procedure Add(ATrocaDevolucao: IPanamahTrocaDevolucao); overload;
     procedure Add(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
     procedure Add(AVenda: IPanamahVenda); overload;
+    procedure Add(AModel: IPanamahModel); overload;
     function GetAcessos: IPanamahAcessoList;
     function GetAssinantes: IPanamahAssinanteList;
     function GetClientes: IPanamahClienteList;
@@ -213,10 +252,16 @@ type
     function GetTrocasDevolucoes: IPanamahTrocaDevolucaoList;
     function GetTrocasFormaPagamento: IPanamahTrocaFormaPagamentoList;
     function GetVendas: IPanamahVendaList;
+    function GetSize: Integer;
+    function GetCreatedAt: TDateTime;
+    function GetPriority: Boolean;
   public
     procedure DeserializeFromJSON(const AJSON: string);
     function SerializeToJSON: string;
+    function SaveToDirectory(const ADirectory: string): string;
+    function CheckForExpiration(AConfig: IPanamahSDKConfig): Boolean;
     class function FromJSON(const AJSON: string): IPanamahBatch;
+    class function FromFile(const AFilename: string): IPanamahBatch;
   published
     property Acessos: IPanamahAcessoList read GetAcessos write SetAcessos;
     property Assinantes: IPanamahAssinanteList read GetAssinantes write SetAssinantes;
@@ -242,6 +287,28 @@ type
     property TrocasDevolucoes: IPanamahTrocaDevolucaoList read GetTrocasDevolucoes write SetTrocasDevolucoes;
     property TrocasFormaPagamento: IPanamahTrocaFormaPagamentoList read GetTrocasFormaPagamento write SetTrocasFormaPagamento;
     property Vendas: IPanamahVendaList read GetVendas write SetVendas;
+    property CreatedAt: TDateTime read GetCreatedAt write SetCreatedAt;
+    property Size: Integer read GetSize;
+    property Priority: Boolean read GetPriority write SetPriority;
+  end;
+
+  TPanamahBatchList = class(TInterfacedObject, IPanamahBatchList)
+  private
+    FList: TInterfaceList;
+    function GetItem(AIndex: Integer): IPanamahBatch;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahBatch);
+    procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
+  public
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
+    class function FromJSON(const AJSON: string): IPanamahBatchList;
+    class function FromDirectory(const ADirectory: string): IPanamahBatchList;
+    constructor Create;
+    procedure Add(const AItem: IPanamahBatch);
+    procedure Clear;
+    function Count: Integer;
+    destructor Destroy; override;
+    property Items[AIndex: Integer]: IPanamahBatch read GetItem write SetItem; default;
   end;
 
 implementation
@@ -416,6 +483,39 @@ begin
   FVendas.Add(AVenda);
 end;
 
+function TPanamahBatch.CheckForExpiration(AConfig: IPanamahSDKConfig): Boolean;
+begin
+  Result := (MilliSecondsBetween(Now, FCreatedAt) >= AConfig.BatchTTL) and (GetSize >= AConfig.BatchMaxSize);
+end;
+
+procedure TPanamahBatch.Clear;
+begin
+  FAcessos.Clear;
+  FAssinantes.Clear;
+  FClientes.Clear;
+  FCompras.Clear;
+  FEans.Clear;
+  FEstoqueMovimentacoes.Clear;
+  FEventosCaixa.Clear;
+  FFormasPagamento.Clear;
+  FFornecedores.Clear;
+  FFuncionarios.Clear;
+  FGrupos.Clear;
+  FHoldings.Clear;
+  FLocaisEstoque.Clear;
+  FLojas.Clear;
+  FMetas.Clear;
+  FProdutos.Clear;
+  FRevendas.Clear;
+  FSecoes.Clear;
+  FSubgrupos.Clear;
+  FTitulosPagar.Clear;
+  FTitulosReceber.Clear;
+  FTrocasDevolucoes.Clear;
+  FTrocasFormaPagamento.Clear;
+  FVendas.Clear;
+end;
+
 procedure TPanamahBatch.DeserializeFromJSON(const AJSON: string);
 var
   JSONObject: TlkJSONobject;
@@ -475,6 +575,23 @@ begin
   end;
 end;
 
+function TPanamahBatch.SaveToDirectory(const ADirectory: string): string;
+var
+  BatchFile : TextFile;
+  BatchFilename: TPanamahBatchFilenameRec;
+begin
+  BatchFilename.CreatedAt := FCreatedAt;
+  BatchFilename.Priority := FPriority;
+  ForceDirectories(ADirectory);
+  AssignFile(BatchFile, Format('%s/%s', [ADirectory, string(BatchFilename)]));
+  try
+    Rewrite(BatchFile);
+    WriteLn(BatchFile, SerializeToJSON);
+  finally
+    CloseFile(BatchFile);
+  end;
+end;
+
 function TPanamahBatch.SerializeToJSON: string;
 var
   JSONObject: TlkJSONobject;
@@ -511,6 +628,24 @@ begin
   end;
 end;
 
+class function TPanamahBatch.FromFile(const AFilename: string): IPanamahBatch;
+var
+  BatchFilename: TPanamahBatchFilenameRec;
+  BatchFile: TStrings;
+begin
+  Result := TPanamahBatch.Create;
+  BatchFilename := AFilename;
+  Result.CreatedAt := BatchFilename.CreatedAt;
+  Result.Priority := BatchFilename.Priority;
+  BatchFile := TStringList.Create;
+  try
+    BatchFile.LoadFromFile(AFilename);
+    Result.DeserializeFromJSON(BatchFile.Text);
+  finally
+    BatchFile.Free;
+  end;
+end;
+
 class function TPanamahBatch.FromJSON(const AJSON: string): IPanamahBatch;
 begin
   Result := TPanamahBatch.Create;
@@ -535,6 +670,11 @@ end;
 procedure TPanamahBatch.SetCompras(ACompras: IPanamahCompraList);
 begin
   FCompras := ACompras;
+end;
+
+procedure TPanamahBatch.SetCreatedAt(ACreatedAt: TDateTime);
+begin
+  FCreatedAt := ACreatedAt;
 end;
 
 procedure TPanamahBatch.SetEans(AEans: IPanamahEanList);
@@ -590,6 +730,11 @@ end;
 procedure TPanamahBatch.SetMetas(AMetas: IPanamahMetaList);
 begin
   FMetas := AMetas;
+end;
+
+procedure TPanamahBatch.SetPriority(APriority: Boolean);
+begin
+  FPriority := APriority;
 end;
 
 procedure TPanamahBatch.SetProdutos(AProdutos: IPanamahProdutoList);
@@ -657,6 +802,11 @@ begin
   Result := FCompras;
 end;
 
+function TPanamahBatch.GetCreatedAt: TDateTime;
+begin
+  Result := FCreatedAt;
+end;
+
 function TPanamahBatch.GetEans: IPanamahEanList;
 begin
   Result := FEans;
@@ -712,6 +862,11 @@ begin
   Result := FMetas;
 end;
 
+function TPanamahBatch.GetPriority: Boolean;
+begin
+  Result := FPriority;
+end;
+
 function TPanamahBatch.GetProdutos: IPanamahProdutoList;
 begin
   Result := FProdutos;
@@ -725,6 +880,11 @@ end;
 function TPanamahBatch.GetSecoes: IPanamahSecaoList;
 begin
   Result := FSecoes;
+end;
+
+function TPanamahBatch.GetSize: Integer;
+begin
+  Result := Length(SerializeToJSON);
 end;
 
 function TPanamahBatch.GetSubgrupos: IPanamahSubgrupoList;
@@ -755,6 +915,181 @@ end;
 function TPanamahBatch.GetVendas: IPanamahVendaList;
 begin
   Result := FVendas;
+end;
+
+procedure TPanamahBatch.Reset;
+begin
+  Clear;
+  FCreatedAt := Now;
+  FPriority := False;
+end;
+
+procedure TPanamahBatch.Add(AModel: IPanamahModel);
+begin
+  if Supports(AModel, IPanamahAcesso) then Add(AModel as IPanamahAcesso) else
+  if Supports(AModel, IPanamahAssinante) then Add(AModel as IPanamahAssinante) else
+  if Supports(AModel, IPanamahCliente) then Add(AModel as IPanamahCliente) else
+  if Supports(AModel, IPanamahCompra) then Add(AModel as IPanamahCompra) else
+  if Supports(AModel, IPanamahEan) then Add(AModel as IPanamahEan) else
+  if Supports(AModel, IPanamahEstoqueMovimentacao) then Add(AModel as IPanamahEstoqueMovimentacao) else
+  if Supports(AModel, IPanamahEventoCaixa) then Add(AModel as IPanamahEventoCaixa) else
+  if Supports(AModel, IPanamahFormaPagamento) then Add(AModel as IPanamahFormaPagamento) else
+  if Supports(AModel, IPanamahFornecedor) then Add(AModel as IPanamahFornecedor) else
+  if Supports(AModel, IPanamahFuncionario) then Add(AModel as IPanamahFuncionario) else
+  if Supports(AModel, IPanamahGrupo) then Add(AModel as IPanamahGrupo) else
+  if Supports(AModel, IPanamahHolding) then Add(AModel as IPanamahHolding) else
+  if Supports(AModel, IPanamahLocalEstoque) then Add(AModel as IPanamahLocalEstoque) else
+  if Supports(AModel, IPanamahLoja) then Add(AModel as IPanamahLoja) else
+  if Supports(AModel, IPanamahMeta) then Add(AModel as IPanamahMeta) else
+  if Supports(AModel, IPanamahProduto) then Add(AModel as IPanamahProduto) else
+  if Supports(AModel, IPanamahRevenda) then Add(AModel as IPanamahRevenda) else
+  if Supports(AModel, IPanamahSecao) then Add(AModel as IPanamahSecao) else
+  if Supports(AModel, IPanamahSubgrupo) then Add(AModel as IPanamahSubgrupo) else
+  if Supports(AModel, IPanamahTituloPagar) then Add(AModel as IPanamahTituloPagar) else
+  if Supports(AModel, IPanamahTituloReceber) then Add(AModel as IPanamahTituloReceber) else
+  if Supports(AModel, IPanamahTrocaDevolucao) then Add(AModel as IPanamahTrocaDevolucao) else
+  if Supports(AModel, IPanamahTrocaFormaPagamento) then Add(AModel as IPanamahTrocaFormaPagamento) else
+  if Supports(AModel, IPanamahVenda) then Add(AModel as IPanamahVenda);
+end;
+
+{ TPanamahBatchList }
+
+constructor TPanamahBatchList.Create;
+begin
+  FList := TInterfaceList.Create;
+end;
+
+destructor TPanamahBatchList.Destroy;
+begin
+  FreeAndNil(FList);
+  inherited;
+end;
+
+class function TPanamahBatchList.FromDirectory(const ADirectory: string): IPanamahBatchList;
+var
+  SearchRec: TSearchRec;
+begin
+  Result := TPanamahBatchList.Create;
+  if DirectoryExists(ADirectory) then
+    begin
+    if FindFirst(Format('%s\*.pbt', [ADirectory]), faAnyFile, SearchRec)=0 then
+    begin
+      repeat
+        Result.Add(TPanamahBatch.FromFile(Format('%s\%s', [ADirectory, SearchRec.Name])));
+      until FindNext(SearchRec) <> 0;
+    end;
+  end
+  else
+    raise PanamahSDKIOException.Create(Format('Diretório %s não existe.', [ADirectory]));
+end;
+
+class function TPanamahBatchList.FromJSON(const AJSON: string): IPanamahBatchList;
+begin
+  Result := TPanamahBatchList.Create;
+  Result.DeserializeFromJSON(AJSON);
+end;
+
+procedure TPanamahBatchList.Add(const AItem: IPanamahBatch);
+begin
+  FList.Add(AItem);
+end;
+
+procedure TPanamahBatchList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
+  var Continue: Boolean);
+var
+  Item: IPanamahBatch;
+begin
+  Item := TPanamahBatch.Create;
+  Item.DeserializeFromJSON(TlkJSON.GenerateText(Elem));
+  FList.Add(Item);
+end;
+
+procedure TPanamahBatchList.Clear;
+begin
+  FList.Clear;
+end;
+
+function TPanamahBatchList.Count: Integer;
+begin
+  Result := FList.Count;
+end;
+
+function TPanamahBatchList.GetItem(AIndex: Integer): IPanamahBatch;
+begin
+  Result := FList.Items[AIndex] as IPanamahBatch;
+end;
+
+procedure TPanamahBatchList.SetItem(AIndex: Integer;
+  const Value: IPanamahBatch);
+begin
+  FList[AIndex] := Value;
+end;
+
+procedure TPanamahBatchList.DeserializeFromJSON(const AJSON: string);
+begin
+  with TlkJSON.ParseText(AJSON) as TlkJSONlist do
+  begin
+    ForEach(AddJSONObjectToList, nil);
+    Free;
+  end;
+end;
+
+function TPanamahBatchList.SerializeToJSON: string;
+var
+  JSONObject: TlkJSONlist;
+  I: Integer;
+begin
+  JSONObject := TlkJSONlist.Create;
+  try
+    for I := 0 to FList.Count - 1 do
+      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahBatch).SerializeToJSON));
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+{ TPanamahBatchFilenameRec }
+
+class function TPanamahBatchFilenameRec.Create(const AFilename: string): TPanamahBatchFilenameRec;
+var
+  Words: TStrings;
+begin
+  FillChar(Result, SizeOf(TPanamahBatchFilenameRec), 0);
+  Words := TStringList.Create;
+  try
+    Words.Delimiter := '_';
+    Words.DelimitedText := AFilename;
+    if Words.Count >= 7 then
+    begin
+      Result.CreatedAt := ISO8601ToDateTime(Format('%s-%s-%sT%s:%s:%s.%s', [
+        Words[0],
+        Words[1],
+        Words[2],
+        Words[3],
+        Words[4],
+        Words[5],
+        Words[6],
+        Words[7]
+      ]));
+    end;
+    if Words.Count >= 8 then
+      Result.Priority := SameText(Words[8], 'P');
+  finally
+    Words.Free;
+  end;
+end;
+
+class operator TPanamahBatchFilenameRec.Implicit(AFilenameRec: TPanamahBatchFilenameRec): string;
+begin
+  Result := FormatDateTime('YYYY_MM_DD_HH_NN_SS_ZZZ', AFilenameRec.CreatedAt);
+  if AFilenameRec.Priority then
+    Result := Concat(Result, '_P');
+end;
+
+class operator TPanamahBatchFilenameRec.Implicit(const AFilename: string): TPanamahBatchFilenameRec;
+begin
+  Result.Create(AFilename);
 end;
 
 end.

@@ -160,7 +160,7 @@ end;
 
 function ISO8601ToDateTime(const AInput: string): TDateTime;
 var
-  Day, Month, Year, Hour, Minute, Second: Word;
+  Day, Month, Year, Hour, Minute, Second, Millisecond: Word;
 begin
   if Trim(AInput) = EmptyStr then
     Result := 0
@@ -172,7 +172,8 @@ begin
       Hour := StrToIntDef(Copy(AInput, 12, 2), 0);
       Minute := StrToIntDef(Copy(AInput, 15, 2), 0);
       Second := StrToIntDef(Copy(AInput, 18, 2), 0);
-      Result := EncodeDate(Year, Month, Day) + EncodeTime(Hour, Minute, Second, 0);
+      Millisecond := StrToIntDef(Copy(AInput, 21, 3), 0);
+      Result := EncodeDate(Year, Month, Day) + EncodeTime(Hour, Minute, Second, Millisecond);
     except
       on E: Exception do
       begin

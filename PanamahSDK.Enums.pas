@@ -34,7 +34,7 @@ type
   TPanamahEventoCaixaTipo = (ectABERTURA, ectFECHAMENTO, ectENTRADA_OPERADOR, ectSAIDA_OPERADOR);
   
   IPanamahSoftwareAtivoList = interface(IJSONSerializable)
-    ['{0F1C22B6-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3436581-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): TPanamahSoftwareAtivo;
     procedure SetItem(AIndex: Integer; const Value: TPanamahSoftwareAtivo);
     procedure Add(const AItem: TPanamahSoftwareAtivo);
@@ -44,7 +44,7 @@ type
   end;
   
   IPanamahSoftwareContratoManutencaoList = interface(IJSONSerializable)
-    ['{0F1C49C0-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3436582-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): TPanamahSoftwareContratoManutencao;
     procedure SetItem(AIndex: Integer; const Value: TPanamahSoftwareContratoManutencao);
     procedure Add(const AItem: TPanamahSoftwareContratoManutencao);
@@ -54,7 +54,7 @@ type
   end;
   
   IPanamahEventoCaixaTipoList = interface(IJSONSerializable)
-    ['{0F1F7E17-6DAE-11E9-88EA-EB5361679635}']
+    ['{D345FD91-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): TPanamahEventoCaixaTipo;
     procedure SetItem(AIndex: Integer; const Value: TPanamahEventoCaixaTipo);
     procedure Add(const AItem: TPanamahEventoCaixaTipo);

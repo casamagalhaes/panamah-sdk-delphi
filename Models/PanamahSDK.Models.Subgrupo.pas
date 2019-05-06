@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahSubgrupo = interface(IModel)
-    ['{0F1D0D16-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahSubgrupo = interface(IPanamahModel)
+    ['{D34401C6-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -28,7 +28,7 @@ type
   end;
   
   IPanamahSubgrupoList = interface(IJSONSerializable)
-    ['{0F1D0D17-6DAE-11E9-88EA-EB5361679635}']
+    ['{D34401C7-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahSubgrupo;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSubgrupo);
     procedure Add(const AItem: IPanamahSubgrupo);
@@ -54,9 +54,11 @@ type
     procedure SetDescricao(const ADescricao: string);
     procedure SetSecaoId(const ASecaoId: string);
     procedure SetGrupoId(const AGrupoId: string);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahSubgrupo;
   published
     property Id: string read GetId write SetId;
@@ -175,6 +177,16 @@ class function TPanamahSubgrupo.FromJSON(const AJSON: string): IPanamahSubgrupo;
 begin
   Result := TPanamahSubgrupo.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahSubgrupo.GetModelName: string;
+begin
+  Result := 'PanamahSubgrupo';
+end;
+
+function TPanamahSubgrupo.Clone: IPanamahModel;
+begin
+  Result := TPanamahSubgrupo.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahSubgrupoList }

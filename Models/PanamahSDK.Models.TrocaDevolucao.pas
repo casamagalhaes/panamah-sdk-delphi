@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahTrocaDevolucaoItem = interface(IModel)
-    ['{0F1F5700-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahTrocaDevolucaoItem = interface(IPanamahModel)
+    ['{D345AF76-7043-11E9-B47F-05333FE0F816}']
     function GetDesconto: Double;
     function GetProdutoId: string;
     function GetQuantidade: Double;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahTrocaDevolucaoItemList = interface(IJSONSerializable)
-    ['{0F1F5701-6DAE-11E9-88EA-EB5361679635}']
+    ['{D345AF77-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucaoItem);
     procedure Add(const AItem: IPanamahTrocaDevolucaoItem);
@@ -40,8 +40,8 @@ type
     property Items[AIndex: Integer]: IPanamahTrocaDevolucaoItem read GetItem write SetItem; default;
   end;
   
-  IPanamahTrocaDevolucao = interface(IModel)
-    ['{0F1EBAC0-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahTrocaDevolucao = interface(IPanamahModel)
+    ['{D3458860-7043-11E9-B47F-05333FE0F816}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetVendaId: variant;
@@ -78,7 +78,7 @@ type
   end;
   
   IPanamahTrocaDevolucaoList = interface(IJSONSerializable)
-    ['{0F1EBAC1-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3458861-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucao);
     procedure Add(const AItem: IPanamahTrocaDevolucao);
@@ -107,9 +107,11 @@ type
     procedure SetValorTotal(const AValorTotal: Double);
     procedure SetValorUnitario(const AValorUnitario: Double);
     procedure SetVendedorId(const AVendedorId: variant);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahTrocaDevolucaoItem;
   published
     property Desconto: Double read GetDesconto write SetDesconto;
@@ -173,9 +175,11 @@ type
     procedure SetSequencial(const ASequencial: variant);
     procedure SetValor(const AValor: Double);
     procedure SetVendedorId(const AVendedorId: variant);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahTrocaDevolucao;
   published
     property AutorizadorId: variant read GetAutorizadorId write SetAutorizadorId;
@@ -312,6 +316,16 @@ class function TPanamahTrocaDevolucaoItem.FromJSON(const AJSON: string): IPanama
 begin
   Result := TPanamahTrocaDevolucaoItem.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahTrocaDevolucaoItem.GetModelName: string;
+begin
+  Result := 'PanamahTrocaDevolucaoItem';
+end;
+
+function TPanamahTrocaDevolucaoItem.Clone: IPanamahModel;
+begin
+  Result := TPanamahTrocaDevolucaoItem.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahTrocaDevolucaoItemList }
@@ -555,6 +569,16 @@ class function TPanamahTrocaDevolucao.FromJSON(const AJSON: string): IPanamahTro
 begin
   Result := TPanamahTrocaDevolucao.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahTrocaDevolucao.GetModelName: string;
+begin
+  Result := 'PanamahTrocaDevolucao';
+end;
+
+function TPanamahTrocaDevolucao.Clone: IPanamahModel;
+begin
+  Result := TPanamahTrocaDevolucao.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahTrocaDevolucaoList }

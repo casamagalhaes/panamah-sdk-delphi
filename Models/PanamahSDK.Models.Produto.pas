@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahProdutoFornecedor = interface(IModel)
-    ['{0F1E4594-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahProdutoFornecedor = interface(IPanamahModel)
+    ['{D3453A44-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetPrincipal: Boolean;
     procedure SetId(const AId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahProdutoFornecedorList = interface(IJSONSerializable)
-    ['{0F1E4595-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3453A45-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahProdutoFornecedor;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoFornecedor);
     procedure Add(const AItem: IPanamahProdutoFornecedor);
@@ -28,8 +28,8 @@ type
     property Items[AIndex: Integer]: IPanamahProdutoFornecedor read GetItem write SetItem; default;
   end;
   
-  IPanamahProdutoComposicaoItem = interface(IModel)
-    ['{0F1E4590-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahProdutoComposicaoItem = interface(IPanamahModel)
+    ['{D3453A40-7043-11E9-B47F-05333FE0F816}']
     function GetProdutoId: string;
     function GetQuantidade: Double;
     procedure SetProdutoId(const AProdutoId: string);
@@ -39,7 +39,7 @@ type
   end;
   
   IPanamahProdutoComposicaoItemList = interface(IJSONSerializable)
-    ['{0F1E4591-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3453A41-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahProdutoComposicaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicaoItem);
     procedure Add(const AItem: IPanamahProdutoComposicaoItem);
@@ -48,8 +48,8 @@ type
     property Items[AIndex: Integer]: IPanamahProdutoComposicaoItem read GetItem write SetItem; default;
   end;
   
-  IPanamahProdutoComposicao = interface(IModel)
-    ['{0F1E1E8C-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahProdutoComposicao = interface(IPanamahModel)
+    ['{D345133E-7043-11E9-B47F-05333FE0F816}']
     function GetItens: IPanamahProdutoComposicaoItemList;
     function GetQuantidade: Double;
     procedure SetItens(const AItens: IPanamahProdutoComposicaoItemList);
@@ -59,7 +59,7 @@ type
   end;
   
   IPanamahProdutoComposicaoList = interface(IJSONSerializable)
-    ['{0F1E1E8D-6DAE-11E9-88EA-EB5361679635}']
+    ['{D345133F-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahProdutoComposicao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicao);
     procedure Add(const AItem: IPanamahProdutoComposicao);
@@ -68,8 +68,8 @@ type
     property Items[AIndex: Integer]: IPanamahProdutoComposicao read GetItem write SetItem; default;
   end;
   
-  IPanamahProduto = interface(IModel)
-    ['{0F1DF779-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahProduto = interface(IPanamahModel)
+    ['{D344EC2A-7043-11E9-B47F-05333FE0F816}']
     function GetComposicao: IPanamahProdutoComposicao;
     function GetTipoComposicao: variant;
     function GetDescricao: string;
@@ -112,7 +112,7 @@ type
   end;
   
   IPanamahProdutoList = interface(IJSONSerializable)
-    ['{0F1DF77A-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3451330-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahProduto;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProduto);
     procedure Add(const AItem: IPanamahProduto);
@@ -129,9 +129,11 @@ type
     function GetPrincipal: Boolean;
     procedure SetId(const AId: string);
     procedure SetPrincipal(const APrincipal: Boolean);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahProdutoFornecedor;
   published
     property Id: string read GetId write SetId;
@@ -164,9 +166,11 @@ type
     function GetQuantidade: Double;
     procedure SetProdutoId(const AProdutoId: string);
     procedure SetQuantidade(const AQuantidade: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahProdutoComposicaoItem;
   published
     property ProdutoId: string read GetProdutoId write SetProdutoId;
@@ -199,9 +203,11 @@ type
     function GetQuantidade: Double;
     procedure SetItens(const AItens: IPanamahProdutoComposicaoItemList);
     procedure SetQuantidade(const AQuantidade: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahProdutoComposicao;
   published
     property Itens: IPanamahProdutoComposicaoItemList read GetItens write SetItens;
@@ -267,9 +273,11 @@ type
     procedure SetSecaoId(const ASecaoId: string);
     procedure SetSubgrupoId(const ASubgrupoId: variant);
     procedure SetFornecedores(const AFornecedores: IPanamahProdutoFornecedorList);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahProduto;
   published
     property Composicao: IPanamahProdutoComposicao read GetComposicao write SetComposicao;
@@ -360,6 +368,16 @@ class function TPanamahProdutoFornecedor.FromJSON(const AJSON: string): IPanamah
 begin
   Result := TPanamahProdutoFornecedor.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProdutoFornecedor.GetModelName: string;
+begin
+  Result := 'PanamahProdutoFornecedor';
+end;
+
+function TPanamahProdutoFornecedor.Clone: IPanamahModel;
+begin
+  Result := TPanamahProdutoFornecedor.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahProdutoFornecedorList }
@@ -496,6 +514,16 @@ begin
   Result.DeserializeFromJSON(AJSON);
 end;
 
+function TPanamahProdutoComposicaoItem.GetModelName: string;
+begin
+  Result := 'PanamahProdutoComposicaoItem';
+end;
+
+function TPanamahProdutoComposicaoItem.Clone: IPanamahModel;
+begin
+  Result := TPanamahProdutoComposicaoItem.FromJSON(SerializeToJSON);
+end;
+
 { TPanamahProdutoComposicaoItemList }
 
 constructor TPanamahProdutoComposicaoItemList.Create;
@@ -629,6 +657,16 @@ class function TPanamahProdutoComposicao.FromJSON(const AJSON: string): IPanamah
 begin
   Result := TPanamahProdutoComposicao.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProdutoComposicao.GetModelName: string;
+begin
+  Result := 'PanamahProdutoComposicao';
+end;
+
+function TPanamahProdutoComposicao.Clone: IPanamahModel;
+begin
+  Result := TPanamahProdutoComposicao.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahProdutoComposicaoList }
@@ -897,6 +935,16 @@ class function TPanamahProduto.FromJSON(const AJSON: string): IPanamahProduto;
 begin
   Result := TPanamahProduto.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProduto.GetModelName: string;
+begin
+  Result := 'PanamahProduto';
+end;
+
+function TPanamahProduto.Clone: IPanamahModel;
+begin
+  Result := TPanamahProduto.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahProdutoList }

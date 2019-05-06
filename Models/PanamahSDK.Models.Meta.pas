@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahMeta = interface(IModel)
-    ['{0F1D8240-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahMeta = interface(IPanamahModel)
+    ['{D34476F5-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetMes: Double;
     function GetAno: Double;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahMetaList = interface(IJSONSerializable)
-    ['{0F1D8241-6DAE-11E9-88EA-EB5361679635}']
+    ['{D34476F6-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahMeta;
     procedure SetItem(AIndex: Integer; const Value: IPanamahMeta);
     procedure Add(const AItem: IPanamahMeta);
@@ -60,9 +60,11 @@ type
     procedure SetLojaId(const ALojaId: string);
     procedure SetSecaoId(const ASecaoId: string);
     procedure SetValor(const AValor: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahMeta;
   published
     property Id: string read GetId write SetId;
@@ -194,6 +196,16 @@ class function TPanamahMeta.FromJSON(const AJSON: string): IPanamahMeta;
 begin
   Result := TPanamahMeta.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahMeta.GetModelName: string;
+begin
+  Result := 'PanamahMeta';
+end;
+
+function TPanamahMeta.Clone: IPanamahModel;
+begin
+  Result := TPanamahMeta.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahMetaList }

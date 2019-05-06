@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahTituloReceberPagamento = interface(IModel)
-    ['{0F20DDAF-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahTituloReceberPagamento = interface(IPanamahModel)
+    ['{D3475D2E-7043-11E9-B47F-05333FE0F816}']
     function GetDataHora: TDateTime;
     function GetValor: Double;
     procedure SetDataHora(const ADataHora: TDateTime);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahTituloReceberPagamentoList = interface(IJSONSerializable)
-    ['{0F20DDB0-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3475D2F-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahTituloReceberPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTituloReceberPagamento);
     procedure Add(const AItem: IPanamahTituloReceberPagamento);
@@ -28,8 +28,8 @@ type
     property Items[AIndex: Integer]: IPanamahTituloReceberPagamento read GetItem write SetItem; default;
   end;
   
-  IPanamahTituloReceber = interface(IModel)
-    ['{0F20DDA1-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahTituloReceber = interface(IPanamahModel)
+    ['{D3475D20-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetLojaId: string;
     function GetClienteId: string;
@@ -69,7 +69,7 @@ type
   end;
   
   IPanamahTituloReceberList = interface(IJSONSerializable)
-    ['{0F20DDA2-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3475D21-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahTituloReceber;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTituloReceber);
     procedure Add(const AItem: IPanamahTituloReceber);
@@ -86,9 +86,11 @@ type
     function GetValor: Double;
     procedure SetDataHora(const ADataHora: TDateTime);
     procedure SetValor(const AValor: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahTituloReceberPagamento;
   published
     property DataHora: TDateTime read GetDataHora write SetDataHora;
@@ -151,9 +153,11 @@ type
     procedure SetDataEmissao(const ADataEmissao: TDateTime);
     procedure SetDataVencimento(const ADataVencimento: TDateTime);
     procedure SetPagamentos(const APagamentos: IPanamahTituloReceberPagamentoList);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahTituloReceber;
   published
     property Id: string read GetId write SetId;
@@ -243,6 +247,16 @@ class function TPanamahTituloReceberPagamento.FromJSON(const AJSON: string): IPa
 begin
   Result := TPanamahTituloReceberPagamento.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahTituloReceberPagamento.GetModelName: string;
+begin
+  Result := 'PanamahTituloReceberPagamento';
+end;
+
+function TPanamahTituloReceberPagamento.Clone: IPanamahModel;
+begin
+  Result := TPanamahTituloReceberPagamento.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahTituloReceberPagamentoList }
@@ -498,6 +512,16 @@ class function TPanamahTituloReceber.FromJSON(const AJSON: string): IPanamahTitu
 begin
   Result := TPanamahTituloReceber.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahTituloReceber.GetModelName: string;
+begin
+  Result := 'PanamahTituloReceber';
+end;
+
+function TPanamahTituloReceber.Clone: IPanamahModel;
+begin
+  Result := TPanamahTituloReceber.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahTituloReceberList }

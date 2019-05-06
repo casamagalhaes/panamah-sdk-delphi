@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahEventoCaixaValoresDeclarados = interface(IModel)
-    ['{0F1F7E19-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahEventoCaixaValoresDeclarados = interface(IPanamahModel)
+    ['{D345FD93-7043-11E9-B47F-05333FE0F816}']
     function GetFormaPagamentoId: string;
     function GetValor: Double;
     procedure SetFormaPagamentoId(const AFormaPagamentoId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahEventoCaixaValoresDeclaradosList = interface(IJSONSerializable)
-    ['{0F1F7E1A-6DAE-11E9-88EA-EB5361679635}']
+    ['{D345FD94-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixaValoresDeclarados;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixaValoresDeclarados);
     procedure Add(const AItem: IPanamahEventoCaixaValoresDeclarados);
@@ -28,8 +28,8 @@ type
     property Items[AIndex: Integer]: IPanamahEventoCaixaValoresDeclarados read GetItem write SetItem; default;
   end;
   
-  IPanamahEventoCaixa = interface(IModel)
-    ['{0F1F7E10-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahEventoCaixa = interface(IPanamahModel)
+    ['{D345D683-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetLojaId: string;
     function GetNumeroCaixa: string;
@@ -54,7 +54,7 @@ type
   end;
   
   IPanamahEventoCaixaList = interface(IJSONSerializable)
-    ['{0F1F7E11-6DAE-11E9-88EA-EB5361679635}']
+    ['{D345D684-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixa;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixa);
     procedure Add(const AItem: IPanamahEventoCaixa);
@@ -71,9 +71,11 @@ type
     function GetValor: Double;
     procedure SetFormaPagamentoId(const AFormaPagamentoId: string);
     procedure SetValor(const AValor: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahEventoCaixaValoresDeclarados;
   published
     property FormaPagamentoId: string read GetFormaPagamentoId write SetFormaPagamentoId;
@@ -121,9 +123,11 @@ type
     procedure SetDataHora(const ADataHora: TDateTime);
     procedure SetTipo(const ATipo: TPanamahEventoCaixaTipo);
     procedure SetValoresDeclarados(const AValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahEventoCaixa;
   published
     property Id: string read GetId write SetId;
@@ -208,6 +212,16 @@ class function TPanamahEventoCaixaValoresDeclarados.FromJSON(const AJSON: string
 begin
   Result := TPanamahEventoCaixaValoresDeclarados.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahEventoCaixaValoresDeclarados.GetModelName: string;
+begin
+  Result := 'PanamahEventoCaixaValoresDeclarados';
+end;
+
+function TPanamahEventoCaixaValoresDeclarados.Clone: IPanamahModel;
+begin
+  Result := TPanamahEventoCaixaValoresDeclarados.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahEventoCaixaValoresDeclaradosList }
@@ -403,6 +417,16 @@ class function TPanamahEventoCaixa.FromJSON(const AJSON: string): IPanamahEvento
 begin
   Result := TPanamahEventoCaixa.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahEventoCaixa.GetModelName: string;
+begin
+  Result := 'PanamahEventoCaixa';
+end;
+
+function TPanamahEventoCaixa.Clone: IPanamahModel;
+begin
+  Result := TPanamahEventoCaixa.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahEventoCaixaList }

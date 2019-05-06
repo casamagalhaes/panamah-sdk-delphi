@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahSecao = interface(IModel)
-    ['{0F1C97E8-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahSecao = interface(IPanamahModel)
+    ['{D343DAB5-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -22,7 +22,7 @@ type
   end;
   
   IPanamahSecaoList = interface(IJSONSerializable)
-    ['{0F1C97E9-6DAE-11E9-88EA-EB5361679635}']
+    ['{D343DAB6-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahSecao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSecao);
     procedure Add(const AItem: IPanamahSecao);
@@ -42,9 +42,11 @@ type
     procedure SetId(const AId: string);
     procedure SetCodigo(const ACodigo: string);
     procedure SetDescricao(const ADescricao: string);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahSecao;
   published
     property Id: string read GetId write SetId;
@@ -137,6 +139,16 @@ class function TPanamahSecao.FromJSON(const AJSON: string): IPanamahSecao;
 begin
   Result := TPanamahSecao.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahSecao.GetModelName: string;
+begin
+  Result := 'PanamahSecao';
+end;
+
+function TPanamahSecao.Clone: IPanamahModel;
+begin
+  Result := TPanamahSecao.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahSecaoList }

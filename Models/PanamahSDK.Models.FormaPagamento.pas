@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahFormaPagamento = interface(IModel)
-    ['{0F1D8248-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahFormaPagamento = interface(IPanamahModel)
+    ['{D3449E00-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetDescricao: string;
     procedure SetId(const AId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahFormaPagamentoList = interface(IJSONSerializable)
-    ['{0F1D8249-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3449E01-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFormaPagamento);
     procedure Add(const AItem: IPanamahFormaPagamento);
@@ -36,9 +36,11 @@ type
     function GetDescricao: string;
     procedure SetId(const AId: string);
     procedure SetDescricao(const ADescricao: string);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahFormaPagamento;
   published
     property Id: string read GetId write SetId;
@@ -118,6 +120,16 @@ class function TPanamahFormaPagamento.FromJSON(const AJSON: string): IPanamahFor
 begin
   Result := TPanamahFormaPagamento.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahFormaPagamento.GetModelName: string;
+begin
+  Result := 'PanamahFormaPagamento';
+end;
+
+function TPanamahFormaPagamento.Clone: IPanamahModel;
+begin
+  Result := TPanamahFormaPagamento.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahFormaPagamentoList }

@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahTrocaFormaPagamento = interface(IModel)
-    ['{0F1E6CA0-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahTrocaFormaPagamento = interface(IPanamahModel)
+    ['{D3456152-7043-11E9-B47F-05333FE0F816}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetFormaPagamentoDestinoId: string;
@@ -46,7 +46,7 @@ type
   end;
   
   IPanamahTrocaFormaPagamentoList = interface(IJSONSerializable)
-    ['{0F1E6CA1-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3456153-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahTrocaFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaFormaPagamento);
     procedure Add(const AItem: IPanamahTrocaFormaPagamento);
@@ -90,9 +90,11 @@ type
     procedure SetSequencialPagamento(const ASequencialPagamento: string);
     procedure SetValor(const AValor: Double);
     procedure SetValorContraValeOuTroco(const AValorContraValeOuTroco: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahTrocaFormaPagamento;
   published
     property AutorizadorId: variant read GetAutorizadorId write SetAutorizadorId;
@@ -289,6 +291,16 @@ class function TPanamahTrocaFormaPagamento.FromJSON(const AJSON: string): IPanam
 begin
   Result := TPanamahTrocaFormaPagamento.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahTrocaFormaPagamento.GetModelName: string;
+begin
+  Result := 'PanamahTrocaFormaPagamento';
+end;
+
+function TPanamahTrocaFormaPagamento.Clone: IPanamahModel;
+begin
+  Result := TPanamahTrocaFormaPagamento.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahTrocaFormaPagamentoList }

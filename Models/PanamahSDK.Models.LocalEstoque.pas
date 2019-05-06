@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahLocalEstoque = interface(IModel)
-    ['{0F208F80-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahLocalEstoque = interface(IPanamahModel)
+    ['{D346C0E2-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetLojaId: string;
     function GetDescricao: string;
@@ -25,7 +25,7 @@ type
   end;
   
   IPanamahLocalEstoqueList = interface(IJSONSerializable)
-    ['{0F208F81-6DAE-11E9-88EA-EB5361679635}']
+    ['{D346C0E3-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahLocalEstoque;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLocalEstoque);
     procedure Add(const AItem: IPanamahLocalEstoque);
@@ -48,9 +48,11 @@ type
     procedure SetLojaId(const ALojaId: string);
     procedure SetDescricao(const ADescricao: string);
     procedure SetDisponivelParaVenda(const ADisponivelParaVenda: Boolean);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahLocalEstoque;
   published
     property Id: string read GetId write SetId;
@@ -156,6 +158,16 @@ class function TPanamahLocalEstoque.FromJSON(const AJSON: string): IPanamahLocal
 begin
   Result := TPanamahLocalEstoque.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahLocalEstoque.GetModelName: string;
+begin
+  Result := 'PanamahLocalEstoque';
+end;
+
+function TPanamahLocalEstoque.Clone: IPanamahModel;
+begin
+  Result := TPanamahLocalEstoque.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahLocalEstoqueList }

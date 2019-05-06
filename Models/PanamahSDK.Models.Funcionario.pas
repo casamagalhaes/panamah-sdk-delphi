@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahFuncionario = interface(IModel)
-    ['{0F1D824C-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahFuncionario = interface(IPanamahModel)
+    ['{D3449E04-7043-11E9-B47F-05333FE0F816}']
     function GetDataNascimento: TDateTime;
     function GetId: string;
     function GetLogin: variant;
@@ -37,7 +37,7 @@ type
   end;
   
   IPanamahFuncionarioList = interface(IJSONSerializable)
-    ['{0F1D824D-6DAE-11E9-88EA-EB5361679635}']
+    ['{D3449E05-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahFuncionario;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFuncionario);
     procedure Add(const AItem: IPanamahFuncionario);
@@ -72,9 +72,11 @@ type
     procedure SetAtivo(const AAtivo: Boolean);
     procedure SetSenha(const ASenha: variant);
     procedure SetLojaIds(const ALojaIds: IPanamahStringValueList);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahFuncionario;
   published
     property DataNascimento: TDateTime read GetDataNascimento write SetDataNascimento;
@@ -233,6 +235,16 @@ class function TPanamahFuncionario.FromJSON(const AJSON: string): IPanamahFuncio
 begin
   Result := TPanamahFuncionario.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahFuncionario.GetModelName: string;
+begin
+  Result := 'PanamahFuncionario';
+end;
+
+function TPanamahFuncionario.Clone: IPanamahModel;
+begin
+  Result := TPanamahFuncionario.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahFuncionarioList }

@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahCliente = interface(IModel)
-    ['{0F1DD064-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahCliente = interface(IPanamahModel)
+    ['{D344C514-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetNome: string;
     function GetNumeroDocumento: string;
@@ -34,7 +34,7 @@ type
   end;
   
   IPanamahClienteList = interface(IJSONSerializable)
-    ['{0F1DD065-6DAE-11E9-88EA-EB5361679635}']
+    ['{D344C515-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahCliente;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCliente);
     procedure Add(const AItem: IPanamahCliente);
@@ -66,9 +66,11 @@ type
     procedure SetUf(const AUf: string);
     procedure SetCidade(const ACidade: string);
     procedure SetBairro(const ABairro: string);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahCliente;
   published
     property Id: string read GetId write SetId;
@@ -213,6 +215,16 @@ class function TPanamahCliente.FromJSON(const AJSON: string): IPanamahCliente;
 begin
   Result := TPanamahCliente.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahCliente.GetModelName: string;
+begin
+  Result := 'PanamahCliente';
+end;
+
+function TPanamahCliente.Clone: IPanamahModel;
+begin
+  Result := TPanamahCliente.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahClienteList }

@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahCompraItem = interface(IModel)
-    ['{0F206870-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahCompraItem = interface(IPanamahModel)
+    ['{D34699D9-7043-11E9-B47F-05333FE0F816}']
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetProdutoId: string;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahCompraItemList = interface(IJSONSerializable)
-    ['{0F206871-6DAE-11E9-88EA-EB5361679635}']
+    ['{D34699DA-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahCompraItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompraItem);
     procedure Add(const AItem: IPanamahCompraItem);
@@ -40,8 +40,8 @@ type
     property Items[AIndex: Integer]: IPanamahCompraItem read GetItem write SetItem; default;
   end;
   
-  IPanamahCompra = interface(IModel)
-    ['{0F204160-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahCompra = interface(IPanamahModel)
+    ['{D34672C5-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetLojaId: string;
     function GetFornecedorId: variant;
@@ -87,7 +87,7 @@ type
   end;
   
   IPanamahCompraList = interface(IJSONSerializable)
-    ['{0F204161-6DAE-11E9-88EA-EB5361679635}']
+    ['{D34672C6-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahCompra;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompra);
     procedure Add(const AItem: IPanamahCompra);
@@ -116,9 +116,11 @@ type
     procedure SetQuantidade(const AQuantidade: Double);
     procedure SetValorTotal(const AValorTotal: Double);
     procedure SetValorUnitario(const AValorUnitario: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahCompraItem;
   published
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
@@ -191,9 +193,11 @@ type
     procedure SetValor(const AValor: Double);
     procedure SetAcrescimo(const AAcrescimo: Double);
     procedure SetItens(const AItens: IPanamahCompraItemList);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahCompra;
   published
     property Id: string read GetId write SetId;
@@ -333,6 +337,16 @@ class function TPanamahCompraItem.FromJSON(const AJSON: string): IPanamahCompraI
 begin
   Result := TPanamahCompraItem.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahCompraItem.GetModelName: string;
+begin
+  Result := 'PanamahCompraItem';
+end;
+
+function TPanamahCompraItem.Clone: IPanamahModel;
+begin
+  Result := TPanamahCompraItem.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahCompraItemList }
@@ -612,6 +626,16 @@ class function TPanamahCompra.FromJSON(const AJSON: string): IPanamahCompra;
 begin
   Result := TPanamahCompra.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahCompra.GetModelName: string;
+begin
+  Result := 'PanamahCompra';
+end;
+
+function TPanamahCompra.Clone: IPanamahModel;
+begin
+  Result := TPanamahCompra.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahCompraList }

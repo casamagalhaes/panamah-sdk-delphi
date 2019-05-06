@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahLoja = interface(IModel)
-    ['{0F1D3425-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahLoja = interface(IPanamahModel)
+    ['{D34428D4-7043-11E9-B47F-05333FE0F816}']
     function GetAtiva: Boolean;
     function GetId: string;
     function GetDescricao: string;
@@ -70,7 +70,7 @@ type
   end;
   
   IPanamahLojaList = interface(IJSONSerializable)
-    ['{0F1D3426-6DAE-11E9-88EA-EB5361679635}']
+    ['{D34428D5-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahLoja;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLoja);
     procedure Add(const AItem: IPanamahLoja);
@@ -138,9 +138,11 @@ type
     procedure SetQtdCheckouts(const AQtdCheckouts: Double);
     procedure SetAreaM2(const AAreaM2: Double);
     procedure SetQtdFuncionarios(const AQtdFuncionarios: Double);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahLoja;
   published
     property Ativa: Boolean read GetAtiva write SetAtiva;
@@ -441,6 +443,16 @@ class function TPanamahLoja.FromJSON(const AJSON: string): IPanamahLoja;
 begin
   Result := TPanamahLoja.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahLoja.GetModelName: string;
+begin
+  Result := 'PanamahLoja';
+end;
+
+function TPanamahLoja.Clone: IPanamahModel;
+begin
+  Result := TPanamahLoja.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahLojaList }

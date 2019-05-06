@@ -52,7 +52,7 @@ type
 
   TAuthenticatedRequest = function(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TTokenStorage): IResponse of object;
 
-  IClient = interface
+  IPanamahClient = interface
     ['{0E22616E-90FA-4D19-9727-C54CA2BBB957}']
     function Authenticate(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ARequestFunction: TAuthenticatedRequest): IResponse;
     function MakeRequest(const ARequest: IRequest): IResponse;
@@ -124,7 +124,7 @@ type
     function Delete(const AURL: string): string; overload;
   end;
 
-  TClient = class(TInterfacedObject, IClient)
+  TClient = class(TInterfacedObject, IPanamahClient)
   private
     FBaseURL: string;
     FTokens: TTokenStorage;

@@ -8,8 +8,8 @@ uses
 
 type
   
-  IPanamahAcesso = interface(IModel)
-    ['{0F1DD060-6DAE-11E9-88EA-EB5361679635}']
+  IPanamahAcesso = interface(IPanamahModel)
+    ['{D344C510-7043-11E9-B47F-05333FE0F816}']
     function GetId: string;
     function GetFuncionarioIds: IPanamahStringValueList;
     procedure SetId(const AId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahAcessoList = interface(IJSONSerializable)
-    ['{0F1DD061-6DAE-11E9-88EA-EB5361679635}']
+    ['{D344C511-7043-11E9-B47F-05333FE0F816}']
     function GetItem(AIndex: Integer): IPanamahAcesso;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAcesso);
     procedure Add(const AItem: IPanamahAcesso);
@@ -36,9 +36,11 @@ type
     function GetFuncionarioIds: IPanamahStringValueList;
     procedure SetId(const AId: string);
     procedure SetFuncionarioIds(const AFuncionarioIds: IPanamahStringValueList);
+    function GetModelName: string;    
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahAcesso;
   published
     property Id: string read GetId write SetId;
@@ -119,6 +121,16 @@ class function TPanamahAcesso.FromJSON(const AJSON: string): IPanamahAcesso;
 begin
   Result := TPanamahAcesso.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahAcesso.GetModelName: string;
+begin
+  Result := 'PanamahAcesso';
+end;
+
+function TPanamahAcesso.Clone: IPanamahModel;
+begin
+  Result := TPanamahAcesso.FromJSON(SerializeToJSON);
 end;
 
 { TPanamahAcessoList }

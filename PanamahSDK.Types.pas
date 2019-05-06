@@ -13,8 +13,31 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
   end;
 
-  IModel = interface(IJSONSerializable)
+  IPanamahModel = interface(IJSONSerializable)
     ['{A749CFD5-4AA6-4443-ABD2-D1B55051CC2B}']
+    function GetModelName: string;
+    function Clone: IPanamahModel;
+    property ModelName: string read GetModelName;
+  end;
+
+  PString = ^string;
+
+  PPanamahModel = ^IPanamahModel;
+
+  IPanamahSDKConfig = interface
+    ['{F5D4BA5C-5DF8-480A-9408-6EA0F41EEA0A}']
+    function GetApiKey: string;
+    function GetBaseDirectory: string;
+    function GetBatchTTL: Integer;
+    function GetBatchMaxSize: Integer;
+    procedure SetApiKey(const AApiKey: string);
+    procedure SetBaseDirectory(const ABaseDirectory: string);
+    procedure SetBatchTTL(const ABatchTTL: Integer);
+    procedure SetBatchMaxSize(const ABatchMaxSize: Integer);
+    property ApiKey: string read GetApiKey write SetApiKey;
+    property BaseDirectory: string read GetBaseDirectory write SetBaseDirectory;
+    property BatchTTL: Integer read GetBatchTTL write SetBatchTTL;
+    property BatchMaxSize: Integer read GetBatchMaxSize write SetBatchMaxSize;
   end;
 
   TMethod = (mtGET, mtPOST, mtPUT, mtDELETE);
@@ -28,6 +51,7 @@ type
   PanamahSDKInvalidSortParamException = class(Exception);
   PanamahSDKNotFoundException = class(Exception);
   PanamahSDKUnknownException = class(Exception);
+  PanamahSDKIOException = class(Exception);
 
   {$IFNDEF UNICODE}
   function MatchText(const AText: string; const AValues: array of string): Boolean; overload;
