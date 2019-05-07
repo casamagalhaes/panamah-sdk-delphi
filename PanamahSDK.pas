@@ -38,6 +38,7 @@ type
   end;
 
   TPanamahBatchEvent = procedure(ABatch: IPanamahBatch) of object;
+
   TPanamahModelEvent = procedure(AModel: IPanamahModel) of object;
 
   TPanamahSDKBatchProcessor = class(TThread)
@@ -51,13 +52,16 @@ type
     FCurrentBatch: IPanamahBatch;
     function GetBatchAccumulationDirectory: string;
     function GetBatchSentDirectory: string;
+    function GetCurrentBatchFilename: string;
     function IsThereAccumulatedBatches: Boolean;
     procedure AccumulateCurrentBatch;
     procedure DoOnCurrentBatchExpired;
     procedure DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
     procedure DoOnBeforeBatchSent(ABatch: IPanamahBatch);
     procedure SendAccumulatedBatches;
-    procedure Loop;
+    procedure LoadCurrentBatch;
+    procedure SaveCurrentBatch;
+    procedure Process;
   public
     destructor Destroy; override;
     constructor Create; reintroduce;
@@ -85,6 +89,7 @@ type
     class procedure Free;
     procedure Init; overload;
     procedure Init(AConfig: IPanamahSDKConfig); overload;
+    procedure Init(const AApiKey: string); overload;
     procedure Flush;
     constructor Create; reintroduce;
     destructor Destroy; override;
@@ -132,13 +137,18 @@ begin
   FProcessor.Start(FConfig);
 end;
 
-procedure TPanamahSDK.Init;
+procedure TPanamahSDK.Init(const AApiKey: string);
 var
   Config: IPanamahSDKConfig;
 begin
   Config := TPanamahSDKConfig.Create;
-  Config.ApiKey := GetEnvironmentVariable('PANAMAH_API_KEY');
+  Config.ApiKey := AApiKey;
   Init(Config);
+end;
+
+procedure TPanamahSDK.Init;
+begin
+  Init(GetEnvironmentVariable('PANAMAH_API_KEY'));
 end;
 
 procedure TPanamahSDK.Send(AFormaPagamento: IPanamahFormaPagamento);
@@ -327,8 +337,7 @@ end;
 constructor TPanamahSDKConfig.Create;
 begin
   inherited Create;
-//  FBatchTTL := 5 * 60 * 1000;
-  FBatchTTL := 10 * 1000;
+  FBatchTTL := 5 * 60 * 1000;
   FBatchMaxSize := 5 * 1024;
   FBaseDirectory := GetCurrentDir + '\.panamah';
 end;
@@ -379,6 +388,7 @@ procedure TPanamahSDKBatchProcessor.AccumulateCurrentBatch;
 begin
   FCurrentBatch.SaveToDirectory(GetBatchAccumulationDirectory);
   FCurrentBatch.Reset;
+  DeleteFile(GetCurrentBatchFilename);
 end;
 
 procedure TPanamahSDKBatchProcessor.Add(AModel: IPanamahModel);
@@ -400,6 +410,11 @@ end;
 function TPanamahSDKBatchProcessor.GetBatchSentDirectory: string;
 begin
   Result := (FConfig.BaseDirectory + '\enviados');
+end;
+
+function TPanamahSDKBatchProcessor.GetCurrentBatchFilename: string;
+begin
+  Result := (FConfig.BaseDirectory + '\current.pbt');
 end;
 
 function TPanamahSDKBatchProcessor.IsThereAccumulatedBatches: Boolean;
@@ -440,15 +455,8 @@ end;
 procedure TPanamahSDKBatchProcessor.Execute;
 begin
   inherited;
-  while not Terminated do
-  begin
-    FCriticalSection.Acquire;
-    try
-      Loop;
-    finally
-      FCriticalSection.Release;
-    end;
-  end;
+  LoadCurrentBatch;
+  Process;
 end;
 
 procedure TPanamahSDKBatchProcessor.Flush;
@@ -465,20 +473,58 @@ begin
   end;
 end;
 
-procedure TPanamahSDKBatchProcessor.Loop;
+procedure TPanamahSDKBatchProcessor.LoadCurrentBatch;
+var
+  CurrentBatchFromFile: IPanamahBatch;
 begin
-  if IsThereAccumulatedBatches then
+  if FileExists(GetCurrentBatchFilename) then
   begin
-    SendAccumulatedBatches;
-  end
-  else
-  begin
-    if (FCurrentBatch.Count > 0) and FCurrentBatch.CheckForExpiration(FConfig) then
-    begin
-      DoOnCurrentBatchExpired;
-      AccumulateCurrentBatch;
+    FCriticalSection.Acquire;
+    try
+      CurrentBatchFromFile := TPanamahBatch.FromFile(GetCurrentBatchFilename);
+      if CurrentBatchFromFile.Count > 0 then
+        FCurrentBatch := CurrentBatchFromFile.Clone;
+    finally
+      FCriticalSection.Release;
     end;
   end;
+end;
+
+procedure TPanamahSDKBatchProcessor.Process;
+var
+  CurrentBatchLastHash: string;
+begin
+  while not Terminated do
+  begin
+    FCriticalSection.Acquire;
+    try
+      if IsThereAccumulatedBatches then
+      begin
+        SendAccumulatedBatches;
+      end
+      else if FCurrentBatch.Count > 0 then
+      begin
+        if FCurrentBatch.CheckForExpiration(FConfig) then
+        begin
+          DoOnCurrentBatchExpired;
+          AccumulateCurrentBatch;
+        end;
+        if CurrentBatchLastHash <> FCurrentBatch.Hash then
+        begin
+          SaveCurrentBatch;
+          CurrentBatchLastHash := FCurrentBatch.Hash;
+        end;
+      end;
+    finally
+      FCriticalSection.Release;
+    end;
+  end;
+end;
+
+procedure TPanamahSDKBatchProcessor.SaveCurrentBatch;
+begin
+  if FCurrentBatch.Count > 0 then
+    FCurrentBatch.SaveToFile(GetCurrentBatchFilename);
 end;
 
 procedure TPanamahSDKBatchProcessor.SendAccumulatedBatches;

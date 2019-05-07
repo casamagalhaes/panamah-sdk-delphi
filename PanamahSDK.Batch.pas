@@ -4,7 +4,7 @@ unit PanamahSDK.Batch;
 interface
 
 uses
-  Classes, SysUtils, DateUtils, Windows, PanamahSDK.JsonUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.Models.Acesso,
+  Classes, SysUtils, DateUtils, MD5, Windows, PanamahSDK.JsonUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.Models.Acesso,
   PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente, PanamahSDK.Models.Compra, PanamahSDK.Models.Ean,
   PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa, PanamahSDK.Models.FormaPagamento,
   PanamahSDK.Models.Fornecedor, PanamahSDK.Models.Funcionario, PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding,
@@ -52,6 +52,7 @@ type
     procedure SetVendas(AVendas: IPanamahVendaList);
     procedure SetCreatedAt(ACreatedAt: TDateTime);
     procedure SetPriority(APriority: Boolean);
+    procedure SaveToFile(const AFilename: string);
     procedure Clear;
     procedure Reset;
     procedure Add(AAcesso: IPanamahAcesso); overload;
@@ -106,10 +107,13 @@ type
     function GetSize: Integer;
     function GetCreatedAt: TDateTime;
     function GetPriority: Boolean;
+    function Clone: IPanamahBatch;
     function CheckForExpiration(AConfig: IPanamahSDKConfig): Boolean;
     function SaveToDirectory(const ADirectory: string): string;
     function MoveToDirectory(const ASource, ADestiny: string): string;
     function GetCount: Integer;
+    function GetHash: string;
+    function GetItem(AIndex: Integer): IPanamahModel;
     property Acessos: IPanamahAcessoList read GetAcessos write SetAcessos;
     property Assinantes: IPanamahAssinanteList read GetAssinantes write SetAssinantes;
     property Clientes: IPanamahClienteList read GetClientes write SetClientes;
@@ -138,6 +142,8 @@ type
     property Size: Integer read GetSize;
     property Priority: Boolean read GetPriority write SetPriority;
     property Count: Integer read GetCount;
+    property Hash: string read GetHash;
+    property Items[AIndex: Integer]: IPanamahModel read GetItem;
   end;
 
   IPanamahBatchList = interface(IJSONSerializable)
@@ -204,6 +210,7 @@ type
     procedure SetVendas(AVendas: IPanamahVendaList);
     procedure SetCreatedAt(ACreatedAt: TDateTime);
     procedure SetPriority(APriority: Boolean);
+    procedure SaveToFile(const AFilename: string);
     procedure Clear;
     procedure Reset;
     procedure Add(AAcesso: IPanamahAcesso); overload;
@@ -258,6 +265,8 @@ type
     function GetSize: Integer;
     function GetCreatedAt: TDateTime;
     function GetPriority: Boolean;
+    function Clone: IPanamahBatch;
+    function GetItem(AIndex: Integer): IPanamahModel;
   public
     procedure DeserializeFromJSON(const AJSON: string);
     function SerializeToJSON: string;
@@ -265,6 +274,7 @@ type
     function MoveToDirectory(const ASource, ADestiny: string): string;
     function CheckForExpiration(AConfig: IPanamahSDKConfig): Boolean;
     function GetCount: Integer;
+    function GetHash: string;
     class function FromJSON(const AJSON: string): IPanamahBatch;
     class function FromFile(const AFilename: string): IPanamahBatch;
   published
@@ -526,6 +536,12 @@ begin
   if(Assigned(FVendas)) then FVendas.Clear;
 end;
 
+function TPanamahBatch.Clone: IPanamahBatch;
+begin
+  Result := TPanamahBatch.Create;
+  Result.DeserializeFromJSON(SerializeToJSON);
+end;
+
 constructor TPanamahBatch.Create;
 begin
   inherited;
@@ -593,13 +609,19 @@ end;
 
 function TPanamahBatch.SaveToDirectory(const ADirectory: string): string;
 var
-  BatchFile : TextFile;
   BatchFilename: TPanamahBatchFilenameRec;
 begin
   BatchFilename.CreatedAt := FCreatedAt;
   BatchFilename.Priority := FPriority;
   ForceDirectories(ADirectory);
-  AssignFile(BatchFile, Format('%s/%s.pbt', [ADirectory, string(BatchFilename)]));
+  SaveToFile(Format('%s/%s.pbt', [ADirectory, string(BatchFilename)]));
+end;
+
+procedure TPanamahBatch.SaveToFile(const AFilename: string);
+var
+  BatchFile : TextFile;
+begin
+  AssignFile(BatchFile, AFilename);
   try
     Rewrite(BatchFile);
     WriteLn(BatchFile, SerializeToJSON);
@@ -887,9 +909,21 @@ begin
   Result := FGrupos;
 end;
 
+function TPanamahBatch.GetHash: string;
+begin
+  Result := MD5DigestToStr(MD5String(SerializeToJSON));
+end;
+
 function TPanamahBatch.GetHoldings: IPanamahHoldingList;
 begin
   Result := FHoldings;
+end;
+
+function TPanamahBatch.GetItem(AIndex: Integer): IPanamahModel;
+var
+  Models: IPanamahModelList;
+begin
+  Models := TPanamahModelList.Create;
 end;
 
 function TPanamahBatch.GetLocaisEstoque: IPanamahLocalEstoqueList;

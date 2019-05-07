@@ -192,7 +192,8 @@ begin
     try
       AuthHeaders.Values['Content-Type'] := 'application/json';
       AuthHeaders.Values['Accept'] := 'application/json';
-      AuthRequest := TRequest.Create(Concat(FBaseURL, '/api/auth'), mtPOST, nil, AuthHeaders, Format('{"apiKey": "%s"}', [FApiKey]));
+      AuthHeaders.Values['x-api-key'] := FApiKey;
+      AuthRequest := TRequest.Create(Concat(FBaseURL, '/api/auth'), mtPOST, nil, AuthHeaders, EmptyStr);
       AuthResponse := MakeRequest(AuthRequest);
       if AuthResponse.Status = 200 then
       begin

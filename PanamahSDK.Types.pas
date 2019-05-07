@@ -3,7 +3,7 @@ unit PanamahSDK.Types;
 interface
 
 uses
-  SysUtils, StrUtils;
+  Classes, SysUtils, StrUtils, uLkJSON;
 
 type
 
@@ -23,6 +23,30 @@ type
   PString = ^string;
 
   PPanamahModel = ^IPanamahModel;
+
+  IPanamahModelList = interface
+    ['{027630A2-754E-483E-A2DF-5D9A167E3366}']
+    function GetItem(AIndex: Integer): IPanamahModel;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahModel);
+    procedure Add(const AItem: IPanamahModel);
+    procedure Clear;
+    function Count: Integer;
+    property Items[AIndex: Integer]: IPanamahModel read GetItem write SetItem; default;
+  end;
+
+  TPanamahModelList = class(TInterfacedObject, IPanamahModelList)
+  private
+    FList: TInterfaceList;
+    function GetItem(AIndex: Integer): IPanamahModel;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahModel);
+  public
+    constructor Create;
+    procedure Add(const AItem: IPanamahModel);
+    procedure Clear;
+    function Count: Integer;
+    destructor Destroy; override;
+    property Items[AIndex: Integer]: IPanamahModel read GetItem write SetItem; default;
+  end;
 
   IPanamahSDKConfig = interface
     ['{F5D4BA5C-5DF8-480A-9408-6EA0F41EEA0A}']
@@ -83,5 +107,43 @@ begin
   Result := AnsiStartsText(ASubText, AText);
 end;
 {$ENDIF}
+
+{ TPanamahModelList }
+
+procedure TPanamahModelList.Add(const AItem: IPanamahModel);
+begin
+  FList.Add(AItem);
+end;
+
+procedure TPanamahModelList.Clear;
+begin
+  FList.Clear;
+end;
+
+function TPanamahModelList.Count: Integer;
+begin
+  Result := FList.Count;
+end;
+
+constructor TPanamahModelList.Create;
+begin
+  FList := TInterfaceList.Create;
+end;
+
+destructor TPanamahModelList.Destroy;
+begin
+  FList.Free;
+  inherited;
+end;
+
+function TPanamahModelList.GetItem(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahModel;
+end;
+
+procedure TPanamahModelList.SetItem(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
+end;
 
 end.
