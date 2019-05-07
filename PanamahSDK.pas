@@ -37,33 +37,50 @@ type
     property BatchMaxSize: Integer read GetBatchMaxSize write SetBatchMaxSize;
   end;
 
-  TBatchExpiredEvent = procedure(ABatch: IPanamahBatch) of object;
-  TBeforeObjectAddedToBatchEvent = procedure(AObject: IPanamahModel) of object;
+  TPanamahBatchEvent = procedure(ABatch: IPanamahBatch) of object;
+  TPanamahModelEvent = procedure(AModel: IPanamahModel) of object;
 
   TPanamahSDKBatchProcessor = class(TThread)
   private
     FCriticalSection: TCriticalSection;
-    FOnCurrentBatchExpired: TBatchExpiredEvent;
-    FOnBeforeObjectAddedToBatch: TBeforeObjectAddedToBatchEvent;
+    FOnCurrentBatchExpired: TPanamahBatchEvent;
+    FOnBeforeObjectAddedToBatch: TPanamahModelEvent;
+    FOnBeforeBatchSent: TPanamahBatchEvent;
     FClient: IPanamahClient;
     FConfig: IPanamahSDKConfig;
     FCurrentBatch: IPanamahBatch;
-    procedure SetOnCurrentBatchExpired(const Value: TBatchExpiredEvent);
+    function GetBatchAccumulationDirectory: string;
+    function GetBatchSentDirectory: string;
+    function IsThereAccumulatedBatches: Boolean;
+    procedure AccumulateCurrentBatch;
     procedure DoOnCurrentBatchExpired;
     procedure DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
-  protected
-    procedure Execute; override;
-    property OnCurrentBatchExpired: TBatchExpiredEvent read FOnCurrentBatchExpired write SetOnCurrentBatchExpired;
-    property OnBeforeObjectAddedToBatch: TBeforeObjectAddedToBatchEvent read FOnBeforeObjectAddedToBatch write FOnBeforeObjectAddedToBatch;
-    procedure Add(AModel: IPanamahModel);
-    constructor Create(AConfig: IPanamahSDKConfig); reintroduce;
+    procedure DoOnBeforeBatchSent(ABatch: IPanamahBatch);
+    procedure SendAccumulatedBatches;
+    procedure Loop;
+  public
     destructor Destroy; override;
+    constructor Create; reintroduce;
+    procedure Start(AConfig: IPanamahSDKConfig); reintroduce;
+    procedure Execute; override;
+    procedure Stop;
+    property OnCurrentBatchExpired: TPanamahBatchEvent read FOnCurrentBatchExpired write FOnCurrentBatchExpired;
+    property OnBeforeObjectAddedToBatch: TPanamahModelEvent read FOnBeforeObjectAddedToBatch write FOnBeforeObjectAddedToBatch;
+    property OnBeforeBatchSent: TPanamahBatchEvent read FOnBeforeBatchSent write FOnBeforeBatchSent;
+    procedure Add(AModel: IPanamahModel);
+    procedure Flush;
   end;
 
   TPanamahSDK = class
   private
     FConfig: IPanamahSDKConfig;
     FProcessor: TPanamahSDKBatchProcessor;
+    function GetOnCurrentBatchExpired: TPanamahBatchEvent;
+    function GetOnBeforeObjectAddedToBatch: TPanamahModelEvent;
+    function GetOnBeforeBatchSent: TPanamahBatchEvent;
+    procedure SetOnCurrentBatchExpired(AEvent: TPanamahBatchEvent);
+    procedure SetOnBeforeObjectAddedToBatch(AEvent: TPanamahModelEvent);
+    procedure SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
   public
     class procedure Free;
     procedure Init; overload;
@@ -95,6 +112,9 @@ type
     procedure Send(ATrocaDevolucao: IPanamahTrocaDevolucao); overload;
     procedure Send(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
     procedure Send(AVenda: IPanamahVenda); overload;
+    property OnCurrentBatchExpired: TPanamahBatchEvent read GetOnCurrentBatchExpired write SetOnCurrentBatchExpired;
+    property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
+    property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
   published
     class function GetInstance: TPanamahSDK;
   end;
@@ -109,8 +129,7 @@ implementation
 procedure TPanamahSDK.Init(AConfig: IPanamahSDKConfig);
 begin
   FConfig := AConfig;
-  FProcessor := TPanamahSDKBatchProcessor.Create(FConfig);
-  FProcessor.Start;
+  FProcessor.Start(FConfig);
 end;
 
 procedure TPanamahSDK.Init;
@@ -202,6 +221,21 @@ begin
   FProcessor.Add(AVenda);
 end;
 
+procedure TPanamahSDK.SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
+begin
+  FProcessor.OnBeforeBatchSent := AEvent;
+end;
+
+procedure TPanamahSDK.SetOnBeforeObjectAddedToBatch(AEvent: TPanamahModelEvent);
+begin
+  FProcessor.OnBeforeObjectAddedToBatch := AEvent;
+end;
+
+procedure TPanamahSDK.SetOnCurrentBatchExpired(AEvent: TPanamahBatchEvent);
+begin
+  FProcessor.OnCurrentBatchExpired := AEvent;
+end;
+
 procedure TPanamahSDK.Send(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
 begin
   FProcessor.Add(ATrocaFormaPagamento);
@@ -245,18 +279,19 @@ end;
 constructor TPanamahSDK.Create;
 begin
   inherited;
+  FProcessor := TPanamahSDKBatchProcessor.Create;
 end;
 
 destructor TPanamahSDK.Destroy;
 begin
-  FProcessor.Terminate;
+  FProcessor.Stop;
   FProcessor.Free;
   inherited;
 end;
 
 procedure TPanamahSDK.Flush;
 begin
-  //
+  FProcessor.Flush;
 end;
 
 class procedure TPanamahSDK.Free;
@@ -272,12 +307,28 @@ begin
   Result := _PanamahSDKInstance;
 end;
 
+function TPanamahSDK.GetOnBeforeBatchSent: TPanamahBatchEvent;
+begin
+  Result := FProcessor.OnBeforeBatchSent;
+end;
+
+function TPanamahSDK.GetOnBeforeObjectAddedToBatch: TPanamahModelEvent;
+begin
+  Result := FProcessor.OnBeforeObjectAddedToBatch;
+end;
+
+function TPanamahSDK.GetOnCurrentBatchExpired: TPanamahBatchEvent;
+begin
+  Result := FProcessor.OnCurrentBatchExpired;
+end;
+
 { TPanamahSDKConfig }
 
 constructor TPanamahSDKConfig.Create;
 begin
   inherited Create;
-  FBatchTTL := 5 * 60 * 1000;
+//  FBatchTTL := 5 * 60 * 1000;
+  FBatchTTL := 10 * 1000;
   FBatchMaxSize := 5 * 1024;
   FBaseDirectory := GetCurrentDir + '\.panamah';
 end;
@@ -324,21 +375,41 @@ end;
 
 { TPanamahSDKBatchProcessor }
 
+procedure TPanamahSDKBatchProcessor.AccumulateCurrentBatch;
+begin
+  FCurrentBatch.SaveToDirectory(GetBatchAccumulationDirectory);
+  FCurrentBatch.Reset;
+end;
+
 procedure TPanamahSDKBatchProcessor.Add(AModel: IPanamahModel);
 begin
   FCriticalSection.Acquire;
   try
+    DoOnBeforeObjectAddedToBatch(AModel);
     FCurrentBatch.Add(AModel.Clone);
   finally
     FCriticalSection.Release;
   end;
 end;
 
-constructor TPanamahSDKBatchProcessor.Create(AConfig: IPanamahSDKConfig);
+function TPanamahSDKBatchProcessor.GetBatchAccumulationDirectory: string;
+begin
+  Result := (FConfig.BaseDirectory + '\acumulados');
+end;
+
+function TPanamahSDKBatchProcessor.GetBatchSentDirectory: string;
+begin
+  Result := (FConfig.BaseDirectory + '\enviados');
+end;
+
+function TPanamahSDKBatchProcessor.IsThereAccumulatedBatches: Boolean;
+begin
+  Result := TPanamahBatchList.CountBatchesInDirectory(GetBatchAccumulationDirectory) > 0;
+end;
+
+constructor TPanamahSDKBatchProcessor.Create;
 begin
   inherited Create(True);
-  FConfig := AConfig;
-  FCurrentBatch := TPanamahBatch.Create;
   FCriticalSection := TCriticalSection.Create;
 end;
 
@@ -354,6 +425,12 @@ begin
   inherited;
 end;
 
+procedure TPanamahSDKBatchProcessor.DoOnBeforeBatchSent(ABatch: IPanamahBatch);
+begin
+  if Assigned(FOnBeforeBatchSent) then
+    FOnBeforeBatchSent(ABatch);
+end;
+
 procedure TPanamahSDKBatchProcessor.DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
 begin
   if Assigned(FOnBeforeObjectAddedToBatch) then
@@ -367,22 +444,71 @@ begin
   begin
     FCriticalSection.Acquire;
     try
-      if FCurrentBatch.CheckForExpiration(FConfig) then
-      begin
-        Synchronize(DoOnCurrentBatchExpired);
-        FCurrentBatch.SaveToDirectory(FConfig.BaseDirectory + '\acumulados');
-        FCurrentBatch.Reset;
-      end;
+      Loop;
     finally
       FCriticalSection.Release;
     end;
-    Sleep(1000);
   end;
 end;
 
-procedure TPanamahSDKBatchProcessor.SetOnCurrentBatchExpired(const Value: TBatchExpiredEvent);
+procedure TPanamahSDKBatchProcessor.Flush;
 begin
-  FOnCurrentBatchExpired := Value;
+  FCriticalSection.Acquire;
+  try
+    if FCurrentBatch.Count > 0 then
+    begin
+      AccumulateCurrentBatch;
+      SendAccumulatedBatches;
+    end;
+  finally
+    FCriticalSection.Release;
+  end;
+end;
+
+procedure TPanamahSDKBatchProcessor.Loop;
+begin
+  if IsThereAccumulatedBatches then
+  begin
+    SendAccumulatedBatches;
+  end
+  else
+  begin
+    if (FCurrentBatch.Count > 0) and FCurrentBatch.CheckForExpiration(FConfig) then
+    begin
+      DoOnCurrentBatchExpired;
+      AccumulateCurrentBatch;
+    end;
+  end;
+end;
+
+procedure TPanamahSDKBatchProcessor.SendAccumulatedBatches;
+var
+  AccumulatedBatches: IPanamahBatchList;
+  Response: IResponse;
+  I: Integer;
+begin
+  AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
+  for I := 0 to AccumulatedBatches.Count - 1 do
+  begin
+    DoOnBeforeBatchSent(AccumulatedBatches[I]);
+    Response := FClient.Post('/record', AccumulatedBatches[I].SerializeToJSON, nil);
+    if Response.Status = 200 then
+      AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
+  end;
+end;
+
+procedure TPanamahSDKBatchProcessor.Start(AConfig: IPanamahSDKConfig);
+begin
+  FConfig := AConfig;
+  FClient := TClient.Create('https://172.16.33.109:7443', FConfig.ApiKey);
+  FCurrentBatch := TPanamahBatch.Create;
+  inherited Start;
+end;
+
+procedure TPanamahSDKBatchProcessor.Stop;
+begin
+  Terminate;
+  WaitFor;
 end;
 
 initialization

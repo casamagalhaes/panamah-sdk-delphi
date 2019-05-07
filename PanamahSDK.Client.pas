@@ -3,7 +3,7 @@ unit PanamahSDK.Client;
 interface
 
 uses
-  SysUtils, StrUtils, Classes, IdHTTP, IdSSLOpenSSL, IdStack, PanamahSDK.Types;
+  SysUtils, StrUtils, Classes, IdHTTP, IdSSLOpenSSL, IdStack, PanamahSDK.Types, uLkJSON, PanamahSDK.JsonUtils;
 
 type
 
@@ -279,19 +279,6 @@ begin
 end;
 
 function TClient.MakeRequest(const ARequest: IRequest): IResponse;
-
-  procedure LogRequest;
-  var
-    Verb: string;
-  begin
-    case ARequest.Method of
-      mtGET: Verb := 'GET';
-      mtPOST: Verb := 'POST';
-      mtPUT: Verb := 'PUT';
-      mtDELETE: Verb := 'DELETE';
-    end;
-  end;
-
 var
   ResponseContent: string;
   HTTP: TSDKIdHTTP;
@@ -299,7 +286,6 @@ var
   HTTPIOHandler: TIdSSLIOHandlerSocketOpenSSL;
   RequestContent: TStream;
 begin
-  LogRequest;
   HTTP := TSDKIdHTTP.Create(nil);
   try
     HTTPIOHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
@@ -459,6 +445,8 @@ begin
   for I := 0 to FOwnedObjects.Count - 1 do
     FOwnedObjects.Objects[I].Free;
   FOwnedObjects.Free;
+  if Assigned(FTokens) then
+    FTokens.Free;
   inherited;
 end;
 
@@ -597,9 +585,17 @@ begin
 end;
 
 class function TTokenStorage.From(const AResponse: IResponse): TTokenStorage;
+var
+  JsonObject: TlkJSONobject;
 begin
-  //TODO: grab tokens
-  Result := nil;
+  JsonObject := TlkJSON.ParseText(AResponse.Content) as TlkJSONobject;
+  try
+    Result := TTokenStorage.Create;
+    Result.AccessToken := JsonObject.Field['accessToken'].Value;
+    Result.RefreshToken := JsonObject.Field['refreshToken'].Value;
+  finally
+    JsonObject.Free;
+  end;
 end;
 
 end.

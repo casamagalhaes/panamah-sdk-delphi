@@ -4,7 +4,7 @@ unit PanamahSDK.Batch;
 interface
 
 uses
-  Classes, SysUtils, DateUtils, PanamahSDK.JsonUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.Models.Acesso,
+  Classes, SysUtils, DateUtils, Windows, PanamahSDK.JsonUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.Models.Acesso,
   PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente, PanamahSDK.Models.Compra, PanamahSDK.Models.Ean,
   PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa, PanamahSDK.Models.FormaPagamento,
   PanamahSDK.Models.Fornecedor, PanamahSDK.Models.Funcionario, PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding,
@@ -108,6 +108,8 @@ type
     function GetPriority: Boolean;
     function CheckForExpiration(AConfig: IPanamahSDKConfig): Boolean;
     function SaveToDirectory(const ADirectory: string): string;
+    function MoveToDirectory(const ASource, ADestiny: string): string;
+    function GetCount: Integer;
     property Acessos: IPanamahAcessoList read GetAcessos write SetAcessos;
     property Assinantes: IPanamahAssinanteList read GetAssinantes write SetAssinantes;
     property Clientes: IPanamahClienteList read GetClientes write SetClientes;
@@ -135,6 +137,7 @@ type
     property CreatedAt: TDateTime read GetCreatedAt write SetCreatedAt;
     property Size: Integer read GetSize;
     property Priority: Boolean read GetPriority write SetPriority;
+    property Count: Integer read GetCount;
   end;
 
   IPanamahBatchList = interface(IJSONSerializable)
@@ -259,7 +262,9 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function SerializeToJSON: string;
     function SaveToDirectory(const ADirectory: string): string;
+    function MoveToDirectory(const ASource, ADestiny: string): string;
     function CheckForExpiration(AConfig: IPanamahSDKConfig): Boolean;
+    function GetCount: Integer;
     class function FromJSON(const AJSON: string): IPanamahBatch;
     class function FromFile(const AFilename: string): IPanamahBatch;
   published
@@ -290,7 +295,10 @@ type
     property CreatedAt: TDateTime read GetCreatedAt write SetCreatedAt;
     property Size: Integer read GetSize;
     property Priority: Boolean read GetPriority write SetPriority;
+    constructor Create; reintroduce;
   end;
+
+  TBatchFileIterationProcedure = procedure(const ABatchFilename: string);
 
   TPanamahBatchList = class(TInterfacedObject, IPanamahBatchList)
   private
@@ -298,11 +306,13 @@ type
     function GetItem(AIndex: Integer): IPanamahBatch;
     procedure SetItem(AIndex: Integer; const Value: IPanamahBatch);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
+    class function GetBatchesInDirectory(const ADirectory: string): TStrings;
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahBatchList;
     class function FromDirectory(const ADirectory: string): IPanamahBatchList;
+    class function CountBatchesInDirectory(const ADirectory: string): Integer;
     constructor Create;
     procedure Add(const AItem: IPanamahBatch);
     procedure Clear;
@@ -485,35 +495,41 @@ end;
 
 function TPanamahBatch.CheckForExpiration(AConfig: IPanamahSDKConfig): Boolean;
 begin
-  Result := (MilliSecondsBetween(Now, FCreatedAt) >= AConfig.BatchTTL) and (GetSize >= AConfig.BatchMaxSize);
+  Result := (MilliSecondsBetween(Now, FCreatedAt) >= AConfig.BatchTTL) or (GetSize >= AConfig.BatchMaxSize);
 end;
 
 procedure TPanamahBatch.Clear;
 begin
-  FAcessos.Clear;
-  FAssinantes.Clear;
-  FClientes.Clear;
-  FCompras.Clear;
-  FEans.Clear;
-  FEstoqueMovimentacoes.Clear;
-  FEventosCaixa.Clear;
-  FFormasPagamento.Clear;
-  FFornecedores.Clear;
-  FFuncionarios.Clear;
-  FGrupos.Clear;
-  FHoldings.Clear;
-  FLocaisEstoque.Clear;
-  FLojas.Clear;
-  FMetas.Clear;
-  FProdutos.Clear;
-  FRevendas.Clear;
-  FSecoes.Clear;
-  FSubgrupos.Clear;
-  FTitulosPagar.Clear;
-  FTitulosReceber.Clear;
-  FTrocasDevolucoes.Clear;
-  FTrocasFormaPagamento.Clear;
-  FVendas.Clear;
+  if(Assigned(FAcessos)) then FAcessos.Clear;
+  if(Assigned(FAssinantes)) then FAssinantes.Clear;
+  if(Assigned(FClientes)) then FClientes.Clear;
+  if(Assigned(FCompras)) then FCompras.Clear;
+  if(Assigned(FEans)) then FEans.Clear;
+  if(Assigned(FEstoqueMovimentacoes)) then FEstoqueMovimentacoes.Clear;
+  if(Assigned(FEventosCaixa)) then FEventosCaixa.Clear;
+  if(Assigned(FFormasPagamento)) then FFormasPagamento.Clear;
+  if(Assigned(FFornecedores)) then FFornecedores.Clear;
+  if(Assigned(FFuncionarios)) then FFuncionarios.Clear;
+  if(Assigned(FGrupos)) then FGrupos.Clear;
+  if(Assigned(FHoldings)) then FHoldings.Clear;
+  if(Assigned(FLocaisEstoque)) then FLocaisEstoque.Clear;
+  if(Assigned(FLojas)) then FLojas.Clear;
+  if(Assigned(FMetas)) then FMetas.Clear;
+  if(Assigned(FProdutos)) then FProdutos.Clear;
+  if(Assigned(FRevendas)) then FRevendas.Clear;
+  if(Assigned(FSecoes)) then FSecoes.Clear;
+  if(Assigned(FSubgrupos)) then FSubgrupos.Clear;
+  if(Assigned(FTitulosPagar)) then FTitulosPagar.Clear;
+  if(Assigned(FTitulosReceber)) then FTitulosReceber.Clear;
+  if(Assigned(FTrocasDevolucoes)) then FTrocasDevolucoes.Clear;
+  if(Assigned(FTrocasFormaPagamento)) then FTrocasFormaPagamento.Clear;
+  if(Assigned(FVendas)) then FVendas.Clear;
+end;
+
+constructor TPanamahBatch.Create;
+begin
+  inherited;
+  FCreatedAt := Now;
 end;
 
 procedure TPanamahBatch.DeserializeFromJSON(const AJSON: string);
@@ -583,7 +599,7 @@ begin
   BatchFilename.CreatedAt := FCreatedAt;
   BatchFilename.Priority := FPriority;
   ForceDirectories(ADirectory);
-  AssignFile(BatchFile, Format('%s/%s', [ADirectory, string(BatchFilename)]));
+  AssignFile(BatchFile, Format('%s/%s.pbt', [ADirectory, string(BatchFilename)]));
   try
     Rewrite(BatchFile);
     WriteLn(BatchFile, SerializeToJSON);
@@ -802,6 +818,35 @@ begin
   Result := FCompras;
 end;
 
+function TPanamahBatch.GetCount: Integer;
+begin
+  Result := 0;
+  if(Assigned(FAcessos)) then Inc(Result, FAcessos.Count);
+  if(Assigned(FAssinantes)) then Inc(Result, FAssinantes.Count);
+  if(Assigned(FClientes)) then Inc(Result, FClientes.Count);
+  if(Assigned(FCompras)) then Inc(Result, FCompras.Count);
+  if(Assigned(FEans)) then Inc(Result, FEans.Count);
+  if(Assigned(FEstoqueMovimentacoes)) then Inc(Result, FEstoqueMovimentacoes.Count);
+  if(Assigned(FEventosCaixa)) then Inc(Result, FEventosCaixa.Count);
+  if(Assigned(FFormasPagamento)) then Inc(Result, FFormasPagamento.Count);
+  if(Assigned(FFornecedores)) then Inc(Result, FFornecedores.Count);
+  if(Assigned(FFuncionarios)) then Inc(Result, FFuncionarios.Count);
+  if(Assigned(FGrupos)) then Inc(Result, FGrupos.Count);
+  if(Assigned(FHoldings)) then Inc(Result, FHoldings.Count);
+  if(Assigned(FLocaisEstoque)) then Inc(Result, FLocaisEstoque.Count);
+  if(Assigned(FLojas)) then Inc(Result, FLojas.Count);
+  if(Assigned(FMetas)) then Inc(Result, FMetas.Count);
+  if(Assigned(FProdutos)) then Inc(Result, FProdutos.Count);
+  if(Assigned(FRevendas)) then Inc(Result, FRevendas.Count);
+  if(Assigned(FSecoes)) then Inc(Result, FSecoes.Count);
+  if(Assigned(FSubgrupos)) then Inc(Result, FSubgrupos.Count);
+  if(Assigned(FTitulosPagar)) then Inc(Result, FTitulosPagar.Count);
+  if(Assigned(FTitulosReceber)) then Inc(Result, FTitulosReceber.Count);
+  if(Assigned(FTrocasDevolucoes)) then Inc(Result, FTrocasDevolucoes.Count);
+  if(Assigned(FTrocasFormaPagamento)) then Inc(Result, FTrocasFormaPagamento.Count);
+  if(Assigned(FVendas)) then Inc(Result, FVendas.Count);
+end;
+
 function TPanamahBatch.GetCreatedAt: TDateTime;
 begin
   Result := FCreatedAt;
@@ -917,6 +962,20 @@ begin
   Result := FVendas;
 end;
 
+function TPanamahBatch.MoveToDirectory(const ASource, ADestiny: string): string;
+var
+  BatchFilename: TPanamahBatchFilenameRec;
+  SourceFile, DestinyFile: string;
+begin
+  BatchFilename.CreatedAt := FCreatedAt;
+  BatchFilename.Priority := FPriority;
+  ForceDirectories(ADestiny);
+  SourceFile := Format('%s\%s.pbt', [ASource, string(BatchFilename)]);
+  DestinyFile := Format('%s\%s.pbt', [ADestiny, string(BatchFilename)]);
+  MoveFile(PChar(SourceFile), PChar(DestinyFile));
+  Result := DestinyFile;
+end;
+
 procedure TPanamahBatch.Reset;
 begin
   Clear;
@@ -967,20 +1026,17 @@ end;
 
 class function TPanamahBatchList.FromDirectory(const ADirectory: string): IPanamahBatchList;
 var
-  SearchRec: TSearchRec;
+  Batches: TStrings;
+  I: Integer;
 begin
   Result := TPanamahBatchList.Create;
-  if DirectoryExists(ADirectory) then
-    begin
-    if FindFirst(Format('%s\*.pbt', [ADirectory]), faAnyFile, SearchRec)=0 then
-    begin
-      repeat
-        Result.Add(TPanamahBatch.FromFile(Format('%s\%s', [ADirectory, SearchRec.Name])));
-      until FindNext(SearchRec) <> 0;
-    end;
-  end
-  else
-    raise PanamahSDKIOException.Create(Format('Diretório %s não existe.', [ADirectory]));
+  Batches := GetBatchesInDirectory(ADirectory);
+  try
+    for I := 0 to Batches.Count - 1 do
+      Result.Add(TPanamahBatch.FromFile(Batches[I]));
+  finally
+    Batches.Free;
+  end;
 end;
 
 class function TPanamahBatchList.FromJSON(const AJSON: string): IPanamahBatchList;
@@ -1014,9 +1070,40 @@ begin
   Result := FList.Count;
 end;
 
+class function TPanamahBatchList.CountBatchesInDirectory(const ADirectory: string): Integer;
+var
+  Batches: TStrings;
+begin
+  Batches := GetBatchesInDirectory(ADirectory);
+  try
+    Result := Batches.Count;
+  finally
+    Batches.Free;
+  end;
+end;
+
 function TPanamahBatchList.GetItem(AIndex: Integer): IPanamahBatch;
 begin
   Result := FList.Items[AIndex] as IPanamahBatch;
+end;
+
+class function TPanamahBatchList.GetBatchesInDirectory(const ADirectory: string): TStrings;
+var
+  SearchRec: TSearchRec;
+begin
+  ForceDirectories(ADirectory);
+  Result := TStringList.Create;
+  if DirectoryExists(ADirectory) then
+    begin
+    if FindFirst(Format('%s\*.pbt', [ADirectory]), faAnyFile, SearchRec) = 0 then
+    begin
+      repeat
+        Result.Add(Format('%s\%s', [ADirectory, SearchRec.Name]));
+      until FindNext(SearchRec) <> 0;
+    end;
+  end
+  else
+    raise PanamahSDKIOException.Create(Format('Diretório %s não existe.', [ADirectory]));
 end;
 
 procedure TPanamahBatchList.SetItem(AIndex: Integer;
@@ -1059,7 +1146,7 @@ begin
   Words := TStringList.Create;
   try
     Words.Delimiter := '_';
-    Words.DelimitedText := AFilename;
+    Words.DelimitedText := ChangeFileExt(ExtractFilename(AFilename), EmptyStr);
     if Words.Count >= 7 then
     begin
       Result.CreatedAt := ISO8601ToDateTime(Format('%s-%s-%sT%s:%s:%s.%s', [
@@ -1069,12 +1156,11 @@ begin
         Words[3],
         Words[4],
         Words[5],
-        Words[6],
-        Words[7]
+        Words[6]
       ]));
     end;
     if Words.Count >= 8 then
-      Result.Priority := SameText(Words[8], 'P');
+      Result.Priority := SameText(Words[7], 'P');
   finally
     Words.Free;
   end;
@@ -1089,7 +1175,7 @@ end;
 
 class operator TPanamahBatchFilenameRec.Implicit(const AFilename: string): TPanamahBatchFilenameRec;
 begin
-  Result.Create(AFilename);
+  Result := TPanamahBatchFilenameRec.Create(AFilename);
 end;
 
 end.
