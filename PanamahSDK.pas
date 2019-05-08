@@ -557,7 +557,7 @@ end;
 procedure TPanamahSDKBatchProcessor.SendAccumulatedBatches;
 var
   AccumulatedBatches: IPanamahBatchList;
-  Response: IResponse;
+  Response: IPanamahResponse;
   I: Integer;
 begin
   AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
@@ -575,7 +575,7 @@ end;
 procedure TPanamahSDKBatchProcessor.Start(AConfig: IPanamahSDKConfig);
 begin
   FConfig := AConfig;
-  FClient := TClient.Create('https://172.16.33.109:7443', FConfig.ApiKey);
+  FClient := TPanamahClient.Create('https://172.16.33.109:7443', FConfig.ApiKey);
   FCurrentBatch := TPanamahBatch.Create;
   inherited Start;
 end;
