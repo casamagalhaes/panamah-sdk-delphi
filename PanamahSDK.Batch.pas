@@ -277,6 +277,7 @@ type
     function GetHash: string;
     class function FromJSON(const AJSON: string): IPanamahBatch;
     class function FromFile(const AFilename: string): IPanamahBatch;
+    property Items[AIndex: Integer]: IPanamahModel read GetItem;
   published
     property Acessos: IPanamahAcessoList read GetAcessos write SetAcessos;
     property Assinantes: IPanamahAssinanteList read GetAssinantes write SetAssinantes;
@@ -922,8 +923,34 @@ end;
 function TPanamahBatch.GetItem(AIndex: Integer): IPanamahModel;
 var
   Models: IPanamahModelList;
+  I: Integer;
 begin
   Models := TPanamahModelList.Create;
+  if Assigned(FAcessos) then for I := 0 to FAcessos.Count - 1 do Models.Add(FAcessos[I].Clone);
+  if Assigned(FAssinantes) then for I := 0 to FAssinantes.Count - 1 do Models.Add(FAssinantes[I].Clone);
+  if Assigned(FClientes) then for I := 0 to FClientes.Count - 1 do Models.Add(FClientes[I].Clone);
+  if Assigned(FCompras) then for I := 0 to FCompras.Count - 1 do Models.Add(FCompras[I].Clone);
+  if Assigned(FEans) then for I := 0 to FEans.Count - 1 do Models.Add(FEans[I].Clone);
+  if Assigned(FEstoqueMovimentacoes) then for I := 0 to FEstoqueMovimentacoes.Count - 1 do Models.Add(FEstoqueMovimentacoes[I].Clone);
+  if Assigned(FEventosCaixa) then for I := 0 to FEventosCaixa.Count - 1 do Models.Add(FEventosCaixa[I].Clone);
+  if Assigned(FFormasPagamento) then for I := 0 to FFormasPagamento.Count - 1 do Models.Add(FFormasPagamento[I].Clone);
+  if Assigned(FFornecedores) then for I := 0 to FFornecedores.Count - 1 do Models.Add(FFornecedores[I].Clone);
+  if Assigned(FFuncionarios) then for I := 0 to FFuncionarios.Count - 1 do Models.Add(FFuncionarios[I].Clone);
+  if Assigned(FGrupos) then for I := 0 to FGrupos.Count - 1 do Models.Add(FGrupos[I].Clone);
+  if Assigned(FHoldings) then for I := 0 to FHoldings.Count - 1 do Models.Add(FHoldings[I].Clone);
+  if Assigned(FLocaisEstoque) then for I := 0 to FLocaisEstoque.Count - 1 do Models.Add(FLocaisEstoque[I].Clone);
+  if Assigned(FLojas) then for I := 0 to FLojas.Count - 1 do Models.Add(FLojas[I].Clone);
+  if Assigned(FMetas) then for I := 0 to FMetas.Count - 1 do Models.Add(FMetas[I].Clone);
+  if Assigned(FProdutos) then for I := 0 to FProdutos.Count - 1 do Models.Add(FProdutos[I].Clone);
+  if Assigned(FRevendas) then for I := 0 to FRevendas.Count - 1 do Models.Add(FRevendas[I].Clone);
+  if Assigned(FSecoes) then for I := 0 to FSecoes.Count - 1 do Models.Add(FSecoes[I].Clone);
+  if Assigned(FSubgrupos) then for I := 0 to FSubgrupos.Count - 1 do Models.Add(FSubgrupos[I].Clone);
+  if Assigned(FTitulosPagar) then for I := 0 to FTitulosPagar.Count - 1 do Models.Add(FTitulosPagar[I].Clone);
+  if Assigned(FTitulosReceber) then for I := 0 to FTitulosReceber.Count - 1 do Models.Add(FTitulosReceber[I].Clone);
+  if Assigned(FTrocasDevolucoes) then for I := 0 to FTrocasDevolucoes.Count - 1 do Models.Add(FTrocasDevolucoes[I].Clone);
+  if Assigned(FTrocasFormaPagamento) then for I := 0 to FTrocasFormaPagamento.Count - 1 do Models.Add(FTrocasFormaPagamento[I].Clone);
+  if Assigned(FVendas) then for I := 0 to FVendas.Count - 1 do Models.Add(FVendas[I].Clone);
+  Result := Models[AIndex];
 end;
 
 function TPanamahBatch.GetLocaisEstoque: IPanamahLocalEstoqueList;

@@ -47,6 +47,7 @@ type
     FOnCurrentBatchExpired: TPanamahBatchEvent;
     FOnBeforeObjectAddedToBatch: TPanamahModelEvent;
     FOnBeforeBatchSent: TPanamahBatchEvent;
+    FOnBeforeObjectSent: TPanamahModelEvent;
     FClient: IPanamahClient;
     FConfig: IPanamahSDKConfig;
     FCurrentBatch: IPanamahBatch;
@@ -58,6 +59,7 @@ type
     procedure DoOnCurrentBatchExpired;
     procedure DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
     procedure DoOnBeforeBatchSent(ABatch: IPanamahBatch);
+    procedure DoOnBeforeObjectSent(AModel: IPanamahModel);
     procedure SendAccumulatedBatches;
     procedure LoadCurrentBatch;
     procedure SaveCurrentBatch;
@@ -71,6 +73,7 @@ type
     property OnCurrentBatchExpired: TPanamahBatchEvent read FOnCurrentBatchExpired write FOnCurrentBatchExpired;
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read FOnBeforeObjectAddedToBatch write FOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read FOnBeforeBatchSent write FOnBeforeBatchSent;
+    property OnBeforeObjectSent: TPanamahModelEvent read FOnBeforeObjectSent write FOnBeforeObjectSent;
     procedure Add(AModel: IPanamahModel);
     procedure Flush;
   end;
@@ -81,10 +84,12 @@ type
     FProcessor: TPanamahSDKBatchProcessor;
     function GetOnCurrentBatchExpired: TPanamahBatchEvent;
     function GetOnBeforeObjectAddedToBatch: TPanamahModelEvent;
+    function GetOnBeforeObjectSent: TPanamahModelEvent;
     function GetOnBeforeBatchSent: TPanamahBatchEvent;
     procedure SetOnCurrentBatchExpired(AEvent: TPanamahBatchEvent);
     procedure SetOnBeforeObjectAddedToBatch(AEvent: TPanamahModelEvent);
     procedure SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
+    procedure SetOnBeforeObjectSent(AEvent: TPanamahModelEvent);
   public
     class procedure Free;
     procedure Init; overload;
@@ -120,6 +125,7 @@ type
     property OnCurrentBatchExpired: TPanamahBatchEvent read GetOnCurrentBatchExpired write SetOnCurrentBatchExpired;
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
+    property OnBeforeObjectSent: TPanamahModelEvent read GetOnBeforeObjectSent write SetOnBeforeObjectSent;
   published
     class function GetInstance: TPanamahSDK;
   end;
@@ -241,6 +247,11 @@ begin
   FProcessor.OnBeforeObjectAddedToBatch := AEvent;
 end;
 
+procedure TPanamahSDK.SetOnBeforeObjectSent(AEvent: TPanamahModelEvent);
+begin
+  FProcessor.OnBeforeObjectSent := AEvent;
+end;
+
 procedure TPanamahSDK.SetOnCurrentBatchExpired(AEvent: TPanamahBatchEvent);
 begin
   FProcessor.OnCurrentBatchExpired := AEvent;
@@ -325,6 +336,11 @@ end;
 function TPanamahSDK.GetOnBeforeObjectAddedToBatch: TPanamahModelEvent;
 begin
   Result := FProcessor.OnBeforeObjectAddedToBatch;
+end;
+
+function TPanamahSDK.GetOnBeforeObjectSent: TPanamahModelEvent;
+begin
+  Result := FProcessor.OnBeforeObjectSent;
 end;
 
 function TPanamahSDK.GetOnCurrentBatchExpired: TPanamahBatchEvent;
@@ -441,15 +457,26 @@ begin
 end;
 
 procedure TPanamahSDKBatchProcessor.DoOnBeforeBatchSent(ABatch: IPanamahBatch);
+var
+  I: Integer;
 begin
   if Assigned(FOnBeforeBatchSent) then
     FOnBeforeBatchSent(ABatch);
+  if Assigned(FOnBeforeObjectSent) then
+    for I := 0 to ABatch.Count - 1 do
+      DoOnBeforeObjectSent(ABatch.Items[I]);
 end;
 
 procedure TPanamahSDKBatchProcessor.DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
 begin
   if Assigned(FOnBeforeObjectAddedToBatch) then
     FOnBeforeObjectAddedToBatch(AModel);
+end;
+
+procedure TPanamahSDKBatchProcessor.DoOnBeforeObjectSent(AModel: IPanamahModel);
+begin
+  if Assigned(FOnBeforeObjectSent) then
+    FOnBeforeObjectSent(AModel);
 end;
 
 procedure TPanamahSDKBatchProcessor.Execute;
@@ -539,7 +566,9 @@ begin
     DoOnBeforeBatchSent(AccumulatedBatches[I]);
     Response := FClient.Post('/record', AccumulatedBatches[I].SerializeToJSON, nil);
     if Response.Status = 200 then
+    begin
       AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
+    end;
   end;
 end;
 

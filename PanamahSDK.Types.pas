@@ -138,7 +138,7 @@ end;
 
 function TPanamahModelList.GetItem(AIndex: Integer): IPanamahModel;
 begin
-  Result := FList[AIndex] as IPanamahModel;
+  Result := IPanamahModel(FList[AIndex]);
 end;
 
 procedure TPanamahModelList.SetItem(AIndex: Integer; const Value: IPanamahModel);
