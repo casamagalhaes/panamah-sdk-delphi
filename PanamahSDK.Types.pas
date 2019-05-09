@@ -54,14 +54,14 @@ type
     function GetBaseDirectory: string;
     function GetBatchTTL: Integer;
     function GetBatchMaxSize: Integer;
+    function GetBatchMaxCount: Integer;
     procedure SetApiKey(const AApiKey: string);
     procedure SetBaseDirectory(const ABaseDirectory: string);
-    procedure SetBatchTTL(const ABatchTTL: Integer);
-    procedure SetBatchMaxSize(const ABatchMaxSize: Integer);
     property ApiKey: string read GetApiKey write SetApiKey;
     property BaseDirectory: string read GetBaseDirectory write SetBaseDirectory;
-    property BatchTTL: Integer read GetBatchTTL write SetBatchTTL;
-    property BatchMaxSize: Integer read GetBatchMaxSize write SetBatchMaxSize;
+    property BatchTTL: Integer read GetBatchTTL;
+    property BatchMaxSize: Integer read GetBatchMaxSize;
+    property BatchMaxCount: Integer read GetBatchMaxCount;
   end;
 
   TMethod = (mtGET, mtPOST, mtPUT, mtDELETE);

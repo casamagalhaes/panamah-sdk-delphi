@@ -28,7 +28,7 @@ var
   EnumConverters: TEnumConverters;
 
 type
-  TPanamahOperationType = (otNONE, otUPDATE, otDELETE);
+  TPanamahOperationType = (otUPDATE, otDELETE);
   TPanamahSoftwareAtivo = (saMILENIO, saSYSPDV, saVAREJOFACIL, saSYSPDVWEB, saEASYASSIST, saSYSPDV_APP, saCOLETOR);
   TPanamahSoftwareContratoManutencao = (scmMILENIO, scmSYSPDV, scmVAREJOFACIL, scmSYSPDVWEB, scmEASYASSIST, scmSYSPDV_APP, scmCOLETOR);
   TPanamahEventoCaixaTipo = (ectABERTURA, ectFECHAMENTO, ectENTRADA_OPERADOR, ectSAIDA_OPERADOR);

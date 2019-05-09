@@ -126,6 +126,7 @@
         <DCCReference Include="Models\PanamahSDK.Models.TrocaDevolucao.pas"/>
         <DCCReference Include="Models\PanamahSDK.Models.TrocaFormaPagamento.pas"/>
         <DCCReference Include="Models\PanamahSDK.Models.Venda.pas"/>
+        <DCCReference Include="PanamahSDK.Operation.pas"/>
         <DCCReference Include="PanamahSDK.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
