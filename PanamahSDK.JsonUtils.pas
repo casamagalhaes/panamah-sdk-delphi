@@ -5,39 +5,6 @@ interface
 uses
   Classes, DateUtils, SysUtils, Variants, PanamahSDK.Types, uLkJSON;
 
-type
-  TSerializerFunction = function(const AJSON: string): IJSONSerializable of object;
-
-  IPanamahStringValueList = interface(IJSONSerializable)
-    ['{6011B746-B54A-447C-924E-FB647D2C5335}']
-    function GetItem(AIndex: Integer): string;
-    procedure SetItem(AIndex: Integer; const Value: string);
-    procedure Add(const AItem: string);
-    procedure Clear;
-    function Count: Integer;
-    property Items[AIndex: Integer]: string read GetItem write SetItem; default;
-    function IndexOf(const Value: string): Integer;
-  end;
-
-  TPanamahStringValueList = class(TInterfacedObject, IPanamahStringValueList)
-  private
-    FList: TStrings;
-    function GetItem(AIndex: Integer): string;
-    procedure SetItem(AIndex: Integer; const Value: string);
-    procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
-  public
-    function SerializeToJSON: string;
-    procedure DeserializeFromJSON(const AJSON: string);
-    class function FromJSON(const AJSON: string): IPanamahStringValueList;
-    constructor Create;
-    procedure Add(const AItem: string);
-    procedure Clear;
-    function Count: Integer;
-    destructor Destroy; override;
-    property Items[AIndex: Integer]: string read GetItem write SetItem; default;
-    function IndexOf(const Value: string): Integer;
-  end;
-
   function DateTimeToISO8601(const AInput: TDateTime): string;
   function ISO8601ToDateTime(const AInput: string): TDateTime;
   function GetFieldValue(AJSONObject: TlkJSONbase; const AName: string; const ADefault: Variant): Variant; overload;
@@ -53,7 +20,7 @@ type
   function GetFieldValueAsDateTime(AJSONObject: TlkJSONbase; const AName: string; ADefault: TDateTime): Double; overload;
   function GetFieldValueAsDateTime(AJSONObject: TlkJSONbase; const AName: string): TDateTime; overload;
   procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: Variant); overload;
-  procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string;  AValue: IJSONSerializable); overload;
+  procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: IJSONSerializable); overload;
 
 implementation
 
@@ -209,85 +176,6 @@ procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue:
 begin
   if AValue <> nil then
     AJSONObject.Add(AName, TlkJSON.ParseText(AValue.SerializeToJSON));
-end;
-
-{ TPanamahStringValueList }
-
-procedure TPanamahStringValueList.Add(const AItem: string);
-begin
-  FList.Add(AItem);
-end;
-
-procedure TPanamahStringValueList.Clear;
-begin
-  FList.Clear;
-end;
-
-function TPanamahStringValueList.Count: Integer;
-begin
-  Result := FList.Count;
-end;
-
-constructor TPanamahStringValueList.Create;
-begin
-  FList := TStringList.Create;
-end;
-
-destructor TPanamahStringValueList.Destroy;
-begin
-  FList.Destroy;
-  inherited;
-end;
-
-function TPanamahStringValueList.GetItem(AIndex: Integer): string;
-begin
-  Result := FList[AIndex];
-end;
-
-function TPanamahStringValueList.IndexOf(const Value: string): Integer;
-begin
-  Result := FList.IndexOf(Value);
-end;
-
-procedure TPanamahStringValueList.SetItem(AIndex: Integer; const Value: string);
-begin
-  FList[AIndex] := Value;
-end;
-
-procedure TPanamahStringValueList.DeserializeFromJSON(const AJSON: string);
-begin
-  with TlkJSON.ParseText(AJSON) as TlkJSONlist do
-  begin
-    ForEach(AddJSONObjectToList, nil);
-    Free;
-  end;
-end;
-
-class function TPanamahStringValueList.FromJSON(const AJSON: string): IPanamahStringValueList;
-begin
-  Result := TPanamahStringValueList.Create;
-  Result.DeserializeFromJSON(AJSON);
-end;
-
-function TPanamahStringValueList.SerializeToJSON: string;
-var
-  JSONObject: TlkJSONlist;
-  I: Integer;
-begin
-  JSONObject := TlkJSONlist.Create;
-  try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSONstring.Generate(FList[I]));
-    Result := TlkJSON.GenerateText(JSONObject);
-  finally
-    JSONObject.Free;
-  end;
-end;
-
-procedure TPanamahStringValueList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
-  var Continue: Boolean);
-begin
-  FList.Add(Elem.Value);
 end;
 
 end.

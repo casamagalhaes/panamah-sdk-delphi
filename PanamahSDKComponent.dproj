@@ -95,6 +95,7 @@
         <DCCReference Include="IndySystem.dcp"/>
         <DCCReference Include="IndyProtocols.dcp"/>
         <DCCReference Include="IndyCore.dcp"/>
+        <DCCReference Include="Lib\md5.pas"/>
         <DCCReference Include="Lib\uLkJSON.pas"/>
         <DCCReference Include="PanamahSDK.Types.pas"/>
         <DCCReference Include="PanamahSDK.JsonUtils.pas"/>
@@ -156,13 +157,13 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment>
-                <DeployFile LocalName="Win32\Debug\pkg\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\..\..\..\Public\Documents\Embarcadero\Studio\15.0\Bpl\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>PanamahSDKComponent.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Pkg\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="Win32\Debug\pkg\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>PanamahSDKComponent.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
@@ -176,7 +177,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\..\..\..\Public\Documents\Embarcadero\Studio\15.0\Bpl\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="Pkg\PanamahSDKComponent.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>PanamahSDKComponent.bpl</RemoteName>
                         <Overwrite>true</Overwrite>

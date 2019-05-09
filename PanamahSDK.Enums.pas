@@ -28,7 +28,7 @@ var
   EnumConverters: TEnumConverters;
 
 type
-  
+  TPanamahOperationType = (otNONE, otUPDATE, otDELETE);
   TPanamahSoftwareAtivo = (saMILENIO, saSYSPDV, saVAREJOFACIL, saSYSPDVWEB, saEASYASSIST, saSYSPDV_APP, saCOLETOR);
   TPanamahSoftwareContratoManutencao = (scmMILENIO, scmSYSPDV, scmVAREJOFACIL, scmSYSPDVWEB, scmEASYASSIST, scmSYSPDV_APP, scmCOLETOR);
   TPanamahEventoCaixaTipo = (ectABERTURA, ectFECHAMENTO, ectENTRADA_OPERADOR, ectSAIDA_OPERADOR);
@@ -156,6 +156,20 @@ end;
 
 {Converters}
 
+function Converter_PanamahOperationType_StrToEnum(const AValue: string): Integer;
+begin
+  if SameText(AValue, 'UPDATE') then Result := Integer(otUPDATE) else
+  if SameText(AValue, 'DELETE') then Result := Integer(otDELETE) else
+  raise EnumException.CreateFmt('Valor %s incorreto para PanamahOperationType.', [AValue]);
+end;
+
+function Converter_PanamahOperationType_EnumToStr(const AValue: Integer): string; overload;
+begin
+  if Integer(otUPDATE) = AValue then Result := 'UPDATE' else
+  if Integer(otDELETE) = AValue then Result := 'DELETE' else
+  raise EnumException.CreateFmt('Valor %d incorreto para PanamahOperationType.', [AValue]);
+end;
+
 function Converter_PanamahSoftwareAtivo_StrToEnum(const AValue: string): Integer;
 begin
   if SameText(AValue, 'MILENIO') then Result := Integer(saMILENIO) else
@@ -179,6 +193,7 @@ begin
   if Integer(saCOLETOR) = AValue then Result := 'COLETOR' else
   raise EnumException.CreateFmt('Valor %d incorreto para PanamahSoftwareAtivo.', [AValue]);
 end;
+
 function Converter_PanamahSoftwareContratoManutencao_StrToEnum(const AValue: string): Integer;
 begin
   if SameText(AValue, 'MILENIO') then Result := Integer(scmMILENIO) else
@@ -202,6 +217,7 @@ begin
   if Integer(scmCOLETOR) = AValue then Result := 'COLETOR' else
   raise EnumException.CreateFmt('Valor %d incorreto para PanamahSoftwareContratoManutencao.', [AValue]);
 end;
+
 function Converter_PanamahEventoCaixaTipo_StrToEnum(const AValue: string): Integer;
 begin
   if SameText(AValue, 'ABERTURA') then Result := Integer(ectABERTURA) else
@@ -446,6 +462,7 @@ end;
 
 initialization
   EnumConverters := TEnumConverters.Create;
+  EnumConverters.Register('PanamahOperationType', @Converter_PanamahOperationType_StrToEnum, @Converter_PanamahOperationType_EnumToStr);
   EnumConverters.Register('PanamahSoftwareAtivo', @Converter_PanamahSoftwareAtivo_StrToEnum, @Converter_PanamahSoftwareAtivo_EnumToStr);
   EnumConverters.Register('PanamahSoftwareContratoManutencao', @Converter_PanamahSoftwareContratoManutencao_StrToEnum, @Converter_PanamahSoftwareContratoManutencao_EnumToStr);
   EnumConverters.Register('PanamahEventoCaixaTipo', @Converter_PanamahEventoCaixaTipo_StrToEnum, @Converter_PanamahEventoCaixaTipo_EnumToStr);

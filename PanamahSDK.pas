@@ -4,14 +4,14 @@ unit PanamahSDK;
 interface
 
 uses
-  Classes, Windows, SysUtils, Messages, SyncObjs, PanamahSDK.Types, PanamahSDK.Client, PanamahSDK.Batch, PanamahSDK.Models.Acesso,
-  PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente, PanamahSDK.Models.Compra, PanamahSDK.Models.Ean,
-  PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa, PanamahSDK.Models.FormaPagamento,
-  PanamahSDK.Models.Fornecedor, PanamahSDK.Models.Funcionario, PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding,
-  PanamahSDK.Models.LocalEstoque, PanamahSDK.Models.Loja, PanamahSDK.Models.Meta, PanamahSDK.Models.Produto,
-  PanamahSDK.Models.Revenda, PanamahSDK.Models.Secao, PanamahSDK.Models.Subgrupo, PanamahSDK.Models.TituloPagar,
-  PanamahSDK.Models.TituloReceber, PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento,
-  PanamahSDK.Models.Venda;
+  Classes, Windows, SysUtils, Messages, SyncObjs, PanamahSDK.Types, PanamahSDK.Client, PanamahSDK.Batch,
+  PanamahSDK.Models.Acesso, PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente, PanamahSDK.Models.Compra,
+  PanamahSDK.Models.Ean, PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa,
+  PanamahSDK.Models.FormaPagamento, PanamahSDK.Models.Fornecedor, PanamahSDK.Models.Funcionario,
+  PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding, PanamahSDK.Models.LocalEstoque, PanamahSDK.Models.Loja,
+  PanamahSDK.Models.Meta, PanamahSDK.Models.Produto, PanamahSDK.Models.Revenda, PanamahSDK.Models.Secao,
+  PanamahSDK.Models.Subgrupo, PanamahSDK.Models.TituloPagar, PanamahSDK.Models.TituloReceber,
+  PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento, PanamahSDK.Models.Venda;
 
 type
 
@@ -98,30 +98,30 @@ type
     procedure Flush;
     constructor Create; reintroduce;
     destructor Destroy; override;
-    procedure Send(AAcesso: IPanamahAcesso); overload;
-    procedure Send(AAssinante: IPanamahAssinante); overload;
-    procedure Send(ACliente: IPanamahCliente); overload;
-    procedure Send(ACompra: IPanamahCompra); overload;
-    procedure Send(AEan: IPanamahEan); overload;
-    procedure Send(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao); overload;
-    procedure Send(AEventoCaixa: IPanamahEventoCaixa); overload;
-    procedure Send(AFormaPagamento: IPanamahFormaPagamento); overload;
-    procedure Send(AFornecedor: IPanamahFornecedor); overload;
-    procedure Send(AFuncionario: IPanamahFuncionario); overload;
-    procedure Send(AGrupo: IPanamahGrupo); overload;
-    procedure Send(AHolding: IPanamahHolding); overload;
-    procedure Send(ALocalEstoque: IPanamahLocalEstoque); overload;
-    procedure Send(ALoja: IPanamahLoja); overload;
-    procedure Send(AMeta: IPanamahMeta); overload;
-    procedure Send(AProduto: IPanamahProduto); overload;
-    procedure Send(ARevenda: IPanamahRevenda); overload;
-    procedure Send(ASecao: IPanamahSecao); overload;
-    procedure Send(ASubgrupo: IPanamahSubgrupo); overload;
-    procedure Send(ATituloPagar: IPanamahTituloPagar); overload;
-    procedure Send(ATituloReceber: IPanamahTituloReceber); overload;
-    procedure Send(ATrocaDevolucao: IPanamahTrocaDevolucao); overload;
-    procedure Send(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
-    procedure Send(AVenda: IPanamahVenda); overload;
+    procedure Save(AAcesso: IPanamahAcesso); overload;
+    procedure Save(AAssinante: IPanamahAssinante); overload;
+    procedure Save(ACliente: IPanamahCliente); overload;
+    procedure Save(ACompra: IPanamahCompra); overload;
+    procedure Save(AEan: IPanamahEan); overload;
+    procedure Save(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao); overload;
+    procedure Save(AEventoCaixa: IPanamahEventoCaixa); overload;
+    procedure Save(AFormaPagamento: IPanamahFormaPagamento); overload;
+    procedure Save(AFornecedor: IPanamahFornecedor); overload;
+    procedure Save(AFuncionario: IPanamahFuncionario); overload;
+    procedure Save(AGrupo: IPanamahGrupo); overload;
+    procedure Save(AHolding: IPanamahHolding); overload;
+    procedure Save(ALocalEstoque: IPanamahLocalEstoque); overload;
+    procedure Save(ALoja: IPanamahLoja); overload;
+    procedure Save(AMeta: IPanamahMeta); overload;
+    procedure Save(AProduto: IPanamahProduto); overload;
+    procedure Save(ARevenda: IPanamahRevenda); overload;
+    procedure Save(ASecao: IPanamahSecao); overload;
+    procedure Save(ASubgrupo: IPanamahSubgrupo); overload;
+    procedure Save(ATituloPagar: IPanamahTituloPagar); overload;
+    procedure Save(ATituloReceber: IPanamahTituloReceber); overload;
+    procedure Save(ATrocaDevolucao: IPanamahTrocaDevolucao); overload;
+    procedure Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
+    procedure Save(AVenda: IPanamahVenda); overload;
     property OnCurrentBatchExpired: TPanamahBatchEvent read GetOnCurrentBatchExpired write SetOnCurrentBatchExpired;
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
@@ -157,82 +157,82 @@ begin
   Init(GetEnvironmentVariable('PANAMAH_API_KEY'));
 end;
 
-procedure TPanamahSDK.Send(AFormaPagamento: IPanamahFormaPagamento);
+procedure TPanamahSDK.Save(AFormaPagamento: IPanamahFormaPagamento);
 begin
   FProcessor.Add(AFormaPagamento);
 end;
 
-procedure TPanamahSDK.Send(AEventoCaixa: IPanamahEventoCaixa);
+procedure TPanamahSDK.Save(AEventoCaixa: IPanamahEventoCaixa);
 begin
   FProcessor.Add(AEventoCaixa);
 end;
 
-procedure TPanamahSDK.Send(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao);
+procedure TPanamahSDK.Save(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao);
 begin
   FProcessor.Add(AEstoqueMovimentacao);
 end;
 
-procedure TPanamahSDK.Send(AGrupo: IPanamahGrupo);
+procedure TPanamahSDK.Save(AGrupo: IPanamahGrupo);
 begin
   FProcessor.Add(AGrupo);
 end;
 
-procedure TPanamahSDK.Send(AFuncionario: IPanamahFuncionario);
+procedure TPanamahSDK.Save(AFuncionario: IPanamahFuncionario);
 begin
   FProcessor.Add(AFuncionario);
 end;
 
-procedure TPanamahSDK.Send(AFornecedor: IPanamahFornecedor);
+procedure TPanamahSDK.Save(AFornecedor: IPanamahFornecedor);
 begin
   FProcessor.Add(AFornecedor);
 end;
 
-procedure TPanamahSDK.Send(AAssinante: IPanamahAssinante);
+procedure TPanamahSDK.Save(AAssinante: IPanamahAssinante);
 begin
   FProcessor.Add(AAssinante);
 end;
 
-procedure TPanamahSDK.Send(AAcesso: IPanamahAcesso);
+procedure TPanamahSDK.Save(AAcesso: IPanamahAcesso);
 begin
   FProcessor.Add(AAcesso);
 end;
 
-procedure TPanamahSDK.Send(AEan: IPanamahEan);
+procedure TPanamahSDK.Save(AEan: IPanamahEan);
 begin
   FProcessor.Add(AEan);
 end;
 
-procedure TPanamahSDK.Send(ACompra: IPanamahCompra);
+procedure TPanamahSDK.Save(ACompra: IPanamahCompra);
 begin
   FProcessor.Add(ACompra);
 end;
 
-procedure TPanamahSDK.Send(ACliente: IPanamahCliente);
+procedure TPanamahSDK.Save(ACliente: IPanamahCliente);
 begin
   FProcessor.Add(ACliente);
 end;
 
-procedure TPanamahSDK.Send(AHolding: IPanamahHolding);
+procedure TPanamahSDK.Save(AHolding: IPanamahHolding);
 begin
   FProcessor.Add(AHolding);
 end;
 
-procedure TPanamahSDK.Send(ATituloReceber: IPanamahTituloReceber);
+procedure TPanamahSDK.Save(ATituloReceber: IPanamahTituloReceber);
 begin
   FProcessor.Add(ATituloReceber);
 end;
 
-procedure TPanamahSDK.Send(ATituloPagar: IPanamahTituloPagar);
+procedure TPanamahSDK.Save(ATituloPagar: IPanamahTituloPagar);
 begin
   FProcessor.Add(ATituloPagar);
 end;
 
-procedure TPanamahSDK.Send(ASubgrupo: IPanamahSubgrupo);
+procedure TPanamahSDK.Save(ASubgrupo: IPanamahSubgrupo);
 begin
   FProcessor.Add(ASubgrupo);
 end;
 
-procedure TPanamahSDK.Send(AVenda: IPanamahVenda);
+procedure TPanamahSDK.Save(AVenda: IPanamahVenda);
 begin
   FProcessor.Add(AVenda);
 end;
@@ -257,42 +257,42 @@ begin
   FProcessor.OnCurrentBatchExpired := AEvent;
 end;
 
-procedure TPanamahSDK.Send(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
+procedure TPanamahSDK.Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
 begin
   FProcessor.Add(ATrocaFormaPagamento);
 end;
 
-procedure TPanamahSDK.Send(ATrocaDevolucao: IPanamahTrocaDevolucao);
+procedure TPanamahSDK.Save(ATrocaDevolucao: IPanamahTrocaDevolucao);
 begin
   FProcessor.Add(ATrocaDevolucao);
 end;
 
-procedure TPanamahSDK.Send(AMeta: IPanamahMeta);
+procedure TPanamahSDK.Save(AMeta: IPanamahMeta);
 begin
   FProcessor.Add(AMeta);
 end;
 
-procedure TPanamahSDK.Send(ALoja: IPanamahLoja);
+procedure TPanamahSDK.Save(ALoja: IPanamahLoja);
 begin
   FProcessor.Add(ALoja);
 end;
 
-procedure TPanamahSDK.Send(ALocalEstoque: IPanamahLocalEstoque);
+procedure TPanamahSDK.Save(ALocalEstoque: IPanamahLocalEstoque);
 begin
   FProcessor.Add(ALocalEstoque);
 end;
 
-procedure TPanamahSDK.Send(ASecao: IPanamahSecao);
+procedure TPanamahSDK.Save(ASecao: IPanamahSecao);
 begin
   FProcessor.Add(ASecao);
 end;
 
-procedure TPanamahSDK.Send(ARevenda: IPanamahRevenda);
+procedure TPanamahSDK.Save(ARevenda: IPanamahRevenda);
 begin
   FProcessor.Add(ARevenda);
 end;
 
-procedure TPanamahSDK.Send(AProduto: IPanamahProduto);
+procedure TPanamahSDK.Save(AProduto: IPanamahProduto);
 begin
   FProcessor.Add(AProduto);
 end;
