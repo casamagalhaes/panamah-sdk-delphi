@@ -37,6 +37,16 @@ type
     property Items[AIndex: Integer]: IPanamahOperation read GetItem write SetItem; default;
   end;
 
+  TPanamahDataIdOperation = class(TInterfacedObject, IJSONSerializable)
+  private
+    FId: string;
+  public
+    procedure DeserializeFromJSON(const AJSON: string);
+    function SerializeToJSON: string;
+    property Id: string read FId write FId;
+    constructor Create(const AId: string); reintroduce;
+  end;
+
   TPanamahOperation = class(TInterfacedObject, IPanamahOperation)
   private
     FOperationType: TPanamahOperationType;
@@ -125,16 +135,43 @@ begin
 end;
 
 function TPanamahOperation.SerializeToJSON: string;
+
+  procedure SetDataToId(AJSONObject: TlkJSONobject);
+  var
+    DataJSONObject: TlkJSONobject;
+    Id: IJSONSerializable;
+  begin
+    DataJSONObject := TlkJSON.ParseText(FData.SerializeToJSON) as TlkJSONobject;
+    try
+      if DataJSONObject.Field['id'] <> nil then
+      begin
+        Id := TPanamahDataIdOperation.Create(GetFieldValueAsString(DataJSONObject, 'id'));
+        SetFieldValue(AJSONObject, 'data', Id);
+      end
+      else
+        SetFieldValue(AJSONObject, 'data', FData);
+    finally
+      DataJSONObject.Free;
+    end;
+  end;
+
 var
   JSONObject: TlkJSONobject;
 begin
   JSONObject := TlkJSONobject.Create;
   try
     case FOperationType of
-      otUPDATE: SetFieldValue(JSONObject, 'op', 'update');
-      otDELETE: SetFieldValue(JSONObject, 'op', 'delete');
+      otUPDATE:
+      begin
+        SetFieldValue(JSONObject, 'op', 'update');
+        SetFieldValue(JSONObject, 'data', FData);
+      end;
+      otDELETE:
+      begin
+        SetFieldValue(JSONObject, 'op', 'delete');
+        SetDataToId(JSONObject);
+      end;
     end;
-    SetFieldValue(JSONObject, 'data', FData);
     SetFieldValue(JSONObject, 'tipoIdentificador', GetDataTypeByModel(FData));
     Result := TlkJSON.GenerateText(JSONObject);
   finally
@@ -301,6 +338,39 @@ begin
   try
     for I := 0 to FList.Count - 1 do
       JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahOperation).SerializeToJSON));
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+{ TPanamahDataIdOperation }
+
+constructor TPanamahDataIdOperation.Create(const AId: string);
+begin
+  inherited Create;
+  FId := AId;
+end;
+
+procedure TPanamahDataIdOperation.DeserializeFromJSON(const AJSON: string);
+var
+  JSONObject: TlkJSONobject;
+begin
+  JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
+  try
+    FId := GetFieldValueAsString(JSONObject, 'id');
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+function TPanamahDataIdOperation.SerializeToJSON: string;
+var
+  JSONObject: TlkJSONobject;
+begin
+  JSONObject := TlkJSONobject.Create;
+  try
+    SetFieldValue(JSONObject, 'id', FId);
     Result := TlkJSON.GenerateText(JSONObject);
   finally
     JSONObject.Free;

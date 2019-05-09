@@ -4,7 +4,7 @@ unit PanamahSDK;
 interface
 
 uses
-  Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Client, PanamahSDK.Batch,
+  Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Enums, PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Client, PanamahSDK.Batch,
   PanamahSDK.Models.Acesso, PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente, PanamahSDK.Models.Compra,
   PanamahSDK.Models.Ean, PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa,
   PanamahSDK.Models.FormaPagamento, PanamahSDK.Models.Fornecedor, PanamahSDK.Models.Funcionario,
@@ -71,6 +71,7 @@ type
     procedure SaveCurrentBatch;
     procedure ExpireCurrentBatch;
     procedure Process;
+    procedure AddOperationToCurrentBatch(AOperationType: TPanamahOperationType; AModel: IPanamahModel);
   public
     destructor Destroy; override;
     constructor Create; reintroduce;
@@ -168,8 +169,6 @@ var
 implementation
 
 { TPanamahSDK }
-
-uses PanamahSDK.Enums;
 
 procedure TPanamahStream.Init(AConfig: IPanamahSDKConfig);
 begin
@@ -559,24 +558,12 @@ end;
 
 procedure TPanamahSDKBatchProcessor.Save(AModel: IPanamahModel);
 begin
-  FCriticalSection.Acquire;
-  try
-    DoOnBeforeObjectAddedToBatch(AModel);
-    FCurrentBatch.Add(TPanamahOperation.Create(otUPDATE, AModel.Clone));
-  finally
-    FCriticalSection.Release;
-  end;
+  AddOperationToCurrentBatch(otUPDATE, AModel);
 end;
 
 procedure TPanamahSDKBatchProcessor.Delete(AModel: IPanamahModel);
 begin
-  FCriticalSection.Acquire;
-  try
-    DoOnBeforeObjectAddedToBatch(AModel);
-    FCurrentBatch.Add(TPanamahOperation.Create(otDELETE, AModel.Clone));
-  finally
-    FCriticalSection.Release;
-  end;
+  AddOperationToCurrentBatch(otDELETE, AModel);
 end;
 
 function TPanamahSDKBatchProcessor.GetBatchAccumulationDirectory: string;
@@ -597,6 +584,21 @@ end;
 function TPanamahSDKBatchProcessor.IsThereAccumulatedBatches: Boolean;
 begin
   Result := TPanamahBatchList.CountBatchesInDirectory(GetBatchAccumulationDirectory) > 0;
+end;
+
+procedure TPanamahSDKBatchProcessor.AddOperationToCurrentBatch(AOperationType: TPanamahOperationType;
+  AModel: IPanamahModel);
+begin
+  FCriticalSection.Acquire;
+  try
+    DoOnBeforeObjectAddedToBatch(AModel);
+    FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone));
+    if BatchExpiredBySize(FConfig.BatchMaxSize) or
+          BatchExpiredByCount(FConfig.BatchMaxCount) then
+      ExpireCurrentBatch;
+  finally
+    FCriticalSection.Release;
+  end;
 end;
 
 function TPanamahSDKBatchProcessor.BatchExpiredByCount(AMaxCount: Integer): Boolean;
@@ -718,10 +720,7 @@ begin
         else
         if FCurrentBatch.Hash <> CurrentBatchLastHash then
         begin
-          if BatchExpiredBySize(FConfig.BatchMaxSize) or BatchExpiredByCount(FConfig.BatchMaxCount) then
-            ExpireCurrentBatch
-          else
-            SaveCurrentBatch;
+          SaveCurrentBatch;
           CurrentBatchLastHash := FCurrentBatch.Hash;
         end;
       end;
