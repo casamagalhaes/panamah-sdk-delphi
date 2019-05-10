@@ -4,12 +4,12 @@ unit PanamahSDK.Models.LocalEstoque;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahLocalEstoque = interface(IPanamahModel)
-    ['{D346C0E2-7043-11E9-B47F-05333FE0F816}']
+    ['{775BAAC2-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetLojaId: string;
     function GetDescricao: string;
@@ -24,13 +24,11 @@ type
     property DisponivelParaVenda: Boolean read GetDisponivelParaVenda write SetDisponivelParaVenda;
   end;
   
-  IPanamahLocalEstoqueList = interface(IJSONSerializable)
-    ['{D346C0E3-7043-11E9-B47F-05333FE0F816}']
+  IPanamahLocalEstoqueList = interface(IPanamahModelList)
+    ['{775BAAC3-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahLocalEstoque;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLocalEstoque);
     procedure Add(const AItem: IPanamahLocalEstoque);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahLocalEstoque read GetItem write SetItem; default;
   end;
   
@@ -54,6 +52,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahLocalEstoque;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
@@ -66,8 +65,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahLocalEstoque;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLocalEstoque);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahLocalEstoqueList;
@@ -77,9 +79,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahLocalEstoque read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahLocalEstoqueValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahLocalEstoque }
 
@@ -170,6 +182,14 @@ begin
   Result := TPanamahLocalEstoque.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahLocalEstoque.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahLocalEstoqueValidator.Create;
+  Result := Validator.Validate(Self as IPanamahLocalEstoque);
+end;
+
 { TPanamahLocalEstoqueList }
 
 constructor TPanamahLocalEstoqueList.Create;
@@ -183,10 +203,29 @@ begin
   inherited;
 end;
 
+function TPanamahLocalEstoqueList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahLocalEstoqueList.FromJSON(const AJSON: string): IPanamahLocalEstoqueList;
 begin
   Result := TPanamahLocalEstoqueList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahLocalEstoqueList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahLocalEstoque;
+end;
+
+procedure TPanamahLocalEstoqueList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahLocalEstoqueList.Add(const AItem: IPanamahLocalEstoque);
@@ -247,6 +286,28 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahLocalEstoqueValidator }
+
+function TPanamahLocalEstoqueValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  LocalEstoque: IPanamahLocalEstoque;
+  Validations: IPanamahValidationResultList;
+begin
+  LocalEstoque := AModel as IPanamahLocalEstoque;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(LocalEstoque.Id) then
+    Validations.AddFailure('LocalEstoque.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(LocalEstoque.LojaId) then
+    Validations.AddFailure('LocalEstoque.LojaId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(LocalEstoque.Descricao) then
+    Validations.AddFailure('LocalEstoque.Descricao obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

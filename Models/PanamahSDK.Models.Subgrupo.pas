@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Subgrupo;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahSubgrupo = interface(IPanamahModel)
-    ['{D34401C6-7043-11E9-B47F-05333FE0F816}']
+    ['{7758EBA6-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -27,13 +27,11 @@ type
     property GrupoId: string read GetGrupoId write SetGrupoId;
   end;
   
-  IPanamahSubgrupoList = interface(IJSONSerializable)
-    ['{D34401C7-7043-11E9-B47F-05333FE0F816}']
+  IPanamahSubgrupoList = interface(IPanamahModelList)
+    ['{7758EBA7-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahSubgrupo;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSubgrupo);
     procedure Add(const AItem: IPanamahSubgrupo);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahSubgrupo read GetItem write SetItem; default;
   end;
   
@@ -60,6 +58,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahSubgrupo;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Codigo: string read GetCodigo write SetCodigo;
@@ -73,8 +72,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahSubgrupo;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSubgrupo);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahSubgrupoList;
@@ -84,9 +86,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahSubgrupo read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahSubgrupoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahSubgrupo }
 
@@ -189,6 +201,14 @@ begin
   Result := TPanamahSubgrupo.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahSubgrupo.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahSubgrupoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahSubgrupo);
+end;
+
 { TPanamahSubgrupoList }
 
 constructor TPanamahSubgrupoList.Create;
@@ -202,10 +222,29 @@ begin
   inherited;
 end;
 
+function TPanamahSubgrupoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahSubgrupoList.FromJSON(const AJSON: string): IPanamahSubgrupoList;
 begin
   Result := TPanamahSubgrupoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahSubgrupoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahSubgrupo;
+end;
+
+procedure TPanamahSubgrupoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahSubgrupoList.Add(const AItem: IPanamahSubgrupo);
@@ -266,6 +305,34 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahSubgrupoValidator }
+
+function TPanamahSubgrupoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Subgrupo: IPanamahSubgrupo;
+  Validations: IPanamahValidationResultList;
+begin
+  Subgrupo := AModel as IPanamahSubgrupo;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Subgrupo.Id) then
+    Validations.AddFailure('Subgrupo.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Subgrupo.Codigo) then
+    Validations.AddFailure('Subgrupo.Codigo obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Subgrupo.Descricao) then
+    Validations.AddFailure('Subgrupo.Descricao obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Subgrupo.SecaoId) then
+    Validations.AddFailure('Subgrupo.SecaoId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Subgrupo.GrupoId) then
+    Validations.AddFailure('Subgrupo.GrupoId obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Compra;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahCompraItem = interface(IPanamahModel)
-    ['{D34699D9-7043-11E9-B47F-05333FE0F816}']
+    ['{775B83C0-7368-11E9-BBA3-6970D342FA48}']
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetProdutoId: string;
@@ -30,18 +30,16 @@ type
     property ValorUnitario: Double read GetValorUnitario write SetValorUnitario;
   end;
   
-  IPanamahCompraItemList = interface(IJSONSerializable)
-    ['{D34699DA-7043-11E9-B47F-05333FE0F816}']
+  IPanamahCompraItemList = interface(IPanamahModelList)
+    ['{775B83C1-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahCompraItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompraItem);
     procedure Add(const AItem: IPanamahCompraItem);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahCompraItem read GetItem write SetItem; default;
   end;
   
   IPanamahCompra = interface(IPanamahModel)
-    ['{D34672C5-7043-11E9-B47F-05333FE0F816}']
+    ['{775B83B0-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetLojaId: string;
     function GetFornecedorId: variant;
@@ -86,13 +84,11 @@ type
     property Itens: IPanamahCompraItemList read GetItens write SetItens;
   end;
   
-  IPanamahCompraList = interface(IJSONSerializable)
-    ['{D34672C6-7043-11E9-B47F-05333FE0F816}']
+  IPanamahCompraList = interface(IPanamahModelList)
+    ['{775B83B1-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahCompra;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompra);
     procedure Add(const AItem: IPanamahCompra);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahCompra read GetItem write SetItem; default;
   end;
   
@@ -122,6 +118,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahCompraItem;
+    function Validate: IPanamahValidationResult;
   published
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
     property Desconto: Double read GetDesconto write SetDesconto;
@@ -136,8 +133,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahCompraItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompraItem);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahCompraItemList;
@@ -147,6 +147,7 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahCompraItem read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
   
   TPanamahCompra = class(TInterfacedObject, IPanamahCompra)
@@ -199,6 +200,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahCompra;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
@@ -221,8 +223,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahCompra;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompra);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahCompraList;
@@ -232,9 +237,24 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahCompra read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahCompraItemValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
+  end;
+  
+  TPanamahCompraValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahCompraItem }
 
@@ -349,6 +369,14 @@ begin
   Result := TPanamahCompraItem.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahCompraItem.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahCompraItemValidator.Create;
+  Result := Validator.Validate(Self as IPanamahCompraItem);
+end;
+
 { TPanamahCompraItemList }
 
 constructor TPanamahCompraItemList.Create;
@@ -362,10 +390,29 @@ begin
   inherited;
 end;
 
+function TPanamahCompraItemList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahCompraItemList.FromJSON(const AJSON: string): IPanamahCompraItemList;
 begin
   Result := TPanamahCompraItemList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahCompraItemList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahCompraItem;
+end;
+
+procedure TPanamahCompraItemList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahCompraItemList.Add(const AItem: IPanamahCompraItem);
@@ -426,6 +473,22 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahCompraItemValidator }
+
+function TPanamahCompraItemValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Itens: IPanamahCompraItem;
+  Validations: IPanamahValidationResultList;
+begin
+  Itens := AModel as IPanamahCompraItem;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Itens.ProdutoId) then
+    Validations.AddFailure('Itens.ProdutoId obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 { TPanamahCompra }
@@ -638,6 +701,14 @@ begin
   Result := TPanamahCompra.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahCompra.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahCompraValidator.Create;
+  Result := Validator.Validate(Self as IPanamahCompra);
+end;
+
 { TPanamahCompraList }
 
 constructor TPanamahCompraList.Create;
@@ -651,10 +722,29 @@ begin
   inherited;
 end;
 
+function TPanamahCompraList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahCompraList.FromJSON(const AJSON: string): IPanamahCompraList;
 begin
   Result := TPanamahCompraList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahCompraList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahCompra;
+end;
+
+procedure TPanamahCompraList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahCompraList.Add(const AItem: IPanamahCompra);
@@ -715,6 +805,30 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahCompraValidator }
+
+function TPanamahCompraValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Compra: IPanamahCompra;
+  Validations: IPanamahValidationResultList;
+begin
+  Compra := AModel as IPanamahCompra;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Compra.Id) then
+    Validations.AddFailure('Compra.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Compra.LojaId) then
+    Validations.AddFailure('Compra.LojaId obrigatorio(a)');
+  
+  if ModelListIsEmpty(Compra.Itens) then
+    Validations.AddFailure('Compra.Itens obrigatorio(a)')
+  else
+    Validations.Add(Compra.Itens.Validate);
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

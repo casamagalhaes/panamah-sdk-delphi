@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Acesso;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahAcesso = interface(IPanamahModel)
-    ['{D344C510-7043-11E9-B47F-05333FE0F816}']
+    ['{775987EA-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetFuncionarioIds: IPanamahStringValueList;
     procedure SetId(const AId: string);
@@ -18,13 +18,11 @@ type
     property FuncionarioIds: IPanamahStringValueList read GetFuncionarioIds write SetFuncionarioIds;
   end;
   
-  IPanamahAcessoList = interface(IJSONSerializable)
-    ['{D344C511-7043-11E9-B47F-05333FE0F816}']
+  IPanamahAcessoList = interface(IPanamahModelList)
+    ['{775987EB-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahAcesso;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAcesso);
     procedure Add(const AItem: IPanamahAcesso);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahAcesso read GetItem write SetItem; default;
   end;
   
@@ -42,6 +40,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahAcesso;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property FuncionarioIds: IPanamahStringValueList read GetFuncionarioIds write SetFuncionarioIds;
@@ -52,8 +51,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahAcesso;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAcesso);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahAcessoList;
@@ -63,9 +65,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahAcesso read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahAcessoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahAcesso }
 
@@ -133,6 +145,14 @@ begin
   Result := TPanamahAcesso.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahAcesso.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahAcessoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahAcesso);
+end;
+
 { TPanamahAcessoList }
 
 constructor TPanamahAcessoList.Create;
@@ -146,10 +166,29 @@ begin
   inherited;
 end;
 
+function TPanamahAcessoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahAcessoList.FromJSON(const AJSON: string): IPanamahAcessoList;
 begin
   Result := TPanamahAcessoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahAcessoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahAcesso;
+end;
+
+procedure TPanamahAcessoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahAcessoList.Add(const AItem: IPanamahAcesso);
@@ -210,6 +249,28 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahAcessoValidator }
+
+function TPanamahAcessoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Acesso: IPanamahAcesso;
+  Validations: IPanamahValidationResultList;
+begin
+  Acesso := AModel as IPanamahAcesso;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Acesso.Id) then
+    Validations.AddFailure('Acesso.Id obrigatorio(a)');
+  
+  if ModelListIsEmpty(Acesso.FuncionarioIds) then
+    Validations.AddFailure('Acesso.FuncionarioIds obrigatorio(a)')
+  else
+  if ModelStringListEmptyIndex(Acesso.FuncionarioIds) > -1 then
+    Validations.AddFailure(Format('Acesso.FuncionarioIds[%d] esta vazio ou invalido', [ModelStringListEmptyIndex(Acesso.FuncionarioIds)]));
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

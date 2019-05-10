@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Secao;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahSecao = interface(IPanamahModel)
-    ['{D343DAB5-7043-11E9-B47F-05333FE0F816}']
+    ['{7758C491-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -21,13 +21,11 @@ type
     property Descricao: string read GetDescricao write SetDescricao;
   end;
   
-  IPanamahSecaoList = interface(IJSONSerializable)
-    ['{D343DAB6-7043-11E9-B47F-05333FE0F816}']
+  IPanamahSecaoList = interface(IPanamahModelList)
+    ['{7758C492-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahSecao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSecao);
     procedure Add(const AItem: IPanamahSecao);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahSecao read GetItem write SetItem; default;
   end;
   
@@ -48,6 +46,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahSecao;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Codigo: string read GetCodigo write SetCodigo;
@@ -59,8 +58,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahSecao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSecao);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahSecaoList;
@@ -70,9 +72,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahSecao read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahSecaoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahSecao }
 
@@ -151,6 +163,14 @@ begin
   Result := TPanamahSecao.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahSecao.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahSecaoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahSecao);
+end;
+
 { TPanamahSecaoList }
 
 constructor TPanamahSecaoList.Create;
@@ -164,10 +184,29 @@ begin
   inherited;
 end;
 
+function TPanamahSecaoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahSecaoList.FromJSON(const AJSON: string): IPanamahSecaoList;
 begin
   Result := TPanamahSecaoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahSecaoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahSecao;
+end;
+
+procedure TPanamahSecaoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahSecaoList.Add(const AItem: IPanamahSecao);
@@ -228,6 +267,28 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahSecaoValidator }
+
+function TPanamahSecaoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Secao: IPanamahSecao;
+  Validations: IPanamahValidationResultList;
+begin
+  Secao := AModel as IPanamahSecao;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Secao.Id) then
+    Validations.AddFailure('Secao.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Secao.Codigo) then
+    Validations.AddFailure('Secao.Codigo obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Secao.Descricao) then
+    Validations.AddFailure('Secao.Descricao obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

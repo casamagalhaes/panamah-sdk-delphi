@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Fornecedor;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahFornecedor = interface(IPanamahModel)
-    ['{D344EC21-7043-11E9-B47F-05333FE0F816}']
+    ['{7759D600-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetNome: string;
     function GetNumeroDocumento: string;
@@ -33,13 +33,11 @@ type
     property Bairro: string read GetBairro write SetBairro;
   end;
   
-  IPanamahFornecedorList = interface(IJSONSerializable)
-    ['{D344EC22-7043-11E9-B47F-05333FE0F816}']
+  IPanamahFornecedorList = interface(IPanamahModelList)
+    ['{7759D601-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahFornecedor;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFornecedor);
     procedure Add(const AItem: IPanamahFornecedor);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahFornecedor read GetItem write SetItem; default;
   end;
   
@@ -72,6 +70,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahFornecedor;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Nome: string read GetNome write SetNome;
@@ -87,8 +86,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahFornecedor;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFornecedor);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahFornecedorList;
@@ -98,9 +100,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahFornecedor read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahFornecedorValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahFornecedor }
 
@@ -227,6 +239,14 @@ begin
   Result := TPanamahFornecedor.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahFornecedor.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahFornecedorValidator.Create;
+  Result := Validator.Validate(Self as IPanamahFornecedor);
+end;
+
 { TPanamahFornecedorList }
 
 constructor TPanamahFornecedorList.Create;
@@ -240,10 +260,29 @@ begin
   inherited;
 end;
 
+function TPanamahFornecedorList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahFornecedorList.FromJSON(const AJSON: string): IPanamahFornecedorList;
 begin
   Result := TPanamahFornecedorList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahFornecedorList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahFornecedor;
+end;
+
+procedure TPanamahFornecedorList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahFornecedorList.Add(const AItem: IPanamahFornecedor);
@@ -304,6 +343,40 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahFornecedorValidator }
+
+function TPanamahFornecedorValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Fornecedor: IPanamahFornecedor;
+  Validations: IPanamahValidationResultList;
+begin
+  Fornecedor := AModel as IPanamahFornecedor;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Fornecedor.Id) then
+    Validations.AddFailure('Fornecedor.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Fornecedor.Nome) then
+    Validations.AddFailure('Fornecedor.Nome obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Fornecedor.NumeroDocumento) then
+    Validations.AddFailure('Fornecedor.NumeroDocumento obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Fornecedor.Ramo) then
+    Validations.AddFailure('Fornecedor.Ramo obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Fornecedor.Uf) then
+    Validations.AddFailure('Fornecedor.Uf obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Fornecedor.Cidade) then
+    Validations.AddFailure('Fornecedor.Cidade obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Fornecedor.Bairro) then
+    Validations.AddFailure('Fornecedor.Bairro obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

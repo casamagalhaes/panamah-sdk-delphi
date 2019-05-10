@@ -4,12 +4,12 @@ unit PanamahSDK.Models.EventoCaixa;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahEventoCaixaValoresDeclarados = interface(IPanamahModel)
-    ['{D345FD93-7043-11E9-B47F-05333FE0F816}']
+    ['{775AE776-7368-11E9-BBA3-6970D342FA48}']
     function GetFormaPagamentoId: string;
     function GetValor: Double;
     procedure SetFormaPagamentoId(const AFormaPagamentoId: string);
@@ -18,18 +18,16 @@ type
     property Valor: Double read GetValor write SetValor;
   end;
   
-  IPanamahEventoCaixaValoresDeclaradosList = interface(IJSONSerializable)
-    ['{D345FD94-7043-11E9-B47F-05333FE0F816}']
+  IPanamahEventoCaixaValoresDeclaradosList = interface(IPanamahModelList)
+    ['{775AE777-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixaValoresDeclarados;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixaValoresDeclarados);
     procedure Add(const AItem: IPanamahEventoCaixaValoresDeclarados);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahEventoCaixaValoresDeclarados read GetItem write SetItem; default;
   end;
   
   IPanamahEventoCaixa = interface(IPanamahModel)
-    ['{D345D683-7043-11E9-B47F-05333FE0F816}']
+    ['{775AC06A-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetLojaId: string;
     function GetNumeroCaixa: string;
@@ -53,13 +51,11 @@ type
     property ValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList read GetValoresDeclarados write SetValoresDeclarados;
   end;
   
-  IPanamahEventoCaixaList = interface(IJSONSerializable)
-    ['{D345D684-7043-11E9-B47F-05333FE0F816}']
+  IPanamahEventoCaixaList = interface(IPanamahModelList)
+    ['{775AC06B-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixa;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixa);
     procedure Add(const AItem: IPanamahEventoCaixa);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahEventoCaixa read GetItem write SetItem; default;
   end;
   
@@ -77,6 +73,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahEventoCaixaValoresDeclarados;
+    function Validate: IPanamahValidationResult;
   published
     property FormaPagamentoId: string read GetFormaPagamentoId write SetFormaPagamentoId;
     property Valor: Double read GetValor write SetValor;
@@ -87,8 +84,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahEventoCaixaValoresDeclarados;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixaValoresDeclarados);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahEventoCaixaValoresDeclaradosList;
@@ -98,6 +98,7 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahEventoCaixaValoresDeclarados read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
   
   TPanamahEventoCaixa = class(TInterfacedObject, IPanamahEventoCaixa)
@@ -129,6 +130,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahEventoCaixa;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
@@ -144,8 +146,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahEventoCaixa;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixa);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahEventoCaixaList;
@@ -155,9 +160,24 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahEventoCaixa read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahEventoCaixaValoresDeclaradosValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
+  end;
+  
+  TPanamahEventoCaixaValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahEventoCaixaValoresDeclarados }
 
@@ -224,6 +244,14 @@ begin
   Result := TPanamahEventoCaixaValoresDeclarados.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahEventoCaixaValoresDeclarados.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahEventoCaixaValoresDeclaradosValidator.Create;
+  Result := Validator.Validate(Self as IPanamahEventoCaixaValoresDeclarados);
+end;
+
 { TPanamahEventoCaixaValoresDeclaradosList }
 
 constructor TPanamahEventoCaixaValoresDeclaradosList.Create;
@@ -237,10 +265,29 @@ begin
   inherited;
 end;
 
+function TPanamahEventoCaixaValoresDeclaradosList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahEventoCaixaValoresDeclaradosList.FromJSON(const AJSON: string): IPanamahEventoCaixaValoresDeclaradosList;
 begin
   Result := TPanamahEventoCaixaValoresDeclaradosList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahEventoCaixaValoresDeclaradosList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahEventoCaixaValoresDeclarados;
+end;
+
+procedure TPanamahEventoCaixaValoresDeclaradosList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahEventoCaixaValoresDeclaradosList.Add(const AItem: IPanamahEventoCaixaValoresDeclarados);
@@ -301,6 +348,22 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahEventoCaixaValoresDeclaradosValidator }
+
+function TPanamahEventoCaixaValoresDeclaradosValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  ValoresDeclarados: IPanamahEventoCaixaValoresDeclarados;
+  Validations: IPanamahValidationResultList;
+begin
+  ValoresDeclarados := AModel as IPanamahEventoCaixaValoresDeclarados;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(ValoresDeclarados.FormaPagamentoId) then
+    Validations.AddFailure('ValoresDeclarados.FormaPagamentoId obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 { TPanamahEventoCaixa }
@@ -429,6 +492,14 @@ begin
   Result := TPanamahEventoCaixa.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahEventoCaixa.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahEventoCaixaValidator.Create;
+  Result := Validator.Validate(Self as IPanamahEventoCaixa);
+end;
+
 { TPanamahEventoCaixaList }
 
 constructor TPanamahEventoCaixaList.Create;
@@ -442,10 +513,29 @@ begin
   inherited;
 end;
 
+function TPanamahEventoCaixaList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahEventoCaixaList.FromJSON(const AJSON: string): IPanamahEventoCaixaList;
 begin
   Result := TPanamahEventoCaixaList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahEventoCaixaList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahEventoCaixa;
+end;
+
+procedure TPanamahEventoCaixaList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahEventoCaixaList.Add(const AItem: IPanamahEventoCaixa);
@@ -506,6 +596,34 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahEventoCaixaValidator }
+
+function TPanamahEventoCaixaValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  EventoCaixa: IPanamahEventoCaixa;
+  Validations: IPanamahValidationResultList;
+begin
+  EventoCaixa := AModel as IPanamahEventoCaixa;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(EventoCaixa.Id) then
+    Validations.AddFailure('EventoCaixa.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(EventoCaixa.LojaId) then
+    Validations.AddFailure('EventoCaixa.LojaId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(EventoCaixa.NumeroCaixa) then
+    Validations.AddFailure('EventoCaixa.NumeroCaixa obrigatorio(a)');
+  
+  if ModelValueIsEmpty(EventoCaixa.Tipo) then
+    Validations.AddFailure('EventoCaixa.Tipo obrigatorio(a)');
+  
+  if not ModelListIsEmpty(EventoCaixa.ValoresDeclarados) then
+    Validations.Add(EventoCaixa.ValoresDeclarados.Validate);
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

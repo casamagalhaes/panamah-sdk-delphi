@@ -4,12 +4,12 @@ unit PanamahSDK.Models.TrocaDevolucao;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahTrocaDevolucaoItem = interface(IPanamahModel)
-    ['{D345AF76-7043-11E9-B47F-05333FE0F816}']
+    ['{775AC062-7368-11E9-BBA3-6970D342FA48}']
     function GetDesconto: Double;
     function GetProdutoId: string;
     function GetQuantidade: Double;
@@ -30,18 +30,16 @@ type
     property VendedorId: variant read GetVendedorId write SetVendedorId;
   end;
   
-  IPanamahTrocaDevolucaoItemList = interface(IJSONSerializable)
-    ['{D345AF77-7043-11E9-B47F-05333FE0F816}']
+  IPanamahTrocaDevolucaoItemList = interface(IPanamahModelList)
+    ['{775AC063-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucaoItem);
     procedure Add(const AItem: IPanamahTrocaDevolucaoItem);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahTrocaDevolucaoItem read GetItem write SetItem; default;
   end;
   
   IPanamahTrocaDevolucao = interface(IPanamahModel)
-    ['{D3458860-7043-11E9-B47F-05333FE0F816}']
+    ['{775A7240-7368-11E9-BBA3-6970D342FA48}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetVendaId: variant;
@@ -77,13 +75,11 @@ type
     property VendedorId: variant read GetVendedorId write SetVendedorId;
   end;
   
-  IPanamahTrocaDevolucaoList = interface(IJSONSerializable)
-    ['{D3458861-7043-11E9-B47F-05333FE0F816}']
+  IPanamahTrocaDevolucaoList = interface(IPanamahModelList)
+    ['{775A7241-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucao);
     procedure Add(const AItem: IPanamahTrocaDevolucao);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahTrocaDevolucao read GetItem write SetItem; default;
   end;
   
@@ -113,6 +109,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahTrocaDevolucaoItem;
+    function Validate: IPanamahValidationResult;
   published
     property Desconto: Double read GetDesconto write SetDesconto;
     property ProdutoId: string read GetProdutoId write SetProdutoId;
@@ -127,8 +124,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucaoItem);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahTrocaDevolucaoItemList;
@@ -138,6 +138,7 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahTrocaDevolucaoItem read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
   
   TPanamahTrocaDevolucao = class(TInterfacedObject, IPanamahTrocaDevolucao)
@@ -181,6 +182,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahTrocaDevolucao;
+    function Validate: IPanamahValidationResult;
   published
     property AutorizadorId: variant read GetAutorizadorId write SetAutorizadorId;
     property Data: TDateTime read GetData write SetData;
@@ -200,8 +202,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucao);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahTrocaDevolucaoList;
@@ -211,9 +216,24 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahTrocaDevolucao read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahTrocaDevolucaoItemValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
+  end;
+  
+  TPanamahTrocaDevolucaoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahTrocaDevolucaoItem }
 
@@ -328,6 +348,14 @@ begin
   Result := TPanamahTrocaDevolucaoItem.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahTrocaDevolucaoItem.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahTrocaDevolucaoItemValidator.Create;
+  Result := Validator.Validate(Self as IPanamahTrocaDevolucaoItem);
+end;
+
 { TPanamahTrocaDevolucaoItemList }
 
 constructor TPanamahTrocaDevolucaoItemList.Create;
@@ -341,10 +369,29 @@ begin
   inherited;
 end;
 
+function TPanamahTrocaDevolucaoItemList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahTrocaDevolucaoItemList.FromJSON(const AJSON: string): IPanamahTrocaDevolucaoItemList;
 begin
   Result := TPanamahTrocaDevolucaoItemList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahTrocaDevolucaoItemList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahTrocaDevolucaoItem;
+end;
+
+procedure TPanamahTrocaDevolucaoItemList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahTrocaDevolucaoItemList.Add(const AItem: IPanamahTrocaDevolucaoItem);
@@ -405,6 +452,22 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahTrocaDevolucaoItemValidator }
+
+function TPanamahTrocaDevolucaoItemValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Itens: IPanamahTrocaDevolucaoItem;
+  Validations: IPanamahValidationResultList;
+begin
+  Itens := AModel as IPanamahTrocaDevolucaoItem;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Itens.ProdutoId) then
+    Validations.AddFailure('Itens.ProdutoId obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 { TPanamahTrocaDevolucao }
@@ -581,6 +644,14 @@ begin
   Result := TPanamahTrocaDevolucao.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahTrocaDevolucao.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahTrocaDevolucaoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahTrocaDevolucao);
+end;
+
 { TPanamahTrocaDevolucaoList }
 
 constructor TPanamahTrocaDevolucaoList.Create;
@@ -594,10 +665,29 @@ begin
   inherited;
 end;
 
+function TPanamahTrocaDevolucaoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahTrocaDevolucaoList.FromJSON(const AJSON: string): IPanamahTrocaDevolucaoList;
 begin
   Result := TPanamahTrocaDevolucaoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahTrocaDevolucaoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahTrocaDevolucao;
+end;
+
+procedure TPanamahTrocaDevolucaoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahTrocaDevolucaoList.Add(const AItem: IPanamahTrocaDevolucao);
@@ -658,6 +748,30 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahTrocaDevolucaoValidator }
+
+function TPanamahTrocaDevolucaoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  TrocaDevolucao: IPanamahTrocaDevolucao;
+  Validations: IPanamahValidationResultList;
+begin
+  TrocaDevolucao := AModel as IPanamahTrocaDevolucao;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(TrocaDevolucao.Id) then
+    Validations.AddFailure('TrocaDevolucao.Id obrigatorio(a)');
+  
+  if ModelListIsEmpty(TrocaDevolucao.Itens) then
+    Validations.AddFailure('TrocaDevolucao.Itens obrigatorio(a)')
+  else
+    Validations.Add(TrocaDevolucao.Itens.Validate);
+  
+  if ModelValueIsEmpty(TrocaDevolucao.LojaId) then
+    Validations.AddFailure('TrocaDevolucao.LojaId obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

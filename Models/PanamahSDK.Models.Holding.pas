@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Holding;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahHolding = interface(IPanamahModel)
-    ['{D34428D0-7043-11E9-B47F-05333FE0F816}']
+    ['{775912B0-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetDescricao: string;
     procedure SetId(const AId: string);
@@ -18,13 +18,11 @@ type
     property Descricao: string read GetDescricao write SetDescricao;
   end;
   
-  IPanamahHoldingList = interface(IJSONSerializable)
-    ['{D34428D1-7043-11E9-B47F-05333FE0F816}']
+  IPanamahHoldingList = interface(IPanamahModelList)
+    ['{775912B1-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahHolding;
     procedure SetItem(AIndex: Integer; const Value: IPanamahHolding);
     procedure Add(const AItem: IPanamahHolding);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahHolding read GetItem write SetItem; default;
   end;
   
@@ -42,6 +40,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahHolding;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Descricao: string read GetDescricao write SetDescricao;
@@ -52,8 +51,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahHolding;
     procedure SetItem(AIndex: Integer; const Value: IPanamahHolding);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahHoldingList;
@@ -63,9 +65,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahHolding read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahHoldingValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahHolding }
 
@@ -132,6 +144,14 @@ begin
   Result := TPanamahHolding.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahHolding.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahHoldingValidator.Create;
+  Result := Validator.Validate(Self as IPanamahHolding);
+end;
+
 { TPanamahHoldingList }
 
 constructor TPanamahHoldingList.Create;
@@ -145,10 +165,29 @@ begin
   inherited;
 end;
 
+function TPanamahHoldingList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahHoldingList.FromJSON(const AJSON: string): IPanamahHoldingList;
 begin
   Result := TPanamahHoldingList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahHoldingList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahHolding;
+end;
+
+procedure TPanamahHoldingList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahHoldingList.Add(const AItem: IPanamahHolding);
@@ -209,6 +248,25 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahHoldingValidator }
+
+function TPanamahHoldingValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Holding: IPanamahHolding;
+  Validations: IPanamahValidationResultList;
+begin
+  Holding := AModel as IPanamahHolding;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Holding.Id) then
+    Validations.AddFailure('Holding.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Holding.Descricao) then
+    Validations.AddFailure('Holding.Descricao obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

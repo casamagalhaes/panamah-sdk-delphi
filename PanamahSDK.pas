@@ -4,9 +4,9 @@ unit PanamahSDK;
 interface
 
 uses
-  Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Enums, PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Client, PanamahSDK.Batch,
-  PanamahSDK.Models.Acesso, PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente, PanamahSDK.Models.Compra,
-  PanamahSDK.Models.Ean, PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa,
+  Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Enums, PanamahSDK.Operation, PanamahSDK.Types,
+  PanamahSDK.Client, PanamahSDK.Batch, PanamahSDK.Models.Acesso, PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente,
+  PanamahSDK.Models.Compra, PanamahSDK.Models.Ean, PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa,
   PanamahSDK.Models.FormaPagamento, PanamahSDK.Models.Fornecedor, PanamahSDK.Models.Funcionario,
   PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding, PanamahSDK.Models.LocalEstoque, PanamahSDK.Models.Loja,
   PanamahSDK.Models.Meta, PanamahSDK.Models.Produto, PanamahSDK.Models.Revenda, PanamahSDK.Models.Secao,
@@ -167,6 +167,9 @@ var
   _PanamahSDKInstance: TPanamahStream;
 
 implementation
+
+uses
+  PanamahSDK.ValidationUtils;
 
 { TPanamahSDK }
 
@@ -557,23 +560,32 @@ begin
 end;
 
 procedure TPanamahSDKBatchProcessor.Save(AModel: IPanamahModel);
+var
+  ValidationResult: IPanamahValidationResult;
 begin
-  AddOperationToCurrentBatch(otUPDATE, AModel);
+  ValidationResult := AModel.Validate;
+  if ValidationResult.Valid then
+    AddOperationToCurrentBatch(otUPDATE, AModel)
+  else
+    raise EPanamahSDKExceptionValidationFailed.Create(ValidationResult.Reasons.Text);
 end;
 
 procedure TPanamahSDKBatchProcessor.Delete(AModel: IPanamahModel);
 begin
-  AddOperationToCurrentBatch(otDELETE, AModel);
+  if ModelHasId(AModel) then
+    AddOperationToCurrentBatch(otDELETE, AModel)
+  else
+    raise EPanamahSDKExceptionValidationFailed.Create(Format('Id obrigatorio para exclusao de %s', [AModel.ModelName]));
 end;
 
 function TPanamahSDKBatchProcessor.GetBatchAccumulationDirectory: string;
 begin
-  Result := (FConfig.BaseDirectory + '\acumulados');
+  Result := (FConfig.BaseDirectory + '\accumulated');
 end;
 
 function TPanamahSDKBatchProcessor.GetBatchSentDirectory: string;
 begin
-  Result := (FConfig.BaseDirectory + '\enviados');
+  Result := (FConfig.BaseDirectory + '\sent');
 end;
 
 function TPanamahSDKBatchProcessor.GetCurrentBatchFilename: string;

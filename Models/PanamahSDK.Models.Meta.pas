@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Meta;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahMeta = interface(IPanamahModel)
-    ['{D34476F5-7043-11E9-B47F-05333FE0F816}']
+    ['{775960D0-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetMes: Double;
     function GetAno: Double;
@@ -30,13 +30,11 @@ type
     property Valor: Double read GetValor write SetValor;
   end;
   
-  IPanamahMetaList = interface(IJSONSerializable)
-    ['{D34476F6-7043-11E9-B47F-05333FE0F816}']
+  IPanamahMetaList = interface(IPanamahModelList)
+    ['{775960D1-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahMeta;
     procedure SetItem(AIndex: Integer; const Value: IPanamahMeta);
     procedure Add(const AItem: IPanamahMeta);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahMeta read GetItem write SetItem; default;
   end;
   
@@ -66,6 +64,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahMeta;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Mes: Double read GetMes write SetMes;
@@ -80,8 +79,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahMeta;
     procedure SetItem(AIndex: Integer; const Value: IPanamahMeta);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahMetaList;
@@ -91,9 +93,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahMeta read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahMetaValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahMeta }
 
@@ -208,6 +220,14 @@ begin
   Result := TPanamahMeta.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahMeta.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahMetaValidator.Create;
+  Result := Validator.Validate(Self as IPanamahMeta);
+end;
+
 { TPanamahMetaList }
 
 constructor TPanamahMetaList.Create;
@@ -221,10 +241,29 @@ begin
   inherited;
 end;
 
+function TPanamahMetaList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahMetaList.FromJSON(const AJSON: string): IPanamahMetaList;
 begin
   Result := TPanamahMetaList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahMetaList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahMeta;
+end;
+
+procedure TPanamahMetaList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahMetaList.Add(const AItem: IPanamahMeta);
@@ -285,6 +324,28 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahMetaValidator }
+
+function TPanamahMetaValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Meta: IPanamahMeta;
+  Validations: IPanamahValidationResultList;
+begin
+  Meta := AModel as IPanamahMeta;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Meta.Id) then
+    Validations.AddFailure('Meta.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Meta.LojaId) then
+    Validations.AddFailure('Meta.LojaId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Meta.SecaoId) then
+    Validations.AddFailure('Meta.SecaoId obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

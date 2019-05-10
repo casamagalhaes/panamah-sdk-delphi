@@ -4,12 +4,12 @@ unit PanamahSDK.Models.EstoqueMovimentacao;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahEstoqueMovimentacao = interface(IPanamahModel)
-    ['{D346E7F0-7043-11E9-B47F-05333FE0F816}']
+    ['{775BD1D3-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetLocalEstoqueId: string;
     function GetDataHora: TDateTime;
@@ -36,13 +36,11 @@ type
     property Markup: Double read GetMarkup write SetMarkup;
   end;
   
-  IPanamahEstoqueMovimentacaoList = interface(IJSONSerializable)
-    ['{D346E7F1-7043-11E9-B47F-05333FE0F816}']
+  IPanamahEstoqueMovimentacaoList = interface(IPanamahModelList)
+    ['{775BD1D4-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahEstoqueMovimentacao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEstoqueMovimentacao);
     procedure Add(const AItem: IPanamahEstoqueMovimentacao);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahEstoqueMovimentacao read GetItem write SetItem; default;
   end;
   
@@ -78,6 +76,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahEstoqueMovimentacao;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property LocalEstoqueId: string read GetLocalEstoqueId write SetLocalEstoqueId;
@@ -94,8 +93,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahEstoqueMovimentacao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEstoqueMovimentacao);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahEstoqueMovimentacaoList;
@@ -105,9 +107,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahEstoqueMovimentacao read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahEstoqueMovimentacaoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahEstoqueMovimentacao }
 
@@ -246,6 +258,14 @@ begin
   Result := TPanamahEstoqueMovimentacao.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahEstoqueMovimentacao.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahEstoqueMovimentacaoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahEstoqueMovimentacao);
+end;
+
 { TPanamahEstoqueMovimentacaoList }
 
 constructor TPanamahEstoqueMovimentacaoList.Create;
@@ -259,10 +279,29 @@ begin
   inherited;
 end;
 
+function TPanamahEstoqueMovimentacaoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahEstoqueMovimentacaoList.FromJSON(const AJSON: string): IPanamahEstoqueMovimentacaoList;
 begin
   Result := TPanamahEstoqueMovimentacaoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahEstoqueMovimentacaoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahEstoqueMovimentacao;
+end;
+
+procedure TPanamahEstoqueMovimentacaoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahEstoqueMovimentacaoList.Add(const AItem: IPanamahEstoqueMovimentacao);
@@ -323,6 +362,28 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahEstoqueMovimentacaoValidator }
+
+function TPanamahEstoqueMovimentacaoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  EstoqueMovimentacao: IPanamahEstoqueMovimentacao;
+  Validations: IPanamahValidationResultList;
+begin
+  EstoqueMovimentacao := AModel as IPanamahEstoqueMovimentacao;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(EstoqueMovimentacao.Id) then
+    Validations.AddFailure('EstoqueMovimentacao.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(EstoqueMovimentacao.LocalEstoqueId) then
+    Validations.AddFailure('EstoqueMovimentacao.LocalEstoqueId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(EstoqueMovimentacao.ProdutoId) then
+    Validations.AddFailure('EstoqueMovimentacao.ProdutoId obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

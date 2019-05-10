@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Loja;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahLoja = interface(IPanamahModel)
-    ['{D34428D4-7043-11E9-B47F-05333FE0F816}']
+    ['{775912B4-7368-11E9-BBA3-6970D342FA48}']
     function GetAtiva: Boolean;
     function GetId: string;
     function GetDescricao: string;
@@ -69,13 +69,11 @@ type
     property QtdFuncionarios: Double read GetQtdFuncionarios write SetQtdFuncionarios;
   end;
   
-  IPanamahLojaList = interface(IJSONSerializable)
-    ['{D34428D5-7043-11E9-B47F-05333FE0F816}']
+  IPanamahLojaList = interface(IPanamahModelList)
+    ['{775912B5-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahLoja;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLoja);
     procedure Add(const AItem: IPanamahLoja);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahLoja read GetItem write SetItem; default;
   end;
   
@@ -144,6 +142,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahLoja;
+    function Validate: IPanamahValidationResult;
   published
     property Ativa: Boolean read GetAtiva write SetAtiva;
     property Id: string read GetId write SetId;
@@ -171,8 +170,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahLoja;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLoja);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahLojaList;
@@ -182,9 +184,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahLoja read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahLojaValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahLoja }
 
@@ -455,6 +467,14 @@ begin
   Result := TPanamahLoja.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahLoja.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahLojaValidator.Create;
+  Result := Validator.Validate(Self as IPanamahLoja);
+end;
+
 { TPanamahLojaList }
 
 constructor TPanamahLojaList.Create;
@@ -468,10 +488,29 @@ begin
   inherited;
 end;
 
+function TPanamahLojaList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahLojaList.FromJSON(const AJSON: string): IPanamahLojaList;
 begin
   Result := TPanamahLojaList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahLojaList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahLoja;
+end;
+
+procedure TPanamahLojaList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahLojaList.Add(const AItem: IPanamahLoja);
@@ -532,6 +571,43 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahLojaValidator }
+
+function TPanamahLojaValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Loja: IPanamahLoja;
+  Validations: IPanamahValidationResultList;
+begin
+  Loja := AModel as IPanamahLoja;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Loja.Id) then
+    Validations.AddFailure('Loja.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Loja.Descricao) then
+    Validations.AddFailure('Loja.Descricao obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Loja.NumeroDocumento) then
+    Validations.AddFailure('Loja.NumeroDocumento obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Loja.HoldingId) then
+    Validations.AddFailure('Loja.HoldingId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Loja.Ramo) then
+    Validations.AddFailure('Loja.Ramo obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Loja.Uf) then
+    Validations.AddFailure('Loja.Uf obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Loja.Cidade) then
+    Validations.AddFailure('Loja.Cidade obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Loja.Bairro) then
+    Validations.AddFailure('Loja.Bairro obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

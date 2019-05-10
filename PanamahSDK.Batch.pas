@@ -352,7 +352,7 @@ begin
     end;
   end
   else
-    raise PanamahSDKIOException.Create(Format('Diretório %s não existe.', [ADirectory]));
+    raise EPanamahSDKIOException.Create(Format('Diretório %s não existe.', [ADirectory]));
 end;
 
 procedure TPanamahBatchList.SetItem(AIndex: Integer;

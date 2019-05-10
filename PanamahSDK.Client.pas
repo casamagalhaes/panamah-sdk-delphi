@@ -360,10 +360,10 @@ begin
           on E: EIdHTTPProtocolException do
           begin
             if HTTP.ResponseCode = 500 then
-              raise PanamahSDKServerInternalException.Create(E.Message)
+              raise EPanamahSDKServerInternalException.Create(E.Message)
             else
             if HTTP.ResponseCode = 400 then
-              raise PanamahSDKBadRequestException.Create(E.Message)
+              raise EPanamahSDKBadRequestException.Create(E.Message)
             else
             if HTTP.ResponseCode = 404 then
             else
@@ -372,11 +372,11 @@ begin
               ResponseContent := E.ErrorMessage;
             end
             else
-              raise PanamahSDKHTTPProtocolException.Create(E.Message);
+              raise EPanamahSDKHTTPProtocolException.Create(E.Message);
           end;
           on E: EIdSocketError do
           begin
-            raise PanamahSDKConnectionRefusedException.Create(E.Message);
+            raise EPanamahSDKConnectionRefusedException.Create(E.Message);
           end;
         end;
       finally

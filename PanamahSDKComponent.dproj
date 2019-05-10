@@ -99,6 +99,7 @@
         <DCCReference Include="Lib\uLkJSON.pas"/>
         <DCCReference Include="PanamahSDK.Types.pas"/>
         <DCCReference Include="PanamahSDK.JsonUtils.pas"/>
+        <DCCReference Include="PanamahSDK.ValidationUtils.pas"/>
         <DCCReference Include="PanamahSDK.Enums.pas"/>
         <DCCReference Include="PanamahSDK.Client.pas"/>
         <DCCReference Include="PanamahSDK.Batch.pas"/>

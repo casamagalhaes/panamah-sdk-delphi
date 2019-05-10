@@ -1,5 +1,5 @@
 unit PanamahSDK.Enums;
-
+
 interface
 
 uses
@@ -32,37 +32,34 @@ type
   TPanamahSoftwareAtivo = (saMILENIO, saSYSPDV, saVAREJOFACIL, saSYSPDVWEB, saEASYASSIST, saSYSPDV_APP, saCOLETOR);
   TPanamahSoftwareContratoManutencao = (scmMILENIO, scmSYSPDV, scmVAREJOFACIL, scmSYSPDVWEB, scmEASYASSIST, scmSYSPDV_APP, scmCOLETOR);
   TPanamahEventoCaixaTipo = (ectABERTURA, ectFECHAMENTO, ectENTRADA_OPERADOR, ectSAIDA_OPERADOR);
-  
-  IPanamahSoftwareAtivoList = interface(IJSONSerializable)
-    ['{D3436581-7043-11E9-B47F-05333FE0F816}']
+
+  IPanamahSoftwareAtivoList = interface(IJSONSerializableList)
+    ['{7A4ED1E0-734E-11E9-86E2-19669B4386F0}']
     function GetItem(AIndex: Integer): TPanamahSoftwareAtivo;
     procedure SetItem(AIndex: Integer; const Value: TPanamahSoftwareAtivo);
     procedure Add(const AItem: TPanamahSoftwareAtivo);
     procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: TPanamahSoftwareAtivo read GetItem write SetItem; default;
   end;
-  
-  IPanamahSoftwareContratoManutencaoList = interface(IJSONSerializable)
-    ['{D3436582-7043-11E9-B47F-05333FE0F816}']
+
+  IPanamahSoftwareContratoManutencaoList = interface(IJSONSerializableList)
+    ['{7A4ED1E1-734E-11E9-86E2-19669B4386F0}']
     function GetItem(AIndex: Integer): TPanamahSoftwareContratoManutencao;
     procedure SetItem(AIndex: Integer; const Value: TPanamahSoftwareContratoManutencao);
     procedure Add(const AItem: TPanamahSoftwareContratoManutencao);
     procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: TPanamahSoftwareContratoManutencao read GetItem write SetItem; default;
   end;
-  
-  IPanamahEventoCaixaTipoList = interface(IJSONSerializable)
-    ['{D345FD91-7043-11E9-B47F-05333FE0F816}']
+
+  IPanamahEventoCaixaTipoList = interface(IJSONSerializableList)
+    ['{7A5142E7-734E-11E9-86E2-19669B4386F0}']
     function GetItem(AIndex: Integer): TPanamahEventoCaixaTipo;
     procedure SetItem(AIndex: Integer; const Value: TPanamahEventoCaixaTipo);
     procedure Add(const AItem: TPanamahEventoCaixaTipo);
     procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: TPanamahEventoCaixaTipo read GetItem write SetItem; default;
   end;
-  
+
   TPanamahSoftwareAtivoList = class(TInterfacedObject, IPanamahSoftwareAtivoList)
   private
     FList: TStrings;
@@ -80,7 +77,6 @@ type
     destructor Destroy; override;
     property Items[AIndex: Integer]: TPanamahSoftwareAtivo read GetItem write SetItem; default;
   end;
-  
   TPanamahSoftwareContratoManutencaoList = class(TInterfacedObject, IPanamahSoftwareContratoManutencaoList)
   private
     FList: TStrings;
@@ -98,7 +94,6 @@ type
     destructor Destroy; override;
     property Items[AIndex: Integer]: TPanamahSoftwareContratoManutencao read GetItem write SetItem; default;
   end;
-  
   TPanamahEventoCaixaTipoList = class(TInterfacedObject, IPanamahEventoCaixaTipoList)
   private
     FList: TStrings;
@@ -116,7 +111,6 @@ type
     destructor Destroy; override;
     property Items[AIndex: Integer]: TPanamahEventoCaixaTipo read GetItem write SetItem; default;
   end;
-  
 
 implementation
 
@@ -193,7 +187,6 @@ begin
   if Integer(saCOLETOR) = AValue then Result := 'COLETOR' else
   raise EnumException.CreateFmt('Valor %d incorreto para PanamahSoftwareAtivo.', [AValue]);
 end;
-
 function Converter_PanamahSoftwareContratoManutencao_StrToEnum(const AValue: string): Integer;
 begin
   if SameText(AValue, 'MILENIO') then Result := Integer(scmMILENIO) else
@@ -217,7 +210,6 @@ begin
   if Integer(scmCOLETOR) = AValue then Result := 'COLETOR' else
   raise EnumException.CreateFmt('Valor %d incorreto para PanamahSoftwareContratoManutencao.', [AValue]);
 end;
-
 function Converter_PanamahEventoCaixaTipo_StrToEnum(const AValue: string): Integer;
 begin
   if SameText(AValue, 'ABERTURA') then Result := Integer(ectABERTURA) else
@@ -471,3 +463,4 @@ finalization
   FreeAndNil(EnumConverters);
 
 end.
+

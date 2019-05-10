@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Funcionario;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahFuncionario = interface(IPanamahModel)
-    ['{D3449E04-7043-11E9-B47F-05333FE0F816}']
+    ['{775987E0-7368-11E9-BBA3-6970D342FA48}']
     function GetDataNascimento: TDateTime;
     function GetId: string;
     function GetLogin: variant;
@@ -36,13 +36,11 @@ type
     property LojaIds: IPanamahStringValueList read GetLojaIds write SetLojaIds;
   end;
   
-  IPanamahFuncionarioList = interface(IJSONSerializable)
-    ['{D3449E05-7043-11E9-B47F-05333FE0F816}']
+  IPanamahFuncionarioList = interface(IPanamahModelList)
+    ['{775987E1-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahFuncionario;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFuncionario);
     procedure Add(const AItem: IPanamahFuncionario);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahFuncionario read GetItem write SetItem; default;
   end;
   
@@ -78,6 +76,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahFuncionario;
+    function Validate: IPanamahValidationResult;
   published
     property DataNascimento: TDateTime read GetDataNascimento write SetDataNascimento;
     property Id: string read GetId write SetId;
@@ -94,8 +93,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahFuncionario;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFuncionario);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahFuncionarioList;
@@ -105,9 +107,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahFuncionario read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahFuncionarioValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahFuncionario }
 
@@ -247,6 +259,14 @@ begin
   Result := TPanamahFuncionario.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahFuncionario.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahFuncionarioValidator.Create;
+  Result := Validator.Validate(Self as IPanamahFuncionario);
+end;
+
 { TPanamahFuncionarioList }
 
 constructor TPanamahFuncionarioList.Create;
@@ -260,10 +280,29 @@ begin
   inherited;
 end;
 
+function TPanamahFuncionarioList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahFuncionarioList.FromJSON(const AJSON: string): IPanamahFuncionarioList;
 begin
   Result := TPanamahFuncionarioList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahFuncionarioList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahFuncionario;
+end;
+
+procedure TPanamahFuncionarioList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahFuncionarioList.Add(const AItem: IPanamahFuncionario);
@@ -324,6 +363,25 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahFuncionarioValidator }
+
+function TPanamahFuncionarioValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Funcionario: IPanamahFuncionario;
+  Validations: IPanamahValidationResultList;
+begin
+  Funcionario := AModel as IPanamahFuncionario;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Funcionario.Id) then
+    Validations.AddFailure('Funcionario.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Funcionario.Nome) then
+    Validations.AddFailure('Funcionario.Nome obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Produto;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahProdutoFornecedor = interface(IPanamahModel)
-    ['{D3453A44-7043-11E9-B47F-05333FE0F816}']
+    ['{775A2420-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetPrincipal: Boolean;
     procedure SetId(const AId: string);
@@ -18,18 +18,16 @@ type
     property Principal: Boolean read GetPrincipal write SetPrincipal;
   end;
   
-  IPanamahProdutoFornecedorList = interface(IJSONSerializable)
-    ['{D3453A45-7043-11E9-B47F-05333FE0F816}']
+  IPanamahProdutoFornecedorList = interface(IPanamahModelList)
+    ['{775A2421-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahProdutoFornecedor;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoFornecedor);
     procedure Add(const AItem: IPanamahProdutoFornecedor);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahProdutoFornecedor read GetItem write SetItem; default;
   end;
   
   IPanamahProdutoComposicaoItem = interface(IPanamahModel)
-    ['{D3453A40-7043-11E9-B47F-05333FE0F816}']
+    ['{7759FD1E-7368-11E9-BBA3-6970D342FA48}']
     function GetProdutoId: string;
     function GetQuantidade: Double;
     procedure SetProdutoId(const AProdutoId: string);
@@ -38,18 +36,16 @@ type
     property Quantidade: Double read GetQuantidade write SetQuantidade;
   end;
   
-  IPanamahProdutoComposicaoItemList = interface(IJSONSerializable)
-    ['{D3453A41-7043-11E9-B47F-05333FE0F816}']
+  IPanamahProdutoComposicaoItemList = interface(IPanamahModelList)
+    ['{7759FD1F-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahProdutoComposicaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicaoItem);
     procedure Add(const AItem: IPanamahProdutoComposicaoItem);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahProdutoComposicaoItem read GetItem write SetItem; default;
   end;
   
   IPanamahProdutoComposicao = interface(IPanamahModel)
-    ['{D345133E-7043-11E9-B47F-05333FE0F816}']
+    ['{7759FD1A-7368-11E9-BBA3-6970D342FA48}']
     function GetItens: IPanamahProdutoComposicaoItemList;
     function GetQuantidade: Double;
     procedure SetItens(const AItens: IPanamahProdutoComposicaoItemList);
@@ -58,18 +54,16 @@ type
     property Quantidade: Double read GetQuantidade write SetQuantidade;
   end;
   
-  IPanamahProdutoComposicaoList = interface(IJSONSerializable)
-    ['{D345133F-7043-11E9-B47F-05333FE0F816}']
+  IPanamahProdutoComposicaoList = interface(IPanamahModelList)
+    ['{7759FD1B-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahProdutoComposicao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicao);
     procedure Add(const AItem: IPanamahProdutoComposicao);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahProdutoComposicao read GetItem write SetItem; default;
   end;
   
   IPanamahProduto = interface(IPanamahModel)
-    ['{D344EC2A-7043-11E9-B47F-05333FE0F816}']
+    ['{7759D609-7368-11E9-BBA3-6970D342FA48}']
     function GetComposicao: IPanamahProdutoComposicao;
     function GetTipoComposicao: variant;
     function GetDescricao: string;
@@ -111,13 +105,11 @@ type
     property Fornecedores: IPanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
   end;
   
-  IPanamahProdutoList = interface(IJSONSerializable)
-    ['{D3451330-7043-11E9-B47F-05333FE0F816}']
+  IPanamahProdutoList = interface(IPanamahModelList)
+    ['{7759D60A-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahProduto;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProduto);
     procedure Add(const AItem: IPanamahProduto);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahProduto read GetItem write SetItem; default;
   end;
   
@@ -135,6 +127,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahProdutoFornecedor;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Principal: Boolean read GetPrincipal write SetPrincipal;
@@ -145,8 +138,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahProdutoFornecedor;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoFornecedor);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahProdutoFornecedorList;
@@ -156,6 +152,7 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahProdutoFornecedor read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
   
   TPanamahProdutoComposicaoItem = class(TInterfacedObject, IPanamahProdutoComposicaoItem)
@@ -172,6 +169,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahProdutoComposicaoItem;
+    function Validate: IPanamahValidationResult;
   published
     property ProdutoId: string read GetProdutoId write SetProdutoId;
     property Quantidade: Double read GetQuantidade write SetQuantidade;
@@ -182,8 +180,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahProdutoComposicaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicaoItem);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahProdutoComposicaoItemList;
@@ -193,6 +194,7 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahProdutoComposicaoItem read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
   
   TPanamahProdutoComposicao = class(TInterfacedObject, IPanamahProdutoComposicao)
@@ -209,6 +211,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahProdutoComposicao;
+    function Validate: IPanamahValidationResult;
   published
     property Itens: IPanamahProdutoComposicaoItemList read GetItens write SetItens;
     property Quantidade: Double read GetQuantidade write SetQuantidade;
@@ -219,8 +222,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahProdutoComposicao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicao);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahProdutoComposicaoList;
@@ -230,6 +236,7 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahProdutoComposicao read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
   
   TPanamahProduto = class(TInterfacedObject, IPanamahProduto)
@@ -279,6 +286,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahProduto;
+    function Validate: IPanamahValidationResult;
   published
     property Composicao: IPanamahProdutoComposicao read GetComposicao write SetComposicao;
     property TipoComposicao: variant read GetTipoComposicao write SetTipoComposicao;
@@ -300,8 +308,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahProduto;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProduto);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahProdutoList;
@@ -311,9 +322,34 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahProduto read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahProdutoFornecedorValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
+  end;
+  
+  TPanamahProdutoComposicaoItemValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
+  end;
+  
+  TPanamahProdutoComposicaoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
+  end;
+  
+  TPanamahProdutoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahProdutoFornecedor }
 
@@ -380,6 +416,14 @@ begin
   Result := TPanamahProdutoFornecedor.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahProdutoFornecedor.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahProdutoFornecedorValidator.Create;
+  Result := Validator.Validate(Self as IPanamahProdutoFornecedor);
+end;
+
 { TPanamahProdutoFornecedorList }
 
 constructor TPanamahProdutoFornecedorList.Create;
@@ -393,10 +437,29 @@ begin
   inherited;
 end;
 
+function TPanamahProdutoFornecedorList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahProdutoFornecedorList.FromJSON(const AJSON: string): IPanamahProdutoFornecedorList;
 begin
   Result := TPanamahProdutoFornecedorList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProdutoFornecedorList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahProdutoFornecedor;
+end;
+
+procedure TPanamahProdutoFornecedorList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahProdutoFornecedorList.Add(const AItem: IPanamahProdutoFornecedor);
@@ -457,6 +520,22 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahProdutoFornecedorValidator }
+
+function TPanamahProdutoFornecedorValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Fornecedores: IPanamahProdutoFornecedor;
+  Validations: IPanamahValidationResultList;
+begin
+  Fornecedores := AModel as IPanamahProdutoFornecedor;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Fornecedores.Id) then
+    Validations.AddFailure('Fornecedores.Id obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 { TPanamahProdutoComposicaoItem }
@@ -524,6 +603,14 @@ begin
   Result := TPanamahProdutoComposicaoItem.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahProdutoComposicaoItem.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahProdutoComposicaoItemValidator.Create;
+  Result := Validator.Validate(Self as IPanamahProdutoComposicaoItem);
+end;
+
 { TPanamahProdutoComposicaoItemList }
 
 constructor TPanamahProdutoComposicaoItemList.Create;
@@ -537,10 +624,29 @@ begin
   inherited;
 end;
 
+function TPanamahProdutoComposicaoItemList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahProdutoComposicaoItemList.FromJSON(const AJSON: string): IPanamahProdutoComposicaoItemList;
 begin
   Result := TPanamahProdutoComposicaoItemList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProdutoComposicaoItemList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahProdutoComposicaoItem;
+end;
+
+procedure TPanamahProdutoComposicaoItemList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahProdutoComposicaoItemList.Add(const AItem: IPanamahProdutoComposicaoItem);
@@ -601,6 +707,22 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahProdutoComposicaoItemValidator }
+
+function TPanamahProdutoComposicaoItemValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Itens: IPanamahProdutoComposicaoItem;
+  Validations: IPanamahValidationResultList;
+begin
+  Itens := AModel as IPanamahProdutoComposicaoItem;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Itens.ProdutoId) then
+    Validations.AddFailure('Itens.ProdutoId obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 { TPanamahProdutoComposicao }
@@ -669,6 +791,14 @@ begin
   Result := TPanamahProdutoComposicao.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahProdutoComposicao.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahProdutoComposicaoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahProdutoComposicao);
+end;
+
 { TPanamahProdutoComposicaoList }
 
 constructor TPanamahProdutoComposicaoList.Create;
@@ -682,10 +812,29 @@ begin
   inherited;
 end;
 
+function TPanamahProdutoComposicaoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahProdutoComposicaoList.FromJSON(const AJSON: string): IPanamahProdutoComposicaoList;
 begin
   Result := TPanamahProdutoComposicaoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProdutoComposicaoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahProdutoComposicao;
+end;
+
+procedure TPanamahProdutoComposicaoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahProdutoComposicaoList.Add(const AItem: IPanamahProdutoComposicao);
@@ -746,6 +895,22 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahProdutoComposicaoValidator }
+
+function TPanamahProdutoComposicaoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Composicao: IPanamahProdutoComposicao;
+  Validations: IPanamahValidationResultList;
+begin
+  Composicao := AModel as IPanamahProdutoComposicao;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if not ModelListIsEmpty(Composicao.Itens) then
+    Validations.Add(Composicao.Itens.Validate);
+  
+  Result := Validations.GetAggregate;
 end;
 
 { TPanamahProduto }
@@ -947,6 +1112,14 @@ begin
   Result := TPanamahProduto.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahProduto.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahProdutoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahProduto);
+end;
+
 { TPanamahProdutoList }
 
 constructor TPanamahProdutoList.Create;
@@ -960,10 +1133,29 @@ begin
   inherited;
 end;
 
+function TPanamahProdutoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahProdutoList.FromJSON(const AJSON: string): IPanamahProdutoList;
 begin
   Result := TPanamahProdutoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProdutoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahProduto;
+end;
+
+procedure TPanamahProdutoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahProdutoList.Add(const AItem: IPanamahProduto);
@@ -1024,6 +1216,31 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahProdutoValidator }
+
+function TPanamahProdutoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Produto: IPanamahProduto;
+  Validations: IPanamahValidationResultList;
+begin
+  Produto := AModel as IPanamahProduto;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Produto.Descricao) then
+    Validations.AddFailure('Produto.Descricao obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Produto.Id) then
+    Validations.AddFailure('Produto.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Produto.SecaoId) then
+    Validations.AddFailure('Produto.SecaoId obrigatorio(a)');
+  
+  if not ModelListIsEmpty(Produto.Fornecedores) then
+    Validations.Add(Produto.Fornecedores.Validate);
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

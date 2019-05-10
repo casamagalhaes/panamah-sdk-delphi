@@ -4,12 +4,12 @@ unit PanamahSDK.Models.TrocaFormaPagamento;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahTrocaFormaPagamento = interface(IPanamahModel)
-    ['{D3456152-7043-11E9-B47F-05333FE0F816}']
+    ['{775A4B30-7368-11E9-BBA3-6970D342FA48}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetFormaPagamentoDestinoId: string;
@@ -45,13 +45,11 @@ type
     property ValorContraValeOuTroco: Double read GetValorContraValeOuTroco write SetValorContraValeOuTroco;
   end;
   
-  IPanamahTrocaFormaPagamentoList = interface(IJSONSerializable)
-    ['{D3456153-7043-11E9-B47F-05333FE0F816}']
+  IPanamahTrocaFormaPagamentoList = interface(IPanamahModelList)
+    ['{775A4B31-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahTrocaFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaFormaPagamento);
     procedure Add(const AItem: IPanamahTrocaFormaPagamento);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahTrocaFormaPagamento read GetItem write SetItem; default;
   end;
   
@@ -96,6 +94,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahTrocaFormaPagamento;
+    function Validate: IPanamahValidationResult;
   published
     property AutorizadorId: variant read GetAutorizadorId write SetAutorizadorId;
     property Data: TDateTime read GetData write SetData;
@@ -115,8 +114,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahTrocaFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaFormaPagamento);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahTrocaFormaPagamentoList;
@@ -126,9 +128,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahTrocaFormaPagamento read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahTrocaFormaPagamentoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahTrocaFormaPagamento }
 
@@ -303,6 +315,14 @@ begin
   Result := TPanamahTrocaFormaPagamento.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahTrocaFormaPagamento.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahTrocaFormaPagamentoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahTrocaFormaPagamento);
+end;
+
 { TPanamahTrocaFormaPagamentoList }
 
 constructor TPanamahTrocaFormaPagamentoList.Create;
@@ -316,10 +336,29 @@ begin
   inherited;
 end;
 
+function TPanamahTrocaFormaPagamentoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahTrocaFormaPagamentoList.FromJSON(const AJSON: string): IPanamahTrocaFormaPagamentoList;
 begin
   Result := TPanamahTrocaFormaPagamentoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahTrocaFormaPagamentoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahTrocaFormaPagamento;
+end;
+
+procedure TPanamahTrocaFormaPagamentoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahTrocaFormaPagamentoList.Add(const AItem: IPanamahTrocaFormaPagamento);
@@ -380,6 +419,34 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahTrocaFormaPagamentoValidator }
+
+function TPanamahTrocaFormaPagamentoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  TrocaFormaPagamento: IPanamahTrocaFormaPagamento;
+  Validations: IPanamahValidationResultList;
+begin
+  TrocaFormaPagamento := AModel as IPanamahTrocaFormaPagamento;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(TrocaFormaPagamento.FormaPagamentoDestinoId) then
+    Validations.AddFailure('TrocaFormaPagamento.FormaPagamentoDestinoId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(TrocaFormaPagamento.FormaPagamentoOrigemId) then
+    Validations.AddFailure('TrocaFormaPagamento.FormaPagamentoOrigemId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(TrocaFormaPagamento.Id) then
+    Validations.AddFailure('TrocaFormaPagamento.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(TrocaFormaPagamento.LojaId) then
+    Validations.AddFailure('TrocaFormaPagamento.LojaId obrigatorio(a)');
+  
+  if ModelValueIsEmpty(TrocaFormaPagamento.SequencialPagamento) then
+    Validations.AddFailure('TrocaFormaPagamento.SequencialPagamento obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

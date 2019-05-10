@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Assinante;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahAssinante = interface(IPanamahModel)
-    ['{D3431760-7043-11E9-B47F-05333FE0F816}']
+    ['{7757DA30-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetNome: string;
     function GetFantasia: string;
@@ -48,13 +48,11 @@ type
     property Ativo: Boolean read GetAtivo write SetAtivo;
   end;
   
-  IPanamahAssinanteList = interface(IJSONSerializable)
-    ['{D3431761-7043-11E9-B47F-05333FE0F816}']
+  IPanamahAssinanteList = interface(IPanamahModelList)
+    ['{7757DA31-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahAssinante;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAssinante);
     procedure Add(const AItem: IPanamahAssinante);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahAssinante read GetItem write SetItem; default;
   end;
   
@@ -102,6 +100,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahAssinante;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Nome: string read GetNome write SetNome;
@@ -122,8 +121,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahAssinante;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAssinante);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahAssinanteList;
@@ -133,9 +135,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahAssinante read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahAssinanteValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahAssinante }
 
@@ -325,6 +337,14 @@ begin
   Result := TPanamahAssinante.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahAssinante.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahAssinanteValidator.Create;
+  Result := Validator.Validate(Self as IPanamahAssinante);
+end;
+
 { TPanamahAssinanteList }
 
 constructor TPanamahAssinanteList.Create;
@@ -338,10 +358,29 @@ begin
   inherited;
 end;
 
+function TPanamahAssinanteList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahAssinanteList.FromJSON(const AJSON: string): IPanamahAssinanteList;
 begin
   Result := TPanamahAssinanteList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahAssinanteList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahAssinante;
+end;
+
+procedure TPanamahAssinanteList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahAssinanteList.Add(const AItem: IPanamahAssinante);
@@ -402,6 +441,46 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahAssinanteValidator }
+
+function TPanamahAssinanteValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Assinante: IPanamahAssinante;
+  Validations: IPanamahValidationResultList;
+begin
+  Assinante := AModel as IPanamahAssinante;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Assinante.Id) then
+    Validations.AddFailure('Assinante.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Assinante.Nome) then
+    Validations.AddFailure('Assinante.Nome obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Assinante.Fantasia) then
+    Validations.AddFailure('Assinante.Fantasia obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Assinante.Ramo) then
+    Validations.AddFailure('Assinante.Ramo obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Assinante.Uf) then
+    Validations.AddFailure('Assinante.Uf obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Assinante.Cidade) then
+    Validations.AddFailure('Assinante.Cidade obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Assinante.Bairro) then
+    Validations.AddFailure('Assinante.Bairro obrigatorio(a)');
+  
+  if ModelListIsEmpty(Assinante.SoftwaresAtivos) then
+    Validations.AddFailure('Assinante.SoftwaresAtivos obrigatorio(a)');
+  
+  if ModelListIsEmpty(Assinante.SoftwaresEmContratosDeManutencao) then
+    Validations.AddFailure('Assinante.SoftwaresEmContratosDeManutencao obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

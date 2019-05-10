@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Cliente;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahCliente = interface(IPanamahModel)
-    ['{D344C514-7043-11E9-B47F-05333FE0F816}']
+    ['{7759AEF1-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetNome: string;
     function GetNumeroDocumento: string;
@@ -33,13 +33,11 @@ type
     property Bairro: string read GetBairro write SetBairro;
   end;
   
-  IPanamahClienteList = interface(IJSONSerializable)
-    ['{D344C515-7043-11E9-B47F-05333FE0F816}']
+  IPanamahClienteList = interface(IPanamahModelList)
+    ['{7759AEF2-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahCliente;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCliente);
     procedure Add(const AItem: IPanamahCliente);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahCliente read GetItem write SetItem; default;
   end;
   
@@ -72,6 +70,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahCliente;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Nome: string read GetNome write SetNome;
@@ -87,8 +86,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahCliente;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCliente);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahClienteList;
@@ -98,9 +100,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahCliente read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahClienteValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahCliente }
 
@@ -227,6 +239,14 @@ begin
   Result := TPanamahCliente.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahCliente.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahClienteValidator.Create;
+  Result := Validator.Validate(Self as IPanamahCliente);
+end;
+
 { TPanamahClienteList }
 
 constructor TPanamahClienteList.Create;
@@ -240,10 +260,29 @@ begin
   inherited;
 end;
 
+function TPanamahClienteList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahClienteList.FromJSON(const AJSON: string): IPanamahClienteList;
 begin
   Result := TPanamahClienteList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahClienteList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahCliente;
+end;
+
+procedure TPanamahClienteList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahClienteList.Add(const AItem: IPanamahCliente);
@@ -304,6 +343,40 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahClienteValidator }
+
+function TPanamahClienteValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Cliente: IPanamahCliente;
+  Validations: IPanamahValidationResultList;
+begin
+  Cliente := AModel as IPanamahCliente;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Cliente.Id) then
+    Validations.AddFailure('Cliente.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Cliente.Nome) then
+    Validations.AddFailure('Cliente.Nome obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Cliente.NumeroDocumento) then
+    Validations.AddFailure('Cliente.NumeroDocumento obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Cliente.Ramo) then
+    Validations.AddFailure('Cliente.Ramo obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Cliente.Uf) then
+    Validations.AddFailure('Cliente.Uf obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Cliente.Cidade) then
+    Validations.AddFailure('Cliente.Cidade obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Cliente.Bairro) then
+    Validations.AddFailure('Cliente.Bairro obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

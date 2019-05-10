@@ -4,12 +4,12 @@ unit PanamahSDK.Models.FormaPagamento;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahFormaPagamento = interface(IPanamahModel)
-    ['{D3449E00-7043-11E9-B47F-05333FE0F816}']
+    ['{775960D8-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetDescricao: string;
     procedure SetId(const AId: string);
@@ -18,13 +18,11 @@ type
     property Descricao: string read GetDescricao write SetDescricao;
   end;
   
-  IPanamahFormaPagamentoList = interface(IJSONSerializable)
-    ['{D3449E01-7043-11E9-B47F-05333FE0F816}']
+  IPanamahFormaPagamentoList = interface(IPanamahModelList)
+    ['{775960D9-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFormaPagamento);
     procedure Add(const AItem: IPanamahFormaPagamento);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahFormaPagamento read GetItem write SetItem; default;
   end;
   
@@ -42,6 +40,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahFormaPagamento;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Descricao: string read GetDescricao write SetDescricao;
@@ -52,8 +51,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFormaPagamento);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahFormaPagamentoList;
@@ -63,9 +65,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahFormaPagamento read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahFormaPagamentoValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahFormaPagamento }
 
@@ -132,6 +144,14 @@ begin
   Result := TPanamahFormaPagamento.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahFormaPagamento.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahFormaPagamentoValidator.Create;
+  Result := Validator.Validate(Self as IPanamahFormaPagamento);
+end;
+
 { TPanamahFormaPagamentoList }
 
 constructor TPanamahFormaPagamentoList.Create;
@@ -145,10 +165,29 @@ begin
   inherited;
 end;
 
+function TPanamahFormaPagamentoList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahFormaPagamentoList.FromJSON(const AJSON: string): IPanamahFormaPagamentoList;
 begin
   Result := TPanamahFormaPagamentoList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahFormaPagamentoList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahFormaPagamento;
+end;
+
+procedure TPanamahFormaPagamentoList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahFormaPagamentoList.Add(const AItem: IPanamahFormaPagamento);
@@ -209,6 +248,25 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahFormaPagamentoValidator }
+
+function TPanamahFormaPagamentoValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  FormaPagamento: IPanamahFormaPagamento;
+  Validations: IPanamahValidationResultList;
+begin
+  FormaPagamento := AModel as IPanamahFormaPagamento;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(FormaPagamento.Id) then
+    Validations.AddFailure('FormaPagamento.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(FormaPagamento.Descricao) then
+    Validations.AddFailure('FormaPagamento.Descricao obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.

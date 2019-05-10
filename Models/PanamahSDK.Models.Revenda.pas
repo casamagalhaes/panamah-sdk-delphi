@@ -4,12 +4,12 @@ unit PanamahSDK.Models.Revenda;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
   
   IPanamahRevenda = interface(IPanamahModel)
-    ['{D343B3A0-7043-11E9-B47F-05333FE0F816}']
+    ['{77587670-7368-11E9-BBA3-6970D342FA48}']
     function GetId: string;
     function GetNome: string;
     function GetFantasia: string;
@@ -33,13 +33,11 @@ type
     property Bairro: string read GetBairro write SetBairro;
   end;
   
-  IPanamahRevendaList = interface(IJSONSerializable)
-    ['{D343B3A1-7043-11E9-B47F-05333FE0F816}']
+  IPanamahRevendaList = interface(IPanamahModelList)
+    ['{77587671-7368-11E9-BBA3-6970D342FA48}']
     function GetItem(AIndex: Integer): IPanamahRevenda;
     procedure SetItem(AIndex: Integer; const Value: IPanamahRevenda);
     procedure Add(const AItem: IPanamahRevenda);
-    procedure Clear;
-    function Count: Integer;
     property Items[AIndex: Integer]: IPanamahRevenda read GetItem write SetItem; default;
   end;
   
@@ -72,6 +70,7 @@ type
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahRevenda;
+    function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
     property Nome: string read GetNome write SetNome;
@@ -87,8 +86,11 @@ type
     FList: TInterfaceList;
     function GetItem(AIndex: Integer): IPanamahRevenda;
     procedure SetItem(AIndex: Integer; const Value: IPanamahRevenda);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function Validate: IPanamahValidationResult;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahRevendaList;
@@ -98,9 +100,19 @@ type
     function Count: Integer;
     destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahRevenda read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
+  end;
+  
+  
+  TPanamahRevendaValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
   
 implementation
+
+uses
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahRevenda }
 
@@ -227,6 +239,14 @@ begin
   Result := TPanamahRevenda.FromJSON(SerializeToJSON);
 end;
 
+function TPanamahRevenda.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahRevendaValidator.Create;
+  Result := Validator.Validate(Self as IPanamahRevenda);
+end;
+
 { TPanamahRevendaList }
 
 constructor TPanamahRevendaList.Create;
@@ -240,10 +260,29 @@ begin
   inherited;
 end;
 
+function TPanamahRevendaList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
 class function TPanamahRevendaList.FromJSON(const AJSON: string): IPanamahRevendaList;
 begin
   Result := TPanamahRevendaList.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahRevendaList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahRevenda;
+end;
+
+procedure TPanamahRevendaList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
 end;
 
 procedure TPanamahRevendaList.Add(const AItem: IPanamahRevenda);
@@ -304,6 +343,40 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+{ TPanamahRevendaValidator }
+
+function TPanamahRevendaValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Revenda: IPanamahRevenda;
+  Validations: IPanamahValidationResultList;
+begin
+  Revenda := AModel as IPanamahRevenda;
+  Validations := TPanamahValidationResultList.Create;
+  
+  if ModelValueIsEmpty(Revenda.Id) then
+    Validations.AddFailure('Revenda.Id obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Revenda.Nome) then
+    Validations.AddFailure('Revenda.Nome obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Revenda.Fantasia) then
+    Validations.AddFailure('Revenda.Fantasia obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Revenda.Ramo) then
+    Validations.AddFailure('Revenda.Ramo obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Revenda.Uf) then
+    Validations.AddFailure('Revenda.Uf obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Revenda.Cidade) then
+    Validations.AddFailure('Revenda.Cidade obrigatorio(a)');
+  
+  if ModelValueIsEmpty(Revenda.Bairro) then
+    Validations.AddFailure('Revenda.Bairro obrigatorio(a)');
+  
+  Result := Validations.GetAggregate;
 end;
 
 end.
