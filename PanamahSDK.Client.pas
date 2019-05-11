@@ -60,7 +60,6 @@ type
     function Put(const AURL, AContent: string; AHeaders: TStrings): IPanamahResponse;
     function Post(const AURL, AContent: string; AHeaders: TStrings): IPanamahResponse;
     function Delete(const AURL: string; AParams, AHeaders: TStrings): IPanamahResponse;
-    procedure SetApiKey(const AApiKey: string);
   end;
 
   TPanamahRequest = class(TInterfacedObject, IPanamahRequest)
@@ -121,13 +120,14 @@ type
     function Delete(const AURL: string): string; overload;
   end;
 
-  TPanamahClient = class(TInterfacedObject, IPanamahClient)
+  TPanamahStreamClient = class(TInterfacedObject, IPanamahClient)
   private
     FBaseURL: string;
     FTokens: TPanamahTokenStorage;
-    FApiKey: string;
+    FSoftwareKey: string;
+    FAssinanteKey: string;
   public
-    procedure SetApiKey(const AApiKey: string);
+    procedure SetSoftwareKey(const ASoftwareKey: string);
     function Authenticate(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ARequestFunction: TPanamahAuthenticatedRequest): IPanamahResponse;
     function AuthenticatedGet(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
     function AuthenticatedPut(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
@@ -138,8 +138,7 @@ type
     function Put(const AURL, AContent: string; AHeaders: TStrings): IPanamahResponse;
     function Post(const AURL, AContent: string; AHeaders: TStrings): IPanamahResponse;
     function Delete(const AURL: string; AParams, AHeaders: TStrings): IPanamahResponse;
-    constructor Create(const ABaseURL: string; const AApiKey: string); overload;
-    constructor Create(const ABaseURL: string); overload;
+    constructor Create(const ABaseURL: string; const ASoftwareKey: string; const AAssinanteKey: string); overload;
     destructor Destroy; override;
   end;
 
@@ -150,7 +149,7 @@ implementation
 
 { TPanamahClient }
 
-function TPanamahClient.Authenticate(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ARequestFunction: TPanamahAuthenticatedRequest): IPanamahResponse;
+function TPanamahStreamClient.Authenticate(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ARequestFunction: TPanamahAuthenticatedRequest): IPanamahResponse;
 var
   AuthRequest: IPanamahRequest;
   AuthResponse: IPanamahResponse;
@@ -162,7 +161,7 @@ begin
   if Assigned(FTokens) then
   begin
     Result := ARequestFunction(AURL, AParams, AHeaders, AContent, FTokens);
-    if (Result.Status = 401) and (FApiKey <> EmptyStr) then
+    if (Result.Status = 401) and (FSoftwareKey <> EmptyStr) then
     begin
       RefreshHeaders := TStringList.Create;
       try
@@ -188,8 +187,8 @@ begin
     try
       AuthHeaders.Values['Content-Type'] := 'application/json';
       AuthHeaders.Values['Accept'] := 'application/json';
-      AuthHeaders.Values['x-api-key'] := FApiKey;
-      AuthRequest := TPanamahRequest.Create(Concat(FBaseURL, '/api/auth'), mtPOST, nil, AuthHeaders, EmptyStr);
+      AuthHeaders.Values['x-software-key'] := FSoftwareKey;
+      AuthRequest := TPanamahRequest.Create(Concat(FBaseURL, '/admin/login'), mtPOST, nil, AuthHeaders, EmptyStr);
       AuthResponse := MakeRequest(AuthRequest);
       if AuthResponse.Status = 200 then
       begin
@@ -204,19 +203,19 @@ begin
   end;
 end;
 
-function TPanamahClient.Delete(const AURL: string; AParams, AHeaders: TStrings): IPanamahResponse;
+function TPanamahStreamClient.Delete(const AURL: string; AParams, AHeaders: TStrings): IPanamahResponse;
 begin
   Result := Authenticate(AURL, AParams, AHeaders, EmptyStr, AuthenticatedDelete);
 end;
 
-destructor TPanamahClient.Destroy;
+destructor TPanamahStreamClient.Destroy;
 begin
   if Assigned(FTokens) then
     FreeAndNil(FTokens);
   inherited;
 end;
 
-function TPanamahClient.AuthenticatedDelete(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
+function TPanamahStreamClient.AuthenticatedDelete(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
 var
   Request: IPanamahRequest;
 begin
@@ -224,7 +223,7 @@ begin
   Result := MakeRequest(Request);
 end;
 
-function TPanamahClient.AuthenticatedGet(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
+function TPanamahStreamClient.AuthenticatedGet(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
 var
   Request: IPanamahRequest;
 begin
@@ -232,7 +231,7 @@ begin
   Result := MakeRequest(Request);
 end;
 
-function TPanamahClient.AuthenticatedPost(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
+function TPanamahStreamClient.AuthenticatedPost(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
 var
   Request: IPanamahRequest;
 begin
@@ -240,7 +239,7 @@ begin
   Result := MakeRequest(Request);
 end;
 
-function TPanamahClient.AuthenticatedPut(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
+function TPanamahStreamClient.AuthenticatedPut(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse;
 var
   Request: IPanamahRequest;
 begin
@@ -248,34 +247,35 @@ begin
   Result := MakeRequest(Request);
 end;
 
-constructor TPanamahClient.Create(const ABaseURL: string; const AApiKey: string);
+constructor TPanamahStreamClient.Create(const ABaseURL: string; const ASoftwareKey: string; const AAssinanteKey: string);
 begin
   inherited Create;
   FBaseURL := ABaseURL;
-  FApiKey := AApiKey;
+  FSoftwareKey := ASoftwareKey;
+  FAssinanteKey := AAssinanteKey;
 end;
 
-function TPanamahClient.Get(const AURL: string; AParams, AHeaders: TStrings): IPanamahResponse;
+function TPanamahStreamClient.Get(const AURL: string; AParams, AHeaders: TStrings): IPanamahResponse;
 begin
   Result := Authenticate(AURL, AParams, AHeaders, EmptyStr, AuthenticatedGet);
 end;
 
-function TPanamahClient.Post(const AURL, AContent: string; AHeaders: TStrings): IPanamahResponse;
+function TPanamahStreamClient.Post(const AURL, AContent: string; AHeaders: TStrings): IPanamahResponse;
 begin
   Result := Authenticate(AURL, nil, nil, AContent, AuthenticatedPost);
 end;
 
-function TPanamahClient.Put(const AURL, AContent: string; AHeaders: TStrings): IPanamahResponse;
+function TPanamahStreamClient.Put(const AURL, AContent: string; AHeaders: TStrings): IPanamahResponse;
 begin
   Result := Authenticate(AURL, nil, nil, AContent, AuthenticatedPut);
 end;
 
-procedure TPanamahClient.SetApiKey(const AApiKey: string);
+procedure TPanamahStreamClient.SetSoftwareKey(const ASoftwareKey: string);
 begin
-  FApiKey := AApiKey;
+  FSoftwareKey := ASoftwareKey;
 end;
 
-function TPanamahClient.MakeRequest(const ARequest: IPanamahRequest): IPanamahResponse;
+function TPanamahStreamClient.MakeRequest(const ARequest: IPanamahRequest): IPanamahResponse;
 var
   ResponseContent: string;
   HTTP: TPanamahSDKIdHTTP;
@@ -389,12 +389,6 @@ begin
   finally
     FreeAndNil(HTTP);
   end;
-end;
-
-constructor TPanamahClient.Create(const ABaseURL: string);
-begin
-  inherited Create;
-  FBaseURL := ABaseURL;
 end;
 
 { TSDKIdHTTP }

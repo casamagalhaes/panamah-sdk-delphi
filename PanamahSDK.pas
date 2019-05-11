@@ -11,86 +11,60 @@ uses
   PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding, PanamahSDK.Models.LocalEstoque, PanamahSDK.Models.Loja,
   PanamahSDK.Models.Meta, PanamahSDK.Models.Produto, PanamahSDK.Models.Revenda, PanamahSDK.Models.Secao,
   PanamahSDK.Models.Subgrupo, PanamahSDK.Models.TituloPagar, PanamahSDK.Models.TituloReceber,
-  PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento, PanamahSDK.Models.Venda;
+  PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento, PanamahSDK.Models.Venda, PanamahSDK.Processor;
 
 type
 
-  TPanamahSDKConfig = class(TInterfacedObject, IPanamahSDKConfig)
+  TPanamahStreamConfig = class(TInterfacedObject, IPanamahStreamConfig)
   private
-    FApiKey: string;
+    FSoftwareKey: string;
     FBaseDirectory: string;
     FBatchTTL: Integer;
     FBatchMaxSize: Integer;
     FBatchMaxCount: Integer;
-    function GetApiKey: string;
     function GetBaseDirectory: string;
     function GetBatchTTL: Integer;
     function GetBatchMaxSize: Integer;
     function GetBatchMaxCount: Integer;
-    procedure SetApiKey(const AApiKey: string);
+    function GetSoftwareKey: string;
     procedure SetBaseDirectory(const ABaseDirectory: string);
+    procedure SetSoftwareKey(const ASoftwareKey: string);
   published
     constructor Create; reintroduce;
-    property ApiKey: string read GetApiKey write SetApiKey;
     property BaseDirectory: string read GetBaseDirectory write SetBaseDirectory;
     property BatchTTL: Integer read GetBatchTTL;
     property BatchMaxSize: Integer read GetBatchMaxSize;
     property BatchMaxCount: Integer read GetBatchMaxCount;
+    property SoftwareKey: string read GetSoftwareKey write SetSoftwareKey;
   end;
 
-  TPanamahBatchEvent = procedure(ABatch: IPanamahBatch) of object;
-
-  TPanamahModelEvent = procedure(AModel: IPanamahModel) of object;
-
-  TPanamahOperationEvent = procedure(AModel: IPanamahOperation) of object;
-
-  TPanamahSDKBatchProcessor = class(TThread)
+  TPanamahAdminConfig = class(TInterfacedObject, IPanamahAdminConfig)
   private
-    FCriticalSection: TCriticalSection;
-    FOnCurrentBatchExpired: TPanamahBatchEvent;
-    FOnBeforeObjectAddedToBatch: TPanamahModelEvent;
-    FOnBeforeBatchSent: TPanamahBatchEvent;
-    FOnBeforeOperationSent: TPanamahOperationEvent;
-    FClient: IPanamahClient;
-    FConfig: IPanamahSDKConfig;
-    FCurrentBatch: IPanamahBatch;
-    function GetBatchAccumulationDirectory: string;
-    function GetBatchSentDirectory: string;
-    function GetCurrentBatchFilename: string;
-    function IsThereAccumulatedBatches: Boolean;
-    function CurrentBatchExpiredByTime(ABatchTTL: Integer): Boolean;
-    function BatchExpiredBySize(AMaxSize: Integer): Boolean;
-    function BatchExpiredByCount(AMaxCount: Integer): Boolean;
-    procedure AccumulateCurrentBatch;
-    procedure DoOnCurrentBatchExpired;
-    procedure DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
-    procedure DoOnBeforeBatchSent(ABatch: IPanamahBatch);
-    procedure DoOnBeforeOperationSent(AOperation: IPanamahOperation);
-    procedure SendAccumulatedBatches;
-    procedure LoadCurrentBatch;
-    procedure SaveCurrentBatch;
-    procedure ExpireCurrentBatch;
-    procedure Process;
-    procedure AddOperationToCurrentBatch(AOperationType: TPanamahOperationType; AModel: IPanamahModel);
-  public
-    destructor Destroy; override;
+    FSoftwareKey: string;
+    function GetSoftwareKey: string;
+    procedure SetSoftwareKey(const ASoftwareKey: string);
+  published
     constructor Create; reintroduce;
-    procedure Start(AConfig: IPanamahSDKConfig); reintroduce;
-    procedure Execute; override;
-    procedure Stop;
-    property OnCurrentBatchExpired: TPanamahBatchEvent read FOnCurrentBatchExpired write FOnCurrentBatchExpired;
-    property OnBeforeObjectAddedToBatch: TPanamahModelEvent read FOnBeforeObjectAddedToBatch write FOnBeforeObjectAddedToBatch;
-    property OnBeforeBatchSent: TPanamahBatchEvent read FOnBeforeBatchSent write FOnBeforeBatchSent;
-    property OnBeforeOperationSent: TPanamahOperationEvent read FOnBeforeOperationSent write FOnBeforeOperationSent;
-    procedure Save(AModel: IPanamahModel);
-    procedure Delete(AModel: IPanamahModel);
-    procedure Flush;
+    property SoftwareKey: string read GetSoftwareKey write SetSoftwareKey;
+  end;
+
+  TPanamahAdmin = class
+  private
+    FConfig: IPanamahAdminConfig;
+    FClient: IPanamahClient;
+  public
+    procedure Init(AConfig: IPanamahAdminConfig); overload;
+    procedure Init(const ASoftwareKey: string); overload;
+    constructor Create; reintroduce;
+    destructor Destroy; override;
+    class function GetInstance: TPanamahAdmin;
+    class procedure Free;
   end;
 
   TPanamahStream = class
   private
-    FConfig: IPanamahSDKConfig;
-    FProcessor: TPanamahSDKBatchProcessor;
+    FConfig: IPanamahStreamConfig;
+    FProcessor: TPanamahBatchProcessor;
     function GetOnCurrentBatchExpired: TPanamahBatchEvent;
     function GetOnBeforeObjectAddedToBatch: TPanamahModelEvent;
     function GetOnBeforeOperationtSent: TPanamahOperationEvent;
@@ -102,7 +76,7 @@ type
   public
     class procedure Free;
     procedure Init; overload;
-    procedure Init(AConfig: IPanamahSDKConfig); overload;
+    procedure Init(AConfig: IPanamahStreamConfig); overload;
     procedure Init(const AApiKey: string); overload;
     procedure Flush;
     constructor Create; reintroduce;
@@ -159,21 +133,21 @@ type
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
     property OnBeforeOperationSent: TPanamahOperationEvent read GetOnBeforeOperationtSent write SetOnBeforeOperationSent;
-  published
     class function GetInstance: TPanamahStream;
   end;
 
 var
-  _PanamahSDKInstance: TPanamahStream;
+  _PanamahStreamInstance: TPanamahStream;
+  _PanamahAdminInstance: TPanamahAdmin;
 
 implementation
 
 uses
   PanamahSDK.ValidationUtils;
 
-{ TPanamahSDK }
+{ TPanamahStream }
 
-procedure TPanamahStream.Init(AConfig: IPanamahSDKConfig);
+procedure TPanamahStream.Init(AConfig: IPanamahStreamConfig);
 begin
   FConfig := AConfig;
   FProcessor.Start(FConfig);
@@ -181,10 +155,10 @@ end;
 
 procedure TPanamahStream.Init(const AApiKey: string);
 var
-  Config: IPanamahSDKConfig;
+  Config: IPanamahStreamConfig;
 begin
-  Config := TPanamahSDKConfig.Create;
-  Config.ApiKey := AApiKey;
+  Config := TPanamahStreamConfig.Create;
+  Config.SoftwareKey := AApiKey;
   Init(Config);
 end;
 
@@ -456,7 +430,7 @@ end;
 constructor TPanamahStream.Create;
 begin
   inherited;
-  FProcessor := TPanamahSDKBatchProcessor.Create;
+  FProcessor := TPanamahBatchProcessor.Create;
 end;
 
 destructor TPanamahStream.Destroy;
@@ -473,15 +447,15 @@ end;
 
 class procedure TPanamahStream.Free;
 begin
-  if Assigned(_PanamahSDKInstance) then
-    _PanamahSDKInstance.Destroy;
+  if Assigned(_PanamahStreamInstance) then
+    _PanamahStreamInstance.Destroy;
 end;
 
 class function TPanamahStream.GetInstance: TPanamahStream;
 begin
-  if not Assigned(_PanamahSDKInstance) then
-    _PanamahSDKInstance := TPanamahStream.Create;
-  Result := _PanamahSDKInstance;
+  if not Assigned(_PanamahStreamInstance) then
+    _PanamahStreamInstance := TPanamahStream.Create;
+  Result := _PanamahStreamInstance;
 end;
 
 function TPanamahStream.GetOnBeforeBatchSent: TPanamahBatchEvent;
@@ -506,7 +480,7 @@ end;
 
 { TPanamahSDKConfig }
 
-constructor TPanamahSDKConfig.Create;
+constructor TPanamahStreamConfig.Create;
 begin
   inherited Create;
   FBatchTTL := 5 * 60 * 1000;
@@ -515,269 +489,97 @@ begin
   FBaseDirectory := GetCurrentDir + '\.panamah';
 end;
 
-function TPanamahSDKConfig.GetApiKey: string;
+function TPanamahStreamConfig.GetSoftwareKey: string;
 begin
-  Result := FApiKey;
+  Result := FSoftwareKey;
 end;
 
-function TPanamahSDKConfig.GetBaseDirectory: string;
+function TPanamahStreamConfig.GetBaseDirectory: string;
 begin
   Result := FBaseDirectory;
 end;
 
-function TPanamahSDKConfig.GetBatchMaxCount: Integer;
+function TPanamahStreamConfig.GetBatchMaxCount: Integer;
 begin
   Result := FBatchMaxCount;
 end;
 
-function TPanamahSDKConfig.GetBatchMaxSize: Integer;
+function TPanamahStreamConfig.GetBatchMaxSize: Integer;
 begin
   Result := FBatchMaxSize;
 end;
 
-function TPanamahSDKConfig.GetBatchTTL: Integer;
+function TPanamahStreamConfig.GetBatchTTL: Integer;
 begin
   Result := FBatchTTL;
 end;
 
-procedure TPanamahSDKConfig.SetApiKey(const AApiKey: string);
-begin
-  FApiKey := AApiKey;
-end;
-
-procedure TPanamahSDKConfig.SetBaseDirectory(const ABaseDirectory: string);
+procedure TPanamahStreamConfig.SetBaseDirectory(const ABaseDirectory: string);
 begin
   FBaseDirectory := ABaseDirectory;
 end;
 
-{ TPanamahSDKBatchProcessor }
-
-procedure TPanamahSDKBatchProcessor.AccumulateCurrentBatch;
+procedure TPanamahStreamConfig.SetSoftwareKey(const ASoftwareKey: string);
 begin
-  FCurrentBatch.SaveToDirectory(GetBatchAccumulationDirectory);
-  FCurrentBatch.Reset;
-  DeleteFile(GetCurrentBatchFilename);
+  FSoftwareKey := ASoftwareKey;
 end;
 
-procedure TPanamahSDKBatchProcessor.Save(AModel: IPanamahModel);
-var
-  ValidationResult: IPanamahValidationResult;
+{ TPanamahAdminConfig }
+
+constructor TPanamahAdminConfig.Create;
 begin
-  ValidationResult := AModel.Validate;
-  if ValidationResult.Valid then
-    AddOperationToCurrentBatch(otUPDATE, AModel)
-  else
-    raise EPanamahSDKExceptionValidationFailed.Create(ValidationResult.Reasons.Text);
+  inherited Create;
 end;
 
-procedure TPanamahSDKBatchProcessor.Delete(AModel: IPanamahModel);
+function TPanamahAdminConfig.GetSoftwareKey: string;
 begin
-  if ModelHasId(AModel) then
-    AddOperationToCurrentBatch(otDELETE, AModel)
-  else
-    raise EPanamahSDKExceptionValidationFailed.Create(Format('Id obrigatorio para exclusao de %s', [AModel.ModelName]));
+  Result := FSoftwareKey;
 end;
 
-function TPanamahSDKBatchProcessor.GetBatchAccumulationDirectory: string;
+procedure TPanamahAdminConfig.SetSoftwareKey(const ASoftwareKey: string);
 begin
-  Result := (FConfig.BaseDirectory + '\accumulated');
+  FSoftwareKey := ASoftwareKey;
 end;
 
-function TPanamahSDKBatchProcessor.GetBatchSentDirectory: string;
+{ TPanamahAdmin }
+
+constructor TPanamahAdmin.Create;
 begin
-  Result := (FConfig.BaseDirectory + '\sent');
+  inherited Create;
+//  FClient := TPanamahAdminClient.Create('https://172.16.33.109:7443', FConfig.SoftwareKey, '');
 end;
 
-function TPanamahSDKBatchProcessor.GetCurrentBatchFilename: string;
+destructor TPanamahAdmin.Destroy;
 begin
-  Result := (FConfig.BaseDirectory + '\current.pbt');
-end;
 
-function TPanamahSDKBatchProcessor.IsThereAccumulatedBatches: Boolean;
-begin
-  Result := TPanamahBatchList.CountBatchesInDirectory(GetBatchAccumulationDirectory) > 0;
-end;
-
-procedure TPanamahSDKBatchProcessor.AddOperationToCurrentBatch(AOperationType: TPanamahOperationType;
-  AModel: IPanamahModel);
-begin
-  FCriticalSection.Acquire;
-  try
-    DoOnBeforeObjectAddedToBatch(AModel);
-    FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone));
-    if BatchExpiredBySize(FConfig.BatchMaxSize) or
-          BatchExpiredByCount(FConfig.BatchMaxCount) then
-      ExpireCurrentBatch;
-  finally
-    FCriticalSection.Release;
-  end;
-end;
-
-function TPanamahSDKBatchProcessor.BatchExpiredByCount(AMaxCount: Integer): Boolean;
-begin
-  Result := FCurrentBatch.Count >= AMaxCount;
-end;
-
-function TPanamahSDKBatchProcessor.BatchExpiredBySize(AMaxSize: Integer): Boolean;
-begin
-  Result := FCurrentBatch.Size > AMaxSize;
-end;
-
-function TPanamahSDKBatchProcessor.CurrentBatchExpiredByTime(ABatchTTL: Integer): Boolean;
-begin
-  Result := MilliSecondsBetween(Now, FCurrentBatch.CreatedAt) >= ABatchTTL;
-end;
-
-constructor TPanamahSDKBatchProcessor.Create;
-begin
-  inherited Create(True);
-  FCriticalSection := TCriticalSection.Create;
-end;
-
-procedure TPanamahSDKBatchProcessor.DoOnCurrentBatchExpired;
-begin
-  if Assigned(FOnCurrentBatchExpired) then
-    FOnCurrentBatchExpired(FCurrentBatch);
-end;
-
-destructor TPanamahSDKBatchProcessor.Destroy;
-begin
-  FCriticalSection.Free;
   inherited;
 end;
 
-procedure TPanamahSDKBatchProcessor.DoOnBeforeBatchSent(ABatch: IPanamahBatch);
+class procedure TPanamahAdmin.Free;
+begin
+  if Assigned(_PanamahAdminInstance) then
+    FreeAndNil(_PanamahAdminInstance);
+end;
+
+class function TPanamahAdmin.GetInstance: TPanamahAdmin;
+begin
+  if not Assigned(_PanamahAdminInstance) then
+    _PanamahAdminInstance := TPanamahAdmin.Create;
+  Result := _PanamahAdminInstance;
+end;
+
+procedure TPanamahAdmin.Init(const ASoftwareKey: string);
 var
-  I: Integer;
+  Config: IPanamahAdminConfig;
 begin
-  if Assigned(FOnBeforeBatchSent) then
-    FOnBeforeBatchSent(ABatch);
-  if Assigned(FOnBeforeOperationSent) then
-    for I := 0 to ABatch.Count - 1 do
-      DoOnBeforeOperationSent(ABatch.Items[I]);
+  Config := TPanamahAdminConfig.Create;
+  Config.SoftwareKey := ASoftwareKey;
+  Init(Config);
 end;
 
-procedure TPanamahSDKBatchProcessor.DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
-begin
-  if Assigned(FOnBeforeObjectAddedToBatch) then
-    FOnBeforeObjectAddedToBatch(AModel);
-end;
-
-procedure TPanamahSDKBatchProcessor.DoOnBeforeOperationSent(AOperation: IPanamahOperation);
-begin
-  if Assigned(FOnBeforeOperationSent) then
-    FOnBeforeOperationSent(AOperation);
-end;
-
-procedure TPanamahSDKBatchProcessor.Execute;
-begin
-  inherited;
-  LoadCurrentBatch;
-  Process;
-end;
-
-procedure TPanamahSDKBatchProcessor.ExpireCurrentBatch;
-begin
-  DoOnCurrentBatchExpired;
-  AccumulateCurrentBatch;
-end;
-
-procedure TPanamahSDKBatchProcessor.Flush;
-begin
-  FCriticalSection.Acquire;
-  try
-    if FCurrentBatch.Count > 0 then
-    begin
-      AccumulateCurrentBatch;
-      SendAccumulatedBatches;
-    end;
-  finally
-    FCriticalSection.Release;
-  end;
-end;
-
-procedure TPanamahSDKBatchProcessor.LoadCurrentBatch;
-var
-  CurrentBatchFromFile: IPanamahBatch;
-begin
-  if FileExists(GetCurrentBatchFilename) then
-  begin
-    FCriticalSection.Acquire;
-    try
-      CurrentBatchFromFile := TPanamahBatch.FromFile(GetCurrentBatchFilename);
-      if CurrentBatchFromFile.Count > 0 then
-        FCurrentBatch := CurrentBatchFromFile.Clone;
-    finally
-      FCriticalSection.Release;
-    end;
-  end;
-end;
-
-procedure TPanamahSDKBatchProcessor.Process;
-var
-  CurrentBatchLastHash: string;
-begin
-  while not Terminated do
-  begin
-    FCriticalSection.Acquire;
-    try
-      if IsThereAccumulatedBatches then
-      begin
-        SendAccumulatedBatches;
-      end
-      else if FCurrentBatch.Count > 0 then
-      begin
-        if CurrentBatchExpiredByTime(FConfig.BatchTTL) then
-          ExpireCurrentBatch
-        else
-        if FCurrentBatch.Hash <> CurrentBatchLastHash then
-        begin
-          SaveCurrentBatch;
-          CurrentBatchLastHash := FCurrentBatch.Hash;
-        end;
-      end;
-    finally
-      FCriticalSection.Release;
-    end;
-  end;
-end;
-
-procedure TPanamahSDKBatchProcessor.SaveCurrentBatch;
-begin
-  if FCurrentBatch.Count > 0 then
-    FCurrentBatch.SaveToFile(GetCurrentBatchFilename);
-end;
-
-procedure TPanamahSDKBatchProcessor.SendAccumulatedBatches;
-var
-  AccumulatedBatches: IPanamahBatchList;
-  Response: IPanamahResponse;
-  I: Integer;
-begin
-  AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
-  for I := 0 to AccumulatedBatches.Count - 1 do
-  begin
-    DoOnBeforeBatchSent(AccumulatedBatches[I]);
-    Response := FClient.Post('/record', AccumulatedBatches[I].SerializeToJSON, nil);
-    if Response.Status = 200 then
-    begin
-      AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
-    end;
-  end;
-end;
-
-procedure TPanamahSDKBatchProcessor.Start(AConfig: IPanamahSDKConfig);
+procedure TPanamahAdmin.Init(AConfig: IPanamahAdminConfig);
 begin
   FConfig := AConfig;
-  FClient := TPanamahClient.Create('https://172.16.33.109:7443', FConfig.ApiKey);
-  FCurrentBatch := TPanamahBatch.Create;
-  inherited Start;
-end;
-
-procedure TPanamahSDKBatchProcessor.Stop;
-begin
-  Terminate;
-  WaitFor;
 end;
 
 initialization

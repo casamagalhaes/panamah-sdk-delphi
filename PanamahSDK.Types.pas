@@ -66,16 +66,23 @@ type
     function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
 
-  IPanamahSDKConfig = interface
+  IPanamahAdminConfig = interface
+    ['{E795306E-4613-408C-977A-409932CE7267}']
+    function GetSoftwareKey: string;
+    procedure SetSoftwareKey(const ASoftwareKey: string);
+    property SoftwareKey: string read GetSoftwareKey write SetSoftwareKey;
+  end;
+
+  IPanamahStreamConfig = interface
     ['{F5D4BA5C-5DF8-480A-9408-6EA0F41EEA0A}']
-    function GetApiKey: string;
+    function GetSoftwareKey: string;
     function GetBaseDirectory: string;
     function GetBatchTTL: Integer;
     function GetBatchMaxSize: Integer;
     function GetBatchMaxCount: Integer;
-    procedure SetApiKey(const AApiKey: string);
+    procedure SetSoftwareKey(const ASoftwareKey: string);
     procedure SetBaseDirectory(const ABaseDirectory: string);
-    property ApiKey: string read GetApiKey write SetApiKey;
+    property SoftwareKey: string read GetSoftwareKey write SetSoftwareKey;
     property BaseDirectory: string read GetBaseDirectory write SetBaseDirectory;
     property BatchTTL: Integer read GetBatchTTL;
     property BatchMaxSize: Integer read GetBatchMaxSize;
