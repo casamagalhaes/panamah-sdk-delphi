@@ -5,8 +5,6 @@ interface
 uses
   Classes, DateUtils, SysUtils, Variants, PanamahSDK.Types, uLkJSON;
 
-  function DateTimeToISO8601(const AInput: TDateTime): string;
-  function ISO8601ToDateTime(const AInput: string): TDateTime;
   function GetFieldValue(AJSONObject: TlkJSONbase; const AName: string; const ADefault: Variant): Variant; overload;
   function GetFieldValue(AJSONObject: TlkJSONbase; const AName: string): Variant; overload;
   function GetFieldValueAsString(AJSONObject: TlkJSONbase; const AName, ADefault: string): string; overload;
@@ -118,35 +116,6 @@ end;
 function GetFieldValueAsDateTime(AJSONObject: TlkJSONbase; const AName: string): TDateTime; overload;
 begin
   Result := GetFieldValueAsDateTime(AJSONObject, AName, 0);
-end;
-
-function DateTimeToISO8601(const AInput: TDateTime): string;
-begin
-  Result := FormatDateTime('yyyy-mm-dd', AInput) + 'T' + FormatDateTime('hh:nn:ss', AInput) + '+0000';
-end;
-
-function ISO8601ToDateTime(const AInput: string): TDateTime;
-var
-  Day, Month, Year, Hour, Minute, Second, Millisecond: Word;
-begin
-  if Trim(AInput) = EmptyStr then
-    Result := 0
-  else
-    try
-      Year := StrToInt(Copy(AInput, 1, 4));
-      Month := StrToInt(Copy(AInput, 6, 2));
-      Day := StrToInt(Copy(AInput, 9, 2));
-      Hour := StrToIntDef(Copy(AInput, 12, 2), 0);
-      Minute := StrToIntDef(Copy(AInput, 15, 2), 0);
-      Second := StrToIntDef(Copy(AInput, 18, 2), 0);
-      Millisecond := StrToIntDef(Copy(AInput, 21, 3), 0);
-      Result := EncodeDate(Year, Month, Day) + EncodeTime(Hour, Minute, Second, Millisecond);
-    except
-      on E: Exception do
-      begin
-        raise e.Create('Falha na conversão de data');
-      end;
-    end;
 end;
 
 procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: Variant); overload;

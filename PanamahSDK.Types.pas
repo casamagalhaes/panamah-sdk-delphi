@@ -155,6 +155,24 @@ type
     property Items[AIndex: Integer]: IPanamahValidationResult read GetItem write SetItem; default;
   end;
 
+  TPanamahModelList = class(TInterfacedObject, IPanamahModelList)
+  private
+    FList: TInterfaceList;
+  public
+    procedure AddModel(AModel: IPanamahModel);
+    procedure AddModels(AModels: IPanamahModelList);
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
+    function Count: Integer;
+    function Validate: IPanamahValidationResult;
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
+    procedure Clear;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel; default;
+    constructor Create; reintroduce;
+    destructor Destroy; override;
+  end;
+
   {Exceptions}
   EPanamahSDKConnectionRefusedException = class(Exception);
   EPanamahSDKUnprocessableEntityException = class(Exception);
@@ -172,6 +190,11 @@ type
   function IndexText(const AText: string; const AValues: array of string): Integer; overload;
   function StartsText(const ASubText, AText: string): Boolean; overload;
   {$ENDIF}
+
+  function CoalesceText(const AText, ATextIfNull: string): string;
+  function DateTimeToISO8601(const AInput: TDateTime): string;
+  function ISO8601ToDateTime(const AInput: string): TDateTime;
+  function DecimalDotStringToDouble(const AString: string): Double;
 
 const
   CURRENT_TIMEZONE = -(3 * 3600);
@@ -400,6 +423,137 @@ end;
 procedure TPanamahValidationResultList.SetItem(AIndex: Integer; const Value: IPanamahValidationResult);
 begin
   FList[AIndex] := Value;
+end;
+
+{ TPanamahModelList }
+
+procedure TPanamahModelList.AddModel(AModel: IPanamahModel);
+begin
+  FList.Add(AModel);
+end;
+
+procedure TPanamahModelList.AddModels(AModels: IPanamahModelList);
+var
+  I: Integer;
+begin
+  if Assigned(AModels) then
+  begin
+    for I := 0 to AModels.Count - 1 do
+      AddModel(AModels[I]);
+  end;
+end;
+
+procedure TPanamahModelList.Clear;
+begin
+  FList.Clear;
+end;
+
+function TPanamahModelList.Count: Integer;
+begin
+  Result := FList.Count;
+end;
+
+constructor TPanamahModelList.Create;
+begin
+  inherited Create;
+  FList := TInterfaceList.Create;
+end;
+
+procedure TPanamahModelList.DeserializeFromJSON(const AJSON: string);
+begin
+  raise EPanamahSDKUnknownException.Create('Impossivel deserializar usando a classe TPanamahModelList');
+end;
+
+destructor TPanamahModelList.Destroy;
+begin
+  FreeAndNil(FList);
+  inherited;
+end;
+
+function TPanamahModelList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahModel;
+end;
+
+function TPanamahModelList.SerializeToJSON: string;
+var
+  JSONObject: TlkJSONlist;
+  I: Integer;
+begin
+  JSONObject := TlkJSONlist.Create;
+  try
+    for I := 0 to FList.Count - 1 do
+      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahModel).SerializeToJSON));
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+procedure TPanamahModelList.SetModel(AIndex: Integer;
+  const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
+end;
+
+function TPanamahModelList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  for I := 0 to FList.Count - 1 do
+    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+end;
+
+function CoalesceText(const AText, ATextIfNull: string): string;
+begin
+  Result := AText;
+  if Trim(AText) = EmptyStr then
+    Result := ATextIfNull;
+end;
+
+function DateTimeToISO8601(const AInput: TDateTime): string;
+begin
+  Result := FormatDateTime('yyyy-mm-dd', AInput) + 'T' + FormatDateTime('hh:nn:ss', AInput) + '+0000';
+end;
+
+function ISO8601ToDateTime(const AInput: string): TDateTime;
+var
+  Day, Month, Year, Hour, Minute, Second, Millisecond: Word;
+begin
+  if Trim(AInput) = EmptyStr then
+    Result := 0
+  else
+    try
+      Year := StrToInt(Copy(AInput, 1, 4));
+      Month := StrToInt(Copy(AInput, 6, 2));
+      Day := StrToInt(Copy(AInput, 9, 2));
+      Hour := StrToIntDef(Copy(AInput, 12, 2), 0);
+      Minute := StrToIntDef(Copy(AInput, 15, 2), 0);
+      Second := StrToIntDef(Copy(AInput, 18, 2), 0);
+      Millisecond := StrToIntDef(Copy(AInput, 21, 3), 0);
+      Result := EncodeDate(Year, Month, Day) + EncodeTime(Hour, Minute, Second, Millisecond);
+    except
+      on E: Exception do
+      begin
+        raise e.Create('Falha na conversão de data');
+      end;
+    end;
+end;
+
+function DecimalDotStringToDouble(const AString: string): Double;
+var
+  Value: string;
+  FormatSettings: TFormatSettings;
+begin
+  Value := StringReplace(AString, '%', '', [rfIgnoreCase, rfReplaceAll]);
+  Value := StringReplace(Value, '$', '', [rfIgnoreCase, rfReplaceAll]);
+  Value := StringReplace(Value, ' ', '', [rfIgnoreCase, rfReplaceAll]);
+  Value := StringReplace(Value, ',', '', [rfIgnoreCase, rfReplaceAll]);
+  FillChar(FormatSettings, SizeOf(FormatSettings), 0);
+  FormatSettings.ThousandSeparator := ',';
+  FormatSettings.DecimalSeparator := '.';
+  Result := StrToFloatDef(AString, 0, FormatSettings);
 end;
 
 end.

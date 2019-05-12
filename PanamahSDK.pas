@@ -51,7 +51,7 @@ type
   TPanamahAdmin = class
   private
     FConfig: IPanamahAdminConfig;
-    FClient: IPanamahClient;
+//    FClient: IPanamahClient;
   public
     procedure Init(AConfig: IPanamahAdminConfig); overload;
     procedure Init(const ASoftwareKey: string); overload;

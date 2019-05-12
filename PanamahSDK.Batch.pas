@@ -4,7 +4,7 @@ unit PanamahSDK.Batch;
 interface
 
 uses
-  Classes, SysUtils, DateUtils, MD5, Windows, PanamahSDK.JsonUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.Models.Acesso,
+  Classes, SysUtils, DateUtils, Windows, PanamahSDK.JsonUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.Models.Acesso,
   PanamahSDK.Models.Assinante, PanamahSDK.Models.Cliente, PanamahSDK.Models.Compra, PanamahSDK.Models.Ean,
   PanamahSDK.Models.EstoqueMovimentacao, PanamahSDK.Models.EventoCaixa, PanamahSDK.Models.FormaPagamento,
   PanamahSDK.Models.Fornecedor, PanamahSDK.Models.Funcionario, PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding,
@@ -119,6 +119,8 @@ implementation
 
 { TPanamahBatch }
 
+uses PanamahSDK.Crypto;
+
 procedure TPanamahBatch.Clear;
 begin
   FOperationList.Clear;
@@ -216,7 +218,7 @@ end;
 
 function TPanamahBatch.GetHash: string;
 begin
-  Result := MD5DigestToStr(MD5String(SerializeToJSON));
+  Result := MD5Hash(SerializeToJson);
 end;
 
 function TPanamahBatch.GetItem(AIndex: Integer): IPanamahOperation;
