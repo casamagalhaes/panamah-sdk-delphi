@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahTrocaFormaPagamento = interface(IPanamahModel)
-    ['{775A4B30-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7BA6F5-75CB-11E9-8B82-D97403569AFA}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetFormaPagamentoDestinoId: string;
@@ -46,7 +46,7 @@ type
   end;
   
   IPanamahTrocaFormaPagamentoList = interface(IPanamahModelList)
-    ['{775A4B31-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7BA6F6-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahTrocaFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaFormaPagamento);
     procedure Add(const AItem: IPanamahTrocaFormaPagamento);
@@ -307,7 +307,7 @@ end;
 
 function TPanamahTrocaFormaPagamento.GetModelName: string;
 begin
-  Result := 'PanamahTrocaFormaPagamento';
+  Result := 'TROCA_FORMA_PAGAMENTO';
 end;
 
 function TPanamahTrocaFormaPagamento.Clone: IPanamahModel;
@@ -342,7 +342,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaFormaPagamento).Validate);
 end;
 
 class function TPanamahTrocaFormaPagamentoList.FromJSON(const AJSON: string): IPanamahTrocaFormaPagamentoList;

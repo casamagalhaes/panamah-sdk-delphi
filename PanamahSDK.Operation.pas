@@ -239,30 +239,7 @@ end;
 
 function GetDataTypeByModel(AModel: IPanamahModel): string;
 begin
-  if AModel is TPanamahAcesso then Result := 'ACESSO' else
-  if AModel is TPanamahAssinante then Result := 'ASSINANTE' else
-  if AModel is TPanamahCliente then Result := 'CLIENTE' else
-  if AModel is TPanamahCompra then Result := 'COMPRA' else
-  if AModel is TPanamahEan then Result := 'EAN' else
-  if AModel is TPanamahEstoqueMovimentacao then Result := 'ESTOQUE_MOVIMENTACAO' else
-  if AModel is TPanamahEventoCaixa then Result := 'EVENTO_CAIXA' else
-  if AModel is TPanamahFormaPagamento then Result := 'FORMA_PAGAMENTO' else
-  if AModel is TPanamahFornecedor then Result := 'FORNECEDOR' else
-  if AModel is TPanamahFuncionario then Result := 'FUNCIONARIO' else
-  if AModel is TPanamahGrupo then Result := 'GRUPO' else
-  if AModel is TPanamahHolding then Result := 'HOLDING' else
-  if AModel is TPanamahLocalEstoque then Result := 'LOCAL_ESTOQUE' else
-  if AModel is TPanamahLoja then Result := 'LOJA' else
-  if AModel is TPanamahMeta then Result := 'META' else
-  if AModel is TPanamahProduto then Result := 'PRODUTO' else
-  if AModel is TPanamahRevenda then Result := 'REVENDA' else
-  if AModel is TPanamahSecao then Result := 'SECAO' else
-  if AModel is TPanamahSubgrupo then Result := 'SUBGRUPO' else
-  if AModel is TPanamahTituloPagar then Result := 'TITULO_PAGAR' else
-  if AModel is TPanamahTituloReceber then Result := 'TITULO_RECEBER' else
-  if AModel is TPanamahTrocaDevolucao then Result := 'TROCA_DEVOLUCAO' else
-  if AModel is TPanamahTrocaFormaPagamento then Result := 'TROCA_FORMA_PAGAMENTO' else
-  if AModel is TPanamahVenda then Result := 'VENDA';
+  Result := AModel.ModelName;
 end;
 
 { TPanamahHoldingList }

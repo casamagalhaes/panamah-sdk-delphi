@@ -15,13 +15,12 @@ uses
 
 type
 
-  TPanamahBatchFilenameRec = record
+  TPanamahBatchFilenameRec = class
   public
     CreatedAt: TDateTime;
     Priority: Boolean;
-    class function Create(const AFilename: string): TPanamahBatchFilenameRec; static;
-    class operator Implicit(AFilenameRec: TPanamahBatchFilenameRec): string;
-    class operator Implicit(const AFilename: string): TPanamahBatchFilenameRec;
+    class function FromFilename(const AFilename: string): TPanamahBatchFilenameRec;
+    function ToString: string; reintroduce;
   end;
 
   IPanamahBatch = interface(IJSONSerializable)
@@ -119,7 +118,8 @@ implementation
 
 { TPanamahBatch }
 
-uses PanamahSDK.Crypto;
+uses
+  PanamahSDK.Crypto;
 
 procedure TPanamahBatch.Clear;
 begin
@@ -148,10 +148,15 @@ function TPanamahBatch.SaveToDirectory(const ADirectory: string): string;
 var
   BatchFilename: TPanamahBatchFilenameRec;
 begin
-  BatchFilename.CreatedAt := FCreatedAt;
-  BatchFilename.Priority := FPriority;
-  ForceDirectories(ADirectory);
-  SaveToFile(Format('%s/%s.pbt', [ADirectory, string(BatchFilename)]));
+  BatchFilename := TPanamahBatchFilenameRec.Create;
+  try
+    BatchFilename.CreatedAt := FCreatedAt;
+    BatchFilename.Priority := FPriority;
+    ForceDirectories(ADirectory);
+    SaveToFile(Format('%s/%s.pbt', [ADirectory, BatchFilename.ToString]));
+  finally
+    BatchFilename.Free;
+  end;
 end;
 
 procedure TPanamahBatch.SaveToFile(const AFilename: string);
@@ -188,15 +193,19 @@ var
   BatchFile: TStrings;
 begin
   Result := TPanamahBatch.Create;
-  BatchFilename := AFilename;
-  Result.CreatedAt := BatchFilename.CreatedAt;
-  Result.Priority := BatchFilename.Priority;
-  BatchFile := TStringList.Create;
+  BatchFilename := TPanamahBatchFilenameRec.FromFilename(AFilename);
   try
-    BatchFile.LoadFromFile(AFilename);
-    Result.DeserializeFromJSON(BatchFile.Text);
+    Result.CreatedAt := BatchFilename.CreatedAt;
+    Result.Priority := BatchFilename.Priority;
+    BatchFile := TStringList.Create;
+    try
+      BatchFile.LoadFromFile(AFilename);
+      Result.DeserializeFromJSON(BatchFile.Text);
+    finally
+      BatchFile.Free;
+    end;
   finally
-    BatchFile.Free;
+    BatchFilename.Free;
   end;
 end;
 
@@ -241,13 +250,18 @@ var
   BatchFilename: TPanamahBatchFilenameRec;
   SourceFile, DestinyFile: string;
 begin
-  BatchFilename.CreatedAt := FCreatedAt;
-  BatchFilename.Priority := FPriority;
-  ForceDirectories(ADestiny);
-  SourceFile := Format('%s\%s.pbt', [ASource, string(BatchFilename)]);
-  DestinyFile := Format('%s\%s.pbt', [ADestiny, string(BatchFilename)]);
-  MoveFile(PChar(SourceFile), PChar(DestinyFile));
-  Result := DestinyFile;
+  BatchFilename := TPanamahBatchFilenameRec.Create;
+  try
+    BatchFilename.CreatedAt := FCreatedAt;
+    BatchFilename.Priority := FPriority;
+    ForceDirectories(ADestiny);
+    SourceFile := Format('%s\%s.pbt', [ASource, BatchFilename.ToString]);
+    DestinyFile := Format('%s\%s.pbt', [ADestiny, BatchFilename.ToString]);
+    MoveFile(PChar(SourceFile), PChar(DestinyFile));
+    Result := DestinyFile;
+  finally
+    BatchFilename.Free;
+  end;
 end;
 
 procedure TPanamahBatch.Reset;
@@ -389,11 +403,11 @@ end;
 
 { TPanamahBatchFilenameRec }
 
-class function TPanamahBatchFilenameRec.Create(const AFilename: string): TPanamahBatchFilenameRec;
+class function TPanamahBatchFilenameRec.FromFilename(const AFilename: string): TPanamahBatchFilenameRec;
 var
   Words: TStrings;
 begin
-  FillChar(Result, SizeOf(TPanamahBatchFilenameRec), 0);
+  Result := TPanamahBatchFilenameRec.Create;
   Words := TStringList.Create;
   try
     Words.Delimiter := '_';
@@ -417,16 +431,11 @@ begin
   end;
 end;
 
-class operator TPanamahBatchFilenameRec.Implicit(AFilenameRec: TPanamahBatchFilenameRec): string;
+function TPanamahBatchFilenameRec.ToString: string;
 begin
-  Result := FormatDateTime('YYYY_MM_DD_HH_NN_SS_ZZZ', AFilenameRec.CreatedAt);
-  if AFilenameRec.Priority then
+  Result := FormatDateTime('YYYY_MM_DD_HH_NN_SS_ZZZ', CreatedAt);
+  if Priority then
     Result := Concat(Result, '_P');
-end;
-
-class operator TPanamahBatchFilenameRec.Implicit(const AFilename: string): TPanamahBatchFilenameRec;
-begin
-  Result := TPanamahBatchFilenameRec.Create(AFilename);
 end;
 
 end.

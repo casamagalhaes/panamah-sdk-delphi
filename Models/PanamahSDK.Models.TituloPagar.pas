@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahTituloPagarPagamento = interface(IPanamahModel)
-    ['{775C1FF0-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7DC9D4-75CB-11E9-8B82-D97403569AFA}']
     function GetDataHora: TDateTime;
     function GetValor: Double;
     procedure SetDataHora(const ADataHora: TDateTime);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahTituloPagarPagamentoList = interface(IPanamahModelList)
-    ['{775C1FF1-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7DC9D5-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahTituloPagarPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTituloPagarPagamento);
     procedure Add(const AItem: IPanamahTituloPagarPagamento);
@@ -27,7 +27,7 @@ type
   end;
   
   IPanamahTituloPagar = interface(IPanamahModel)
-    ['{775BF8E2-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7DA2C2-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetLojaId: string;
     function GetFornecedorId: string;
@@ -39,7 +39,7 @@ type
     function GetValorPago: Double;
     function GetDataEmissao: TDateTime;
     function GetDataVencimento: TDateTime;
-    function GetPagamentos: IPanamahTituloPagarPagamentoList;
+    function GetPagamentos: IpanamahTituloPagarPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetFornecedorId(const AFornecedorId: string);
@@ -51,7 +51,7 @@ type
     procedure SetValorPago(const AValorPago: Double);
     procedure SetDataEmissao(const ADataEmissao: TDateTime);
     procedure SetDataVencimento(const ADataVencimento: TDateTime);
-    procedure SetPagamentos(const APagamentos: IPanamahTituloPagarPagamentoList);
+    procedure SetPagamentos(const APagamentos: IpanamahTituloPagarPagamentoList);
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
     property FornecedorId: string read GetFornecedorId write SetFornecedorId;
@@ -63,11 +63,11 @@ type
     property ValorPago: Double read GetValorPago write SetValorPago;
     property DataEmissao: TDateTime read GetDataEmissao write SetDataEmissao;
     property DataVencimento: TDateTime read GetDataVencimento write SetDataVencimento;
-    property Pagamentos: IPanamahTituloPagarPagamentoList read GetPagamentos write SetPagamentos;
+    property Pagamentos: IpanamahTituloPagarPagamentoList read GetPagamentos write SetPagamentos;
   end;
   
   IPanamahTituloPagarList = interface(IPanamahModelList)
-    ['{775BF8E3-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7DA2C3-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahTituloPagar;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTituloPagar);
     procedure Add(const AItem: IPanamahTituloPagar);
@@ -129,7 +129,7 @@ type
     FValorPago: Double;
     FDataEmissao: TDateTime;
     FDataVencimento: TDateTime;
-    FPagamentos: IPanamahTituloPagarPagamentoList;
+    FPagamentos: IpanamahTituloPagarPagamentoList;
     function GetId: string;
     function GetLojaId: string;
     function GetFornecedorId: string;
@@ -141,7 +141,7 @@ type
     function GetValorPago: Double;
     function GetDataEmissao: TDateTime;
     function GetDataVencimento: TDateTime;
-    function GetPagamentos: IPanamahTituloPagarPagamentoList;
+    function GetPagamentos: IpanamahTituloPagarPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetFornecedorId(const AFornecedorId: string);
@@ -153,7 +153,7 @@ type
     procedure SetValorPago(const AValorPago: Double);
     procedure SetDataEmissao(const ADataEmissao: TDateTime);
     procedure SetDataVencimento(const ADataVencimento: TDateTime);
-    procedure SetPagamentos(const APagamentos: IPanamahTituloPagarPagamentoList);
+    procedure SetPagamentos(const APagamentos: IpanamahTituloPagarPagamentoList);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -173,7 +173,7 @@ type
     property ValorPago: Double read GetValorPago write SetValorPago;
     property DataEmissao: TDateTime read GetDataEmissao write SetDataEmissao;
     property DataVencimento: TDateTime read GetDataVencimento write SetDataVencimento;
-    property Pagamentos: IPanamahTituloPagarPagamentoList read GetPagamentos write SetPagamentos;
+    property Pagamentos: IpanamahTituloPagarPagamentoList read GetPagamentos write SetPagamentos;
   end;
 
   TPanamahTituloPagarList = class(TInterfacedObject, IPanamahTituloPagarList)
@@ -271,7 +271,7 @@ end;
 
 function TPanamahTituloPagarPagamento.GetModelName: string;
 begin
-  Result := 'PanamahTituloPagarPagamento';
+  Result := 'TITULO_PAGAR_PAGAMENTOS';
 end;
 
 function TPanamahTituloPagarPagamento.Clone: IPanamahModel;
@@ -306,7 +306,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTituloPagarPagamento).Validate);
 end;
 
 class function TPanamahTituloPagarPagamentoList.FromJSON(const AJSON: string): IPanamahTituloPagarPagamentoList;
@@ -510,12 +510,12 @@ begin
   FDataVencimento := ADataVencimento;
 end;
 
-function TPanamahTituloPagar.GetPagamentos: IPanamahTituloPagarPagamentoList;
+function TPanamahTituloPagar.GetPagamentos: IpanamahTituloPagarPagamentoList;
 begin
   Result := FPagamentos;
 end;
 
-procedure TPanamahTituloPagar.SetPagamentos(const APagamentos: IPanamahTituloPagarPagamentoList);
+procedure TPanamahTituloPagar.SetPagamentos(const APagamentos: IpanamahTituloPagarPagamentoList);
 begin
   FPagamentos := APagamentos;
 end;
@@ -538,7 +538,7 @@ begin
     FDataEmissao := GetFieldValueAsDatetime(JSONObject, 'dataEmissao');
     FDataVencimento := GetFieldValueAsDatetime(JSONObject, 'dataVencimento');
     if JSONObject.Field['pagamentos'] is TlkJSONlist then
-      FPagamentos := TPanamahTituloPagarPagamentoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['pagamentos']));
+      FPagamentos := TpanamahTituloPagarPagamentoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['pagamentos']));
   finally
     JSONObject.Free;
   end;
@@ -576,7 +576,7 @@ end;
 
 function TPanamahTituloPagar.GetModelName: string;
 begin
-  Result := 'PanamahTituloPagar';
+  Result := 'TITULO_PAGAR';
 end;
 
 function TPanamahTituloPagar.Clone: IPanamahModel;
@@ -611,7 +611,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTituloPagar).Validate);
 end;
 
 class function TPanamahTituloPagarList.FromJSON(const AJSON: string): IPanamahTituloPagarList;

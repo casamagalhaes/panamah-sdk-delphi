@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahGrupo = interface(IPanamahModel)
-    ['{7758EBA0-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7A6E75-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -25,7 +25,7 @@ type
   end;
   
   IPanamahGrupoList = interface(IPanamahModelList)
-    ['{7758EBA1-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7A6E76-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahGrupo;
     procedure SetItem(AIndex: Integer; const Value: IPanamahGrupo);
     procedure Add(const AItem: IPanamahGrupo);
@@ -174,7 +174,7 @@ end;
 
 function TPanamahGrupo.GetModelName: string;
 begin
-  Result := 'PanamahGrupo';
+  Result := 'GRUPO';
 end;
 
 function TPanamahGrupo.Clone: IPanamahModel;
@@ -209,7 +209,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahGrupo).Validate);
 end;
 
 class function TPanamahGrupoList.FromJSON(const AJSON: string): IPanamahGrupoList;

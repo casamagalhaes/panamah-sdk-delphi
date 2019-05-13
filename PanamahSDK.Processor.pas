@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Enums,
-  PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Batch, PanamahSDK.Client;
+  PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Batch, PanamahSDK.Client, PanamahSDK.Consts;
 
 type
 
@@ -269,7 +269,7 @@ begin
   for I := 0 to AccumulatedBatches.Count - 1 do
   begin
     DoOnBeforeBatchSent(AccumulatedBatches[I]);
-    Response := FClient.Post('/record', AccumulatedBatches[I].SerializeToJSON, nil);
+    Response := FClient.Post('/stream/data', AccumulatedBatches[I].SerializeToJSON, nil);
     if Response.Status = 200 then
     begin
       AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
@@ -280,7 +280,7 @@ end;
 procedure TPanamahBatchProcessor.Start(AConfig: IPanamahStreamConfig);
 begin
   FConfig := AConfig;
-  FClient := TPanamahStreamClient.Create('https://172.16.33.109:7443', FConfig.SoftwareKey, '');
+  FClient := TPanamahStreamClient.Create(API_BASE_URL, FConfig.AuthorizationToken, FConfig.Secret, FConfig.AssinanteId);
   FCurrentBatch := TPanamahBatch.Create;
   inherited Start;
 end;

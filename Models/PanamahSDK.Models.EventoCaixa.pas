@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahEventoCaixaValoresDeclarados = interface(IPanamahModel)
-    ['{775AE776-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C4339-75CB-11E9-8B82-D97403569AFA}']
     function GetFormaPagamentoId: string;
     function GetValor: Double;
     procedure SetFormaPagamentoId(const AFormaPagamentoId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahEventoCaixaValoresDeclaradosList = interface(IPanamahModelList)
-    ['{775AE777-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C433A-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixaValoresDeclarados;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixaValoresDeclarados);
     procedure Add(const AItem: IPanamahEventoCaixaValoresDeclarados);
@@ -27,32 +27,32 @@ type
   end;
   
   IPanamahEventoCaixa = interface(IPanamahModel)
-    ['{775AC06A-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C4330-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetLojaId: string;
     function GetNumeroCaixa: string;
     function GetFuncionarioId: variant;
     function GetDataHora: TDateTime;
-    function GetTipo: TPanamahEventoCaixaTipo;
-    function GetValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList;
+    function GetTipo: TpanamahEventoCaixaTipo;
+    function GetValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetNumeroCaixa(const ANumeroCaixa: string);
     procedure SetFuncionarioId(const AFuncionarioId: variant);
     procedure SetDataHora(const ADataHora: TDateTime);
-    procedure SetTipo(const ATipo: TPanamahEventoCaixaTipo);
-    procedure SetValoresDeclarados(const AValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList);
+    procedure SetTipo(const ATipo: TpanamahEventoCaixaTipo);
+    procedure SetValoresDeclarados(const AValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList);
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
     property NumeroCaixa: string read GetNumeroCaixa write SetNumeroCaixa;
     property FuncionarioId: variant read GetFuncionarioId write SetFuncionarioId;
     property DataHora: TDateTime read GetDataHora write SetDataHora;
-    property Tipo: TPanamahEventoCaixaTipo read GetTipo write SetTipo;
-    property ValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList read GetValoresDeclarados write SetValoresDeclarados;
+    property Tipo: TpanamahEventoCaixaTipo read GetTipo write SetTipo;
+    property ValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList read GetValoresDeclarados write SetValoresDeclarados;
   end;
   
   IPanamahEventoCaixaList = interface(IPanamahModelList)
-    ['{775AC06B-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C4331-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixa;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixa);
     procedure Add(const AItem: IPanamahEventoCaixa);
@@ -108,22 +108,22 @@ type
     FNumeroCaixa: string;
     FFuncionarioId: variant;
     FDataHora: TDateTime;
-    FTipo: TPanamahEventoCaixaTipo;
-    FValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList;
+    FTipo: TpanamahEventoCaixaTipo;
+    FValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList;
     function GetId: string;
     function GetLojaId: string;
     function GetNumeroCaixa: string;
     function GetFuncionarioId: variant;
     function GetDataHora: TDateTime;
-    function GetTipo: TPanamahEventoCaixaTipo;
-    function GetValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList;
+    function GetTipo: TpanamahEventoCaixaTipo;
+    function GetValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetNumeroCaixa(const ANumeroCaixa: string);
     procedure SetFuncionarioId(const AFuncionarioId: variant);
     procedure SetDataHora(const ADataHora: TDateTime);
-    procedure SetTipo(const ATipo: TPanamahEventoCaixaTipo);
-    procedure SetValoresDeclarados(const AValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList);
+    procedure SetTipo(const ATipo: TpanamahEventoCaixaTipo);
+    procedure SetValoresDeclarados(const AValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -137,8 +137,8 @@ type
     property NumeroCaixa: string read GetNumeroCaixa write SetNumeroCaixa;
     property FuncionarioId: variant read GetFuncionarioId write SetFuncionarioId;
     property DataHora: TDateTime read GetDataHora write SetDataHora;
-    property Tipo: TPanamahEventoCaixaTipo read GetTipo write SetTipo;
-    property ValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList read GetValoresDeclarados write SetValoresDeclarados;
+    property Tipo: TpanamahEventoCaixaTipo read GetTipo write SetTipo;
+    property ValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList read GetValoresDeclarados write SetValoresDeclarados;
   end;
 
   TPanamahEventoCaixaList = class(TInterfacedObject, IPanamahEventoCaixaList)
@@ -236,7 +236,7 @@ end;
 
 function TPanamahEventoCaixaValoresDeclarados.GetModelName: string;
 begin
-  Result := 'PanamahEventoCaixaValoresDeclarados';
+  Result := 'EVENTO_CAIXA_VALORES_DECLARADOS';
 end;
 
 function TPanamahEventoCaixaValoresDeclarados.Clone: IPanamahModel;
@@ -271,7 +271,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEventoCaixaValoresDeclarados).Validate);
 end;
 
 class function TPanamahEventoCaixaValoresDeclaradosList.FromJSON(const AJSON: string): IPanamahEventoCaixaValoresDeclaradosList;
@@ -418,22 +418,22 @@ begin
   FDataHora := ADataHora;
 end;
 
-function TPanamahEventoCaixa.GetTipo: TPanamahEventoCaixaTipo;
+function TPanamahEventoCaixa.GetTipo: TpanamahEventoCaixaTipo;
 begin
   Result := FTipo;
 end;
 
-procedure TPanamahEventoCaixa.SetTipo(const ATipo: TPanamahEventoCaixaTipo);
+procedure TPanamahEventoCaixa.SetTipo(const ATipo: TpanamahEventoCaixaTipo);
 begin
   FTipo := ATipo;
 end;
 
-function TPanamahEventoCaixa.GetValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList;
+function TPanamahEventoCaixa.GetValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList;
 begin
   Result := FValoresDeclarados;
 end;
 
-procedure TPanamahEventoCaixa.SetValoresDeclarados(const AValoresDeclarados: IPanamahEventoCaixaValoresDeclaradosList);
+procedure TPanamahEventoCaixa.SetValoresDeclarados(const AValoresDeclarados: IpanamahEventoCaixaValoresDeclaradosList);
 begin
   FValoresDeclarados := AValoresDeclarados;
 end;
@@ -449,9 +449,9 @@ begin
     FNumeroCaixa := GetFieldValueAsString(JSONObject, 'numeroCaixa');
     FFuncionarioId := GetFieldValue(JSONObject, 'funcionarioId');
     FDataHora := GetFieldValueAsDatetime(JSONObject, 'dataHora');
-    FTipo := TPanamahEventoCaixaTipo(EnumConverters.Execute('PanamahEventoCaixaTipo', GetFieldValueAsString(JSONObject, 'tipo')));
+    FTipo := TpanamahEventoCaixaTipo(EnumConverters.Execute('panamahEventoCaixaTipo', GetFieldValueAsString(JSONObject, 'tipo')));
     if JSONObject.Field['valoresDeclarados'] is TlkJSONlist then
-      FValoresDeclarados := TPanamahEventoCaixaValoresDeclaradosList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['valoresDeclarados']));
+      FValoresDeclarados := TpanamahEventoCaixaValoresDeclaradosList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['valoresDeclarados']));
   finally
     JSONObject.Free;
   end;
@@ -468,7 +468,7 @@ begin
     SetFieldValue(JSONObject, 'numeroCaixa', FNumeroCaixa);    
     SetFieldValue(JSONObject, 'funcionarioId', FFuncionarioId);    
     SetFieldValue(JSONObject, 'dataHora', FDataHora);    
-    SetFieldValue(JSONObject, 'tipo', EnumConverters.Execute('PanamahEventoCaixaTipo', Ord(FTipo)));    
+    SetFieldValue(JSONObject, 'tipo', EnumConverters.Execute('panamahEventoCaixaTipo', Ord(FTipo)));    
     SetFieldValue(JSONObject, 'valoresDeclarados', FValoresDeclarados);
     Result := TlkJSON.GenerateText(JSONObject);
   finally
@@ -484,7 +484,7 @@ end;
 
 function TPanamahEventoCaixa.GetModelName: string;
 begin
-  Result := 'PanamahEventoCaixa';
+  Result := 'EVENTO_CAIXA';
 end;
 
 function TPanamahEventoCaixa.Clone: IPanamahModel;
@@ -519,7 +519,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEventoCaixa).Validate);
 end;
 
 class function TPanamahEventoCaixaList.FromJSON(const AJSON: string): IPanamahEventoCaixaList;

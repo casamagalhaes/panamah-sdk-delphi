@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahCliente = interface(IPanamahModel)
-    ['{7759AEF1-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B31C0-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetNome: string;
     function GetNumeroDocumento: string;
@@ -34,7 +34,7 @@ type
   end;
   
   IPanamahClienteList = interface(IPanamahModelList)
-    ['{7759AEF2-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B31C1-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahCliente;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCliente);
     procedure Add(const AItem: IPanamahCliente);
@@ -231,7 +231,7 @@ end;
 
 function TPanamahCliente.GetModelName: string;
 begin
-  Result := 'PanamahCliente';
+  Result := 'CLIENTE';
 end;
 
 function TPanamahCliente.Clone: IPanamahModel;
@@ -266,7 +266,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahCliente).Validate);
 end;
 
 class function TPanamahClienteList.FromJSON(const AJSON: string): IPanamahClienteList;

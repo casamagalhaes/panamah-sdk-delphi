@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahSecao = interface(IPanamahModel)
-    ['{7758C491-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7A6E70-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -22,7 +22,7 @@ type
   end;
   
   IPanamahSecaoList = interface(IPanamahModelList)
-    ['{7758C492-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7A6E71-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahSecao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSecao);
     procedure Add(const AItem: IPanamahSecao);
@@ -155,7 +155,7 @@ end;
 
 function TPanamahSecao.GetModelName: string;
 begin
-  Result := 'PanamahSecao';
+  Result := 'SECAO';
 end;
 
 function TPanamahSecao.Clone: IPanamahModel;
@@ -190,7 +190,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahSecao).Validate);
 end;
 
 class function TPanamahSecaoList.FromJSON(const AJSON: string): IPanamahSecaoList;

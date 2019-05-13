@@ -41,7 +41,10 @@ begin
   if Assigned(AList) then
     for I := 0 to AList.Count - 1 do
       if ModelValueIsEmpty(AList[I]) then
-        Exit(I);
+      begin
+        Result := I;
+        Exit;
+      end;
 end;
 
 function ModelHasId(AModel: IPanamahModel): Boolean;

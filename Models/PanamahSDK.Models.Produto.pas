@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahProdutoFornecedor = interface(IPanamahModel)
-    ['{775A2420-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B7FE8-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetPrincipal: Boolean;
     procedure SetId(const AId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahProdutoFornecedorList = interface(IPanamahModelList)
-    ['{775A2421-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B7FE9-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahProdutoFornecedor;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoFornecedor);
     procedure Add(const AItem: IPanamahProdutoFornecedor);
@@ -27,7 +27,7 @@ type
   end;
   
   IPanamahProdutoComposicaoItem = interface(IPanamahModel)
-    ['{7759FD1E-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B7FE4-75CB-11E9-8B82-D97403569AFA}']
     function GetProdutoId: string;
     function GetQuantidade: Double;
     procedure SetProdutoId(const AProdutoId: string);
@@ -37,7 +37,7 @@ type
   end;
   
   IPanamahProdutoComposicaoItemList = interface(IPanamahModelList)
-    ['{7759FD1F-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B7FE5-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahProdutoComposicaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicaoItem);
     procedure Add(const AItem: IPanamahProdutoComposicaoItem);
@@ -45,17 +45,17 @@ type
   end;
   
   IPanamahProdutoComposicao = interface(IPanamahModel)
-    ['{7759FD1A-7368-11E9-BBA3-6970D342FA48}']
-    function GetItens: IPanamahProdutoComposicaoItemList;
+    ['{8E7B7FE0-75CB-11E9-8B82-D97403569AFA}']
+    function GetItens: IpanamahProdutoComposicaoItemList;
     function GetQuantidade: Double;
-    procedure SetItens(const AItens: IPanamahProdutoComposicaoItemList);
+    procedure SetItens(const AItens: IpanamahProdutoComposicaoItemList);
     procedure SetQuantidade(const AQuantidade: Double);
-    property Itens: IPanamahProdutoComposicaoItemList read GetItens write SetItens;
+    property Itens: IpanamahProdutoComposicaoItemList read GetItens write SetItens;
     property Quantidade: Double read GetQuantidade write SetQuantidade;
   end;
   
   IPanamahProdutoComposicaoList = interface(IPanamahModelList)
-    ['{7759FD1B-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B7FE1-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahProdutoComposicao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoComposicao);
     procedure Add(const AItem: IPanamahProdutoComposicao);
@@ -63,8 +63,8 @@ type
   end;
   
   IPanamahProduto = interface(IPanamahModel)
-    ['{7759D609-7368-11E9-BBA3-6970D342FA48}']
-    function GetComposicao: IPanamahProdutoComposicao;
+    ['{8E7B58D0-75CB-11E9-8B82-D97403569AFA}']
+    function GetComposicao: IpanamahProdutoComposicao;
     function GetTipoComposicao: variant;
     function GetDescricao: string;
     function GetDataInclusao: TDateTime;
@@ -76,8 +76,8 @@ type
     function GetQuantidadeItensEmbalagem: Double;
     function GetSecaoId: string;
     function GetSubgrupoId: variant;
-    function GetFornecedores: IPanamahProdutoFornecedorList;
-    procedure SetComposicao(const AComposicao: IPanamahProdutoComposicao);
+    function GetFornecedores: IpanamahProdutoFornecedorList;
+    procedure SetComposicao(const AComposicao: IpanamahProdutoComposicao);
     procedure SetTipoComposicao(const ATipoComposicao: variant);
     procedure SetDescricao(const ADescricao: string);
     procedure SetDataInclusao(const ADataInclusao: TDateTime);
@@ -89,8 +89,8 @@ type
     procedure SetQuantidadeItensEmbalagem(const AQuantidadeItensEmbalagem: Double);
     procedure SetSecaoId(const ASecaoId: string);
     procedure SetSubgrupoId(const ASubgrupoId: variant);
-    procedure SetFornecedores(const AFornecedores: IPanamahProdutoFornecedorList);
-    property Composicao: IPanamahProdutoComposicao read GetComposicao write SetComposicao;
+    procedure SetFornecedores(const AFornecedores: IpanamahProdutoFornecedorList);
+    property Composicao: IpanamahProdutoComposicao read GetComposicao write SetComposicao;
     property TipoComposicao: variant read GetTipoComposicao write SetTipoComposicao;
     property Descricao: string read GetDescricao write SetDescricao;
     property DataInclusao: TDateTime read GetDataInclusao write SetDataInclusao;
@@ -102,11 +102,11 @@ type
     property QuantidadeItensEmbalagem: Double read GetQuantidadeItensEmbalagem write SetQuantidadeItensEmbalagem;
     property SecaoId: string read GetSecaoId write SetSecaoId;
     property SubgrupoId: variant read GetSubgrupoId write SetSubgrupoId;
-    property Fornecedores: IPanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
+    property Fornecedores: IpanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
   end;
   
   IPanamahProdutoList = interface(IPanamahModelList)
-    ['{7759D60A-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B58D1-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahProduto;
     procedure SetItem(AIndex: Integer; const Value: IPanamahProduto);
     procedure Add(const AItem: IPanamahProduto);
@@ -199,11 +199,11 @@ type
   
   TPanamahProdutoComposicao = class(TInterfacedObject, IPanamahProdutoComposicao)
   private
-    FItens: IPanamahProdutoComposicaoItemList;
+    FItens: IpanamahProdutoComposicaoItemList;
     FQuantidade: Double;
-    function GetItens: IPanamahProdutoComposicaoItemList;
+    function GetItens: IpanamahProdutoComposicaoItemList;
     function GetQuantidade: Double;
-    procedure SetItens(const AItens: IPanamahProdutoComposicaoItemList);
+    procedure SetItens(const AItens: IpanamahProdutoComposicaoItemList);
     procedure SetQuantidade(const AQuantidade: Double);
     function GetModelName: string;    
   public
@@ -213,7 +213,7 @@ type
     class function FromJSON(const AJSON: string): IPanamahProdutoComposicao;
     function Validate: IPanamahValidationResult;
   published
-    property Itens: IPanamahProdutoComposicaoItemList read GetItens write SetItens;
+    property Itens: IpanamahProdutoComposicaoItemList read GetItens write SetItens;
     property Quantidade: Double read GetQuantidade write SetQuantidade;
   end;
 
@@ -241,7 +241,7 @@ type
   
   TPanamahProduto = class(TInterfacedObject, IPanamahProduto)
   private
-    FComposicao: IPanamahProdutoComposicao;
+    FComposicao: IpanamahProdutoComposicao;
     FTipoComposicao: variant;
     FDescricao: string;
     FDataInclusao: TDateTime;
@@ -253,8 +253,8 @@ type
     FQuantidadeItensEmbalagem: Double;
     FSecaoId: string;
     FSubgrupoId: variant;
-    FFornecedores: IPanamahProdutoFornecedorList;
-    function GetComposicao: IPanamahProdutoComposicao;
+    FFornecedores: IpanamahProdutoFornecedorList;
+    function GetComposicao: IpanamahProdutoComposicao;
     function GetTipoComposicao: variant;
     function GetDescricao: string;
     function GetDataInclusao: TDateTime;
@@ -266,8 +266,8 @@ type
     function GetQuantidadeItensEmbalagem: Double;
     function GetSecaoId: string;
     function GetSubgrupoId: variant;
-    function GetFornecedores: IPanamahProdutoFornecedorList;
-    procedure SetComposicao(const AComposicao: IPanamahProdutoComposicao);
+    function GetFornecedores: IpanamahProdutoFornecedorList;
+    procedure SetComposicao(const AComposicao: IpanamahProdutoComposicao);
     procedure SetTipoComposicao(const ATipoComposicao: variant);
     procedure SetDescricao(const ADescricao: string);
     procedure SetDataInclusao(const ADataInclusao: TDateTime);
@@ -279,7 +279,7 @@ type
     procedure SetQuantidadeItensEmbalagem(const AQuantidadeItensEmbalagem: Double);
     procedure SetSecaoId(const ASecaoId: string);
     procedure SetSubgrupoId(const ASubgrupoId: variant);
-    procedure SetFornecedores(const AFornecedores: IPanamahProdutoFornecedorList);
+    procedure SetFornecedores(const AFornecedores: IpanamahProdutoFornecedorList);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -288,7 +288,7 @@ type
     class function FromJSON(const AJSON: string): IPanamahProduto;
     function Validate: IPanamahValidationResult;
   published
-    property Composicao: IPanamahProdutoComposicao read GetComposicao write SetComposicao;
+    property Composicao: IpanamahProdutoComposicao read GetComposicao write SetComposicao;
     property TipoComposicao: variant read GetTipoComposicao write SetTipoComposicao;
     property Descricao: string read GetDescricao write SetDescricao;
     property DataInclusao: TDateTime read GetDataInclusao write SetDataInclusao;
@@ -300,7 +300,7 @@ type
     property QuantidadeItensEmbalagem: Double read GetQuantidadeItensEmbalagem write SetQuantidadeItensEmbalagem;
     property SecaoId: string read GetSecaoId write SetSecaoId;
     property SubgrupoId: variant read GetSubgrupoId write SetSubgrupoId;
-    property Fornecedores: IPanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
+    property Fornecedores: IpanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
   end;
 
   TPanamahProdutoList = class(TInterfacedObject, IPanamahProdutoList)
@@ -408,7 +408,7 @@ end;
 
 function TPanamahProdutoFornecedor.GetModelName: string;
 begin
-  Result := 'PanamahProdutoFornecedor';
+  Result := 'PRODUTO_FORNECEDORES';
 end;
 
 function TPanamahProdutoFornecedor.Clone: IPanamahModel;
@@ -443,7 +443,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahProdutoFornecedor).Validate);
 end;
 
 class function TPanamahProdutoFornecedorList.FromJSON(const AJSON: string): IPanamahProdutoFornecedorList;
@@ -595,7 +595,7 @@ end;
 
 function TPanamahProdutoComposicaoItem.GetModelName: string;
 begin
-  Result := 'PanamahProdutoComposicaoItem';
+  Result := 'PRODUTO_COMPOSICAO_ITENS';
 end;
 
 function TPanamahProdutoComposicaoItem.Clone: IPanamahModel;
@@ -630,7 +630,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahProdutoComposicaoItem).Validate);
 end;
 
 class function TPanamahProdutoComposicaoItemList.FromJSON(const AJSON: string): IPanamahProdutoComposicaoItemList;
@@ -727,12 +727,12 @@ end;
 
 { TPanamahProdutoComposicao }
 
-function TPanamahProdutoComposicao.GetItens: IPanamahProdutoComposicaoItemList;
+function TPanamahProdutoComposicao.GetItens: IpanamahProdutoComposicaoItemList;
 begin
   Result := FItens;
 end;
 
-procedure TPanamahProdutoComposicao.SetItens(const AItens: IPanamahProdutoComposicaoItemList);
+procedure TPanamahProdutoComposicao.SetItens(const AItens: IpanamahProdutoComposicaoItemList);
 begin
   FItens := AItens;
 end;
@@ -754,7 +754,7 @@ begin
   JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
   try
     if JSONObject.Field['itens'] is TlkJSONlist then
-      FItens := TPanamahProdutoComposicaoItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
+      FItens := TpanamahProdutoComposicaoItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
     FQuantidade := GetFieldValueAsDouble(JSONObject, 'quantidade');
   finally
     JSONObject.Free;
@@ -783,7 +783,7 @@ end;
 
 function TPanamahProdutoComposicao.GetModelName: string;
 begin
-  Result := 'PanamahProdutoComposicao';
+  Result := 'PRODUTO_COMPOSICAO';
 end;
 
 function TPanamahProdutoComposicao.Clone: IPanamahModel;
@@ -818,7 +818,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahProdutoComposicao).Validate);
 end;
 
 class function TPanamahProdutoComposicaoList.FromJSON(const AJSON: string): IPanamahProdutoComposicaoList;
@@ -915,12 +915,12 @@ end;
 
 { TPanamahProduto }
 
-function TPanamahProduto.GetComposicao: IPanamahProdutoComposicao;
+function TPanamahProduto.GetComposicao: IpanamahProdutoComposicao;
 begin
   Result := FComposicao;
 end;
 
-procedure TPanamahProduto.SetComposicao(const AComposicao: IPanamahProdutoComposicao);
+procedure TPanamahProduto.SetComposicao(const AComposicao: IpanamahProdutoComposicao);
 begin
   FComposicao := AComposicao;
 end;
@@ -1035,12 +1035,12 @@ begin
   FSubgrupoId := ASubgrupoId;
 end;
 
-function TPanamahProduto.GetFornecedores: IPanamahProdutoFornecedorList;
+function TPanamahProduto.GetFornecedores: IpanamahProdutoFornecedorList;
 begin
   Result := FFornecedores;
 end;
 
-procedure TPanamahProduto.SetFornecedores(const AFornecedores: IPanamahProdutoFornecedorList);
+procedure TPanamahProduto.SetFornecedores(const AFornecedores: IpanamahProdutoFornecedorList);
 begin
   FFornecedores := AFornecedores;
 end;
@@ -1052,7 +1052,7 @@ begin
   JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
   try
     if JSONObject.Field['composicao'] is TlkJSONobject then
-      FComposicao := TPanamahProdutoComposicao.FromJSON(TlkJSON.GenerateText(JSONObject.Field['composicao']));
+      FComposicao := TpanamahProdutoComposicao.FromJSON(TlkJSON.GenerateText(JSONObject.Field['composicao']));
     FTipoComposicao := GetFieldValue(JSONObject, 'tipoComposicao');
     FDescricao := GetFieldValueAsString(JSONObject, 'descricao');
     FDataInclusao := GetFieldValueAsDatetime(JSONObject, 'dataInclusao');
@@ -1065,7 +1065,7 @@ begin
     FSecaoId := GetFieldValueAsString(JSONObject, 'secaoId');
     FSubgrupoId := GetFieldValue(JSONObject, 'subgrupoId');
     if JSONObject.Field['fornecedores'] is TlkJSONlist then
-      FFornecedores := TPanamahProdutoFornecedorList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['fornecedores']));
+      FFornecedores := TpanamahProdutoFornecedorList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['fornecedores']));
   finally
     JSONObject.Free;
   end;
@@ -1104,7 +1104,7 @@ end;
 
 function TPanamahProduto.GetModelName: string;
 begin
-  Result := 'PanamahProduto';
+  Result := 'PRODUTO';
 end;
 
 function TPanamahProduto.Clone: IPanamahModel;
@@ -1139,7 +1139,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahProduto).Validate);
 end;
 
 class function TPanamahProdutoList.FromJSON(const AJSON: string): IPanamahProdutoList;

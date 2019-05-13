@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahHolding = interface(IPanamahModel)
-    ['{775912B0-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7A9587-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetDescricao: string;
     procedure SetId(const AId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahHoldingList = interface(IPanamahModelList)
-    ['{775912B1-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7A9588-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahHolding;
     procedure SetItem(AIndex: Integer; const Value: IPanamahHolding);
     procedure Add(const AItem: IPanamahHolding);
@@ -136,7 +136,7 @@ end;
 
 function TPanamahHolding.GetModelName: string;
 begin
-  Result := 'PanamahHolding';
+  Result := 'HOLDING';
 end;
 
 function TPanamahHolding.Clone: IPanamahModel;
@@ -171,7 +171,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahHolding).Validate);
 end;
 
 class function TPanamahHoldingList.FromJSON(const AJSON: string): IPanamahHoldingList;

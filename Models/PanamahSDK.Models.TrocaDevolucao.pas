@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahTrocaDevolucaoItem = interface(IPanamahModel)
-    ['{775AC062-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C1C27-75CB-11E9-8B82-D97403569AFA}']
     function GetDesconto: Double;
     function GetProdutoId: string;
     function GetQuantidade: Double;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahTrocaDevolucaoItemList = interface(IPanamahModelList)
-    ['{775AC063-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C1C28-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucaoItem);
     procedure Add(const AItem: IPanamahTrocaDevolucaoItem);
@@ -39,12 +39,12 @@ type
   end;
   
   IPanamahTrocaDevolucao = interface(IPanamahModel)
-    ['{775A7240-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7BCE04-75CB-11E9-8B82-D97403569AFA}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetVendaId: variant;
     function GetId: string;
-    function GetItens: IPanamahTrocaDevolucaoItemList;
+    function GetItens: IpanamahTrocaDevolucaoItemList;
     function GetLojaId: string;
     function GetNumeroCaixa: variant;
     function GetOperadorId: variant;
@@ -55,7 +55,7 @@ type
     procedure SetData(const AData: TDateTime);
     procedure SetVendaId(const AVendaId: variant);
     procedure SetId(const AId: string);
-    procedure SetItens(const AItens: IPanamahTrocaDevolucaoItemList);
+    procedure SetItens(const AItens: IpanamahTrocaDevolucaoItemList);
     procedure SetLojaId(const ALojaId: string);
     procedure SetNumeroCaixa(const ANumeroCaixa: variant);
     procedure SetOperadorId(const AOperadorId: variant);
@@ -66,7 +66,7 @@ type
     property Data: TDateTime read GetData write SetData;
     property VendaId: variant read GetVendaId write SetVendaId;
     property Id: string read GetId write SetId;
-    property Itens: IPanamahTrocaDevolucaoItemList read GetItens write SetItens;
+    property Itens: IpanamahTrocaDevolucaoItemList read GetItens write SetItens;
     property LojaId: string read GetLojaId write SetLojaId;
     property NumeroCaixa: variant read GetNumeroCaixa write SetNumeroCaixa;
     property OperadorId: variant read GetOperadorId write SetOperadorId;
@@ -76,7 +76,7 @@ type
   end;
   
   IPanamahTrocaDevolucaoList = interface(IPanamahModelList)
-    ['{775A7241-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7BCE05-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucao);
     procedure Add(const AItem: IPanamahTrocaDevolucao);
@@ -147,7 +147,7 @@ type
     FData: TDateTime;
     FVendaId: variant;
     FId: string;
-    FItens: IPanamahTrocaDevolucaoItemList;
+    FItens: IpanamahTrocaDevolucaoItemList;
     FLojaId: string;
     FNumeroCaixa: variant;
     FOperadorId: variant;
@@ -158,7 +158,7 @@ type
     function GetData: TDateTime;
     function GetVendaId: variant;
     function GetId: string;
-    function GetItens: IPanamahTrocaDevolucaoItemList;
+    function GetItens: IpanamahTrocaDevolucaoItemList;
     function GetLojaId: string;
     function GetNumeroCaixa: variant;
     function GetOperadorId: variant;
@@ -169,7 +169,7 @@ type
     procedure SetData(const AData: TDateTime);
     procedure SetVendaId(const AVendaId: variant);
     procedure SetId(const AId: string);
-    procedure SetItens(const AItens: IPanamahTrocaDevolucaoItemList);
+    procedure SetItens(const AItens: IpanamahTrocaDevolucaoItemList);
     procedure SetLojaId(const ALojaId: string);
     procedure SetNumeroCaixa(const ANumeroCaixa: variant);
     procedure SetOperadorId(const AOperadorId: variant);
@@ -188,7 +188,7 @@ type
     property Data: TDateTime read GetData write SetData;
     property VendaId: variant read GetVendaId write SetVendaId;
     property Id: string read GetId write SetId;
-    property Itens: IPanamahTrocaDevolucaoItemList read GetItens write SetItens;
+    property Itens: IpanamahTrocaDevolucaoItemList read GetItens write SetItens;
     property LojaId: string read GetLojaId write SetLojaId;
     property NumeroCaixa: variant read GetNumeroCaixa write SetNumeroCaixa;
     property OperadorId: variant read GetOperadorId write SetOperadorId;
@@ -340,7 +340,7 @@ end;
 
 function TPanamahTrocaDevolucaoItem.GetModelName: string;
 begin
-  Result := 'PanamahTrocaDevolucaoItem';
+  Result := 'TROCA_DEVOLUCAO_ITENS';
 end;
 
 function TPanamahTrocaDevolucaoItem.Clone: IPanamahModel;
@@ -375,7 +375,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaDevolucaoItem).Validate);
 end;
 
 class function TPanamahTrocaDevolucaoItemList.FromJSON(const AJSON: string): IPanamahTrocaDevolucaoItemList;
@@ -512,12 +512,12 @@ begin
   FId := AId;
 end;
 
-function TPanamahTrocaDevolucao.GetItens: IPanamahTrocaDevolucaoItemList;
+function TPanamahTrocaDevolucao.GetItens: IpanamahTrocaDevolucaoItemList;
 begin
   Result := FItens;
 end;
 
-procedure TPanamahTrocaDevolucao.SetItens(const AItens: IPanamahTrocaDevolucaoItemList);
+procedure TPanamahTrocaDevolucao.SetItens(const AItens: IpanamahTrocaDevolucaoItemList);
 begin
   FItens := AItens;
 end;
@@ -593,7 +593,7 @@ begin
     FVendaId := GetFieldValue(JSONObject, 'vendaId');
     FId := GetFieldValueAsString(JSONObject, 'id');
     if JSONObject.Field['itens'] is TlkJSONlist then
-      FItens := TPanamahTrocaDevolucaoItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
+      FItens := TpanamahTrocaDevolucaoItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
     FLojaId := GetFieldValueAsString(JSONObject, 'lojaId');
     FNumeroCaixa := GetFieldValue(JSONObject, 'numeroCaixa');
     FOperadorId := GetFieldValue(JSONObject, 'operadorId');
@@ -636,7 +636,7 @@ end;
 
 function TPanamahTrocaDevolucao.GetModelName: string;
 begin
-  Result := 'PanamahTrocaDevolucao';
+  Result := 'TROCA_DEVOLUCAO';
 end;
 
 function TPanamahTrocaDevolucao.Clone: IPanamahModel;
@@ -671,7 +671,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaDevolucao).Validate);
 end;
 
 class function TPanamahTrocaDevolucaoList.FromJSON(const AJSON: string): IPanamahTrocaDevolucaoList;

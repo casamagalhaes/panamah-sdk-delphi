@@ -3,7 +3,7 @@ unit PanamahSDK.Types;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, uLkJSON;
+  Classes, SysUtils, StrUtils, uLkJSON, Windows, PanamahSDK.Consts;
 
 type
 
@@ -68,21 +68,27 @@ type
 
   IPanamahAdminConfig = interface
     ['{E795306E-4613-408C-977A-409932CE7267}']
-    function GetSoftwareKey: string;
-    procedure SetSoftwareKey(const ASoftwareKey: string);
-    property SoftwareKey: string read GetSoftwareKey write SetSoftwareKey;
+    function GetAuthorizationToken: string;
+    procedure SetAuthorizationToken(const ASoftwareKey: string);
+    property AuthorizationToken: string read GetAuthorizationToken write SetAuthorizationToken;
   end;
 
   IPanamahStreamConfig = interface
     ['{F5D4BA5C-5DF8-480A-9408-6EA0F41EEA0A}']
-    function GetSoftwareKey: string;
+    function GetAssinanteId: string;
+    function GetSecret: string;
+    function GetAuthorizationToken: string;
     function GetBaseDirectory: string;
     function GetBatchTTL: Integer;
     function GetBatchMaxSize: Integer;
     function GetBatchMaxCount: Integer;
-    procedure SetSoftwareKey(const ASoftwareKey: string);
+    procedure SetAssinanteId(const AAssinanteId: string);
     procedure SetBaseDirectory(const ABaseDirectory: string);
-    property SoftwareKey: string read GetSoftwareKey write SetSoftwareKey;
+    procedure SetSecret(const ASecret: string);
+    procedure SetAuthorizationToken(const AAuthorizationToken: string);
+    property AssinanteId: string read GetAssinanteId write SetAssinanteId;
+    property Secret: string read GetSecret write SetSecret;
+    property AuthorizationToken: string read GetAuthorizationToken write SetAuthorizationToken;
     property BaseDirectory: string read GetBaseDirectory write SetBaseDirectory;
     property BatchTTL: Integer read GetBatchTTL;
     property BatchMaxSize: Integer read GetBatchMaxSize;
@@ -195,12 +201,8 @@ type
   function DateTimeToISO8601(const AInput: TDateTime): string;
   function ISO8601ToDateTime(const AInput: string): TDateTime;
   function DecimalDotStringToDouble(const AString: string): Double;
-
-const
-  CURRENT_TIMEZONE = -(3 * 3600);
-  UTF8_CODEPAGE = 65001;
-  LATIN_CODEPAGE = 28591;
-  HTTPS_PROTOCOL = 'https';
+  function TzSpecificLocalTimeToSystemTime(lpTimeZoneInformation: PTimeZoneInformation; var lpLocalTime, lpUniversalTime: TSystemTime): BOOL; stdcall;
+  function NowUTC: TDateTime;
 
 implementation
 
@@ -554,6 +556,19 @@ begin
   FormatSettings.ThousandSeparator := ',';
   FormatSettings.DecimalSeparator := '.';
   Result := StrToFloatDef(AString, 0, FormatSettings);
+end;
+
+function TzSpecificLocalTimeToSystemTime; external kernel32 name 'TzSpecificLocalTimeToSystemTime';
+
+function NowUTC: TDateTime;
+var
+  TimeZoneInformation: TTimeZoneInformation;
+  LocalTime, UniversalTime: TSystemTime;
+begin
+  GetTimeZoneInformation(TimeZoneInformation);
+  DateTimeToSystemTime(Now, LocalTime);
+  TzSpecificLocalTimeToSystemTime(@TimeZoneInformation, LocalTime, UniversalTime);
+  Result := SystemTimeToDateTime(UniversalTime);
 end;
 
 end.

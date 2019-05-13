@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahVendaPagamento = interface(IPanamahModel)
-    ['{775B5CA9-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7D0680-75CB-11E9-8B82-D97403569AFA}']
     function GetFormaPagamentoId: string;
     function GetSequencial: string;
     function GetValor: Double;
@@ -22,7 +22,7 @@ type
   end;
   
   IPanamahVendaPagamentoList = interface(IPanamahModelList)
-    ['{775B5CAA-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7D0681-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahVendaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahVendaPagamento);
     procedure Add(const AItem: IPanamahVendaPagamento);
@@ -30,7 +30,7 @@ type
   end;
   
   IPanamahVendaItem = interface(IPanamahModel)
-    ['{775B3597-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C915F-75CB-11E9-8B82-D97403569AFA}']
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetEfetivo: Boolean;
@@ -82,7 +82,7 @@ type
   end;
   
   IPanamahVendaItemList = interface(IPanamahModelList)
-    ['{775B3598-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C9160-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahVendaItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahVendaItem);
     procedure Add(const AItem: IPanamahVendaItem);
@@ -90,7 +90,7 @@ type
   end;
   
   IPanamahVenda = interface(IPanamahModel)
-    ['{775B0E80-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C6A41-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetLojaId: string;
     function GetClienteId: variant;
@@ -111,8 +111,8 @@ type
     function GetValorItensCancelados: Double;
     function GetAcrescimo: Double;
     function GetNumeroCaixa: variant;
-    function GetItens: IPanamahVendaItemList;
-    function GetPagamentos: IPanamahVendaPagamentoList;
+    function GetItens: IpanamahVendaItemList;
+    function GetPagamentos: IpanamahVendaPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetClienteId(const AClienteId: variant);
@@ -133,8 +133,8 @@ type
     procedure SetValorItensCancelados(const AValorItensCancelados: Double);
     procedure SetAcrescimo(const AAcrescimo: Double);
     procedure SetNumeroCaixa(const ANumeroCaixa: variant);
-    procedure SetItens(const AItens: IPanamahVendaItemList);
-    procedure SetPagamentos(const APagamentos: IPanamahVendaPagamentoList);
+    procedure SetItens(const AItens: IpanamahVendaItemList);
+    procedure SetPagamentos(const APagamentos: IpanamahVendaPagamentoList);
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
     property ClienteId: variant read GetClienteId write SetClienteId;
@@ -155,12 +155,12 @@ type
     property ValorItensCancelados: Double read GetValorItensCancelados write SetValorItensCancelados;
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
     property NumeroCaixa: variant read GetNumeroCaixa write SetNumeroCaixa;
-    property Itens: IPanamahVendaItemList read GetItens write SetItens;
-    property Pagamentos: IPanamahVendaPagamentoList read GetPagamentos write SetPagamentos;
+    property Itens: IpanamahVendaItemList read GetItens write SetItens;
+    property Pagamentos: IpanamahVendaPagamentoList read GetPagamentos write SetPagamentos;
   end;
   
   IPanamahVendaList = interface(IPanamahModelList)
-    ['{775B0E81-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7C6A42-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahVenda;
     procedure SetItem(AIndex: Integer; const Value: IPanamahVenda);
     procedure Add(const AItem: IPanamahVenda);
@@ -333,8 +333,8 @@ type
     FValorItensCancelados: Double;
     FAcrescimo: Double;
     FNumeroCaixa: variant;
-    FItens: IPanamahVendaItemList;
-    FPagamentos: IPanamahVendaPagamentoList;
+    FItens: IpanamahVendaItemList;
+    FPagamentos: IpanamahVendaPagamentoList;
     function GetId: string;
     function GetLojaId: string;
     function GetClienteId: variant;
@@ -355,8 +355,8 @@ type
     function GetValorItensCancelados: Double;
     function GetAcrescimo: Double;
     function GetNumeroCaixa: variant;
-    function GetItens: IPanamahVendaItemList;
-    function GetPagamentos: IPanamahVendaPagamentoList;
+    function GetItens: IpanamahVendaItemList;
+    function GetPagamentos: IpanamahVendaPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetClienteId(const AClienteId: variant);
@@ -377,8 +377,8 @@ type
     procedure SetValorItensCancelados(const AValorItensCancelados: Double);
     procedure SetAcrescimo(const AAcrescimo: Double);
     procedure SetNumeroCaixa(const ANumeroCaixa: variant);
-    procedure SetItens(const AItens: IPanamahVendaItemList);
-    procedure SetPagamentos(const APagamentos: IPanamahVendaPagamentoList);
+    procedure SetItens(const AItens: IpanamahVendaItemList);
+    procedure SetPagamentos(const APagamentos: IpanamahVendaPagamentoList);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -407,8 +407,8 @@ type
     property ValorItensCancelados: Double read GetValorItensCancelados write SetValorItensCancelados;
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
     property NumeroCaixa: variant read GetNumeroCaixa write SetNumeroCaixa;
-    property Itens: IPanamahVendaItemList read GetItens write SetItens;
-    property Pagamentos: IPanamahVendaPagamentoList read GetPagamentos write SetPagamentos;
+    property Itens: IpanamahVendaItemList read GetItens write SetItens;
+    property Pagamentos: IpanamahVendaPagamentoList read GetPagamentos write SetPagamentos;
   end;
 
   TPanamahVendaList = class(TInterfacedObject, IPanamahVendaList)
@@ -523,7 +523,7 @@ end;
 
 function TPanamahVendaPagamento.GetModelName: string;
 begin
-  Result := 'PanamahVendaPagamento';
+  Result := 'VENDA_PAGAMENTOS';
 end;
 
 function TPanamahVendaPagamento.Clone: IPanamahModel;
@@ -558,7 +558,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahVendaPagamento).Validate);
 end;
 
 class function TPanamahVendaPagamentoList.FromJSON(const AJSON: string): IPanamahVendaPagamentoList;
@@ -881,7 +881,7 @@ end;
 
 function TPanamahVendaItem.GetModelName: string;
 begin
-  Result := 'PanamahVendaItem';
+  Result := 'VENDA_ITENS';
 end;
 
 function TPanamahVendaItem.Clone: IPanamahModel;
@@ -916,7 +916,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahVendaItem).Validate);
 end;
 
 class function TPanamahVendaItemList.FromJSON(const AJSON: string): IPanamahVendaItemList;
@@ -1216,22 +1216,22 @@ begin
   FNumeroCaixa := ANumeroCaixa;
 end;
 
-function TPanamahVenda.GetItens: IPanamahVendaItemList;
+function TPanamahVenda.GetItens: IpanamahVendaItemList;
 begin
   Result := FItens;
 end;
 
-procedure TPanamahVenda.SetItens(const AItens: IPanamahVendaItemList);
+procedure TPanamahVenda.SetItens(const AItens: IpanamahVendaItemList);
 begin
   FItens := AItens;
 end;
 
-function TPanamahVenda.GetPagamentos: IPanamahVendaPagamentoList;
+function TPanamahVenda.GetPagamentos: IpanamahVendaPagamentoList;
 begin
   Result := FPagamentos;
 end;
 
-procedure TPanamahVenda.SetPagamentos(const APagamentos: IPanamahVendaPagamentoList);
+procedure TPanamahVenda.SetPagamentos(const APagamentos: IpanamahVendaPagamentoList);
 begin
   FPagamentos := APagamentos;
 end;
@@ -1263,9 +1263,9 @@ begin
     FAcrescimo := GetFieldValueAsDouble(JSONObject, 'acrescimo');
     FNumeroCaixa := GetFieldValue(JSONObject, 'numeroCaixa');
     if JSONObject.Field['itens'] is TlkJSONlist then
-      FItens := TPanamahVendaItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
+      FItens := TpanamahVendaItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
     if JSONObject.Field['pagamentos'] is TlkJSONlist then
-      FPagamentos := TPanamahVendaPagamentoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['pagamentos']));
+      FPagamentos := TpanamahVendaPagamentoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['pagamentos']));
   finally
     JSONObject.Free;
   end;
@@ -1313,7 +1313,7 @@ end;
 
 function TPanamahVenda.GetModelName: string;
 begin
-  Result := 'PanamahVenda';
+  Result := 'VENDA';
 end;
 
 function TPanamahVenda.Clone: IPanamahModel;
@@ -1348,7 +1348,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahVenda).Validate);
 end;
 
 class function TPanamahVendaList.FromJSON(const AJSON: string): IPanamahVendaList;

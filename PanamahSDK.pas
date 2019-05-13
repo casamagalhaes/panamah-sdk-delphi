@@ -11,13 +11,16 @@ uses
   PanamahSDK.Models.Grupo, PanamahSDK.Models.Holding, PanamahSDK.Models.LocalEstoque, PanamahSDK.Models.Loja,
   PanamahSDK.Models.Meta, PanamahSDK.Models.Produto, PanamahSDK.Models.Revenda, PanamahSDK.Models.Secao,
   PanamahSDK.Models.Subgrupo, PanamahSDK.Models.TituloPagar, PanamahSDK.Models.TituloReceber,
-  PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento, PanamahSDK.Models.Venda, PanamahSDK.Processor;
+  PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento, PanamahSDK.Models.Venda, PanamahSDK.Processor,
+  PanamahSDK.NFe, PanamahSDK.Consts;
 
 type
 
   TPanamahStreamConfig = class(TInterfacedObject, IPanamahStreamConfig)
   private
-    FSoftwareKey: string;
+    FAssinanteId: string;
+    FSecret: string;
+    FAuthorizationToken: string;
     FBaseDirectory: string;
     FBatchTTL: Integer;
     FBatchMaxSize: Integer;
@@ -26,37 +29,44 @@ type
     function GetBatchTTL: Integer;
     function GetBatchMaxSize: Integer;
     function GetBatchMaxCount: Integer;
-    function GetSoftwareKey: string;
+    function GetAssinanteId: string;
+    function GetSecret: string;
+    function GetAuthorizationToken: string;
+    procedure SetAuthorizationToken(const AAuthorizationToken: string);
     procedure SetBaseDirectory(const ABaseDirectory: string);
-    procedure SetSoftwareKey(const ASoftwareKey: string);
+    procedure SetAssinanteId(const AAssinanteId: string);
+    procedure SetSecret(const ASecret: string);
   published
     constructor Create; reintroduce;
     property BaseDirectory: string read GetBaseDirectory write SetBaseDirectory;
     property BatchTTL: Integer read GetBatchTTL;
     property BatchMaxSize: Integer read GetBatchMaxSize;
     property BatchMaxCount: Integer read GetBatchMaxCount;
-    property SoftwareKey: string read GetSoftwareKey write SetSoftwareKey;
+    property AssinanteId: string read GetAssinanteId write SetAssinanteId;
+    property Secret: string read GetSecret write SetSecret;
+    property AuthorizationToken: string read GetAuthorizationToken write SetAuthorizationToken;
   end;
 
   TPanamahAdminConfig = class(TInterfacedObject, IPanamahAdminConfig)
   private
-    FSoftwareKey: string;
-    function GetSoftwareKey: string;
-    procedure SetSoftwareKey(const ASoftwareKey: string);
+    FAuthorizationToken: string;
+    function GetAuthorizationToken: string;
+    procedure SetAuthorizationToken(const AAuthorizationToken: string);
   published
     constructor Create; reintroduce;
-    property SoftwareKey: string read GetSoftwareKey write SetSoftwareKey;
+    property AuthorizationToken: string read GetAuthorizationToken write SetAuthorizationToken;
   end;
 
   TPanamahAdmin = class
   private
     FConfig: IPanamahAdminConfig;
-//    FClient: IPanamahClient;
+    FClient: IPanamahClient;
   public
     procedure Init(AConfig: IPanamahAdminConfig); overload;
-    procedure Init(const ASoftwareKey: string); overload;
+    procedure Init(const AAuthorizationToken: string); overload;
+    function GetAssinante(const AAssinanteId: string): IPanamahAssinante;
+    function SaveAssinante(AAssinante: IPanamahAssinante): Boolean;
     constructor Create; reintroduce;
-    destructor Destroy; override;
     class function GetInstance: TPanamahAdmin;
     class procedure Free;
   end;
@@ -74,13 +84,17 @@ type
     procedure SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
     procedure SetOnBeforeOperationSent(AEvent: TPanamahOperationEvent);
   public
-    class procedure Free;
-    procedure Init; overload;
-    procedure Init(AConfig: IPanamahStreamConfig); overload;
-    procedure Init(const AApiKey: string); overload;
-    procedure Flush;
     constructor Create; reintroduce;
     destructor Destroy; override;
+    class procedure Free;
+    class function GetInstance: TPanamahStream;
+    function ReadNFe(const AFilename: string): IPanamahNFeDocument; overload;
+    function ReadNFe(ADocumentType: TPanamahNFeDocumentType; const AFilename: string): IPanamahNFeDocument; overload;
+    procedure Init; overload;
+    procedure Init(AConfig: IPanamahStreamConfig); overload;
+    procedure Init(const AAuthorizationToken, ASecret, AAssinanteId: string); overload;
+    procedure Flush;
+    procedure Save(ANFeDocument: IPanamahNFeDocument); overload;
     procedure Save(AAcesso: IPanamahAcesso); overload;
     procedure Save(AAssinante: IPanamahAssinante); overload;
     procedure Save(ACliente: IPanamahCliente); overload;
@@ -133,7 +147,6 @@ type
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
     property OnBeforeOperationSent: TPanamahOperationEvent read GetOnBeforeOperationtSent write SetOnBeforeOperationSent;
-    class function GetInstance: TPanamahStream;
   end;
 
 var
@@ -153,18 +166,30 @@ begin
   FProcessor.Start(FConfig);
 end;
 
-procedure TPanamahStream.Init(const AApiKey: string);
+procedure TPanamahStream.Init(const AAuthorizationToken, ASecret, AAssinanteId: string);
 var
   Config: IPanamahStreamConfig;
 begin
   Config := TPanamahStreamConfig.Create;
-  Config.SoftwareKey := AApiKey;
+  Config.AssinanteId := AAssinanteId;
+  Config.Secret := ASecret;
+  Config.AuthorizationToken := AAuthorizationToken;
   Init(Config);
+end;
+
+function TPanamahStream.ReadNFe(ADocumentType: TPanamahNFeDocumentType; const AFilename: string): IPanamahNFeDocument;
+begin
+  Result := TPanamahNFeDocument.FromFile(ADocumentType, AFilename);
+end;
+
+function TPanamahStream.ReadNFe(const AFilename: string): IPanamahNFeDocument;
+begin
+  Result := ReadNFe(TPanamahNFeDocumentType.ndtDESCONHECIDO, AFilename);
 end;
 
 procedure TPanamahStream.Init;
 begin
-  Init(GetEnvironmentVariable('PANAMAH_API_KEY'));
+  Init(GetEnvironmentVariable('PANAMAH_AUTHORIZATION_TOKEN'), GetEnvironmentVariable('PANAMAH_ASSINANTE_ID'), GetEnvironmentVariable('PANAMAH_SECRET'));
 end;
 
 procedure TPanamahStream.SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
@@ -265,6 +290,14 @@ end;
 procedure TPanamahStream.Save(AVenda: IPanamahVenda);
 begin
   FProcessor.Save(AVenda);
+end;
+
+procedure TPanamahStream.Save(ANFeDocument: IPanamahNFeDocument);
+var
+  I: Integer;
+begin
+  for I := 0 to ANFeDocument.Models.Count - 1 do
+    FProcessor.Save(ANFeDocument.Models[I]);
 end;
 
 procedure TPanamahStream.Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
@@ -489,9 +522,14 @@ begin
   FBaseDirectory := GetCurrentDir + '\.panamah';
 end;
 
-function TPanamahStreamConfig.GetSoftwareKey: string;
+function TPanamahStreamConfig.GetAssinanteId: string;
 begin
-  Result := FSoftwareKey;
+  Result := FAssinanteId;
+end;
+
+function TPanamahStreamConfig.GetAuthorizationToken: string;
+begin
+  Result := FAuthorizationToken;
 end;
 
 function TPanamahStreamConfig.GetBaseDirectory: string;
@@ -514,14 +552,29 @@ begin
   Result := FBatchTTL;
 end;
 
+function TPanamahStreamConfig.GetSecret: string;
+begin
+  Result := FSecret;
+end;
+
 procedure TPanamahStreamConfig.SetBaseDirectory(const ABaseDirectory: string);
 begin
   FBaseDirectory := ABaseDirectory;
 end;
 
-procedure TPanamahStreamConfig.SetSoftwareKey(const ASoftwareKey: string);
+procedure TPanamahStreamConfig.SetSecret(const ASecret: string);
 begin
-  FSoftwareKey := ASoftwareKey;
+  FSecret := ASecret;
+end;
+
+procedure TPanamahStreamConfig.SetAssinanteId(const AAssinanteId: string);
+begin
+  FAssinanteId := AAssinanteId;
+end;
+
+procedure TPanamahStreamConfig.SetAuthorizationToken(const AAuthorizationToken: string);
+begin
+  FAuthorizationToken := AAuthorizationToken;
 end;
 
 { TPanamahAdminConfig }
@@ -531,14 +584,14 @@ begin
   inherited Create;
 end;
 
-function TPanamahAdminConfig.GetSoftwareKey: string;
+function TPanamahAdminConfig.GetAuthorizationToken: string;
 begin
-  Result := FSoftwareKey;
+  Result := FAuthorizationToken;
 end;
 
-procedure TPanamahAdminConfig.SetSoftwareKey(const ASoftwareKey: string);
+procedure TPanamahAdminConfig.SetAuthorizationToken(const AAuthorizationToken: string);
 begin
-  FSoftwareKey := ASoftwareKey;
+  FAuthorizationToken := AAuthorizationToken;
 end;
 
 { TPanamahAdmin }
@@ -546,19 +599,39 @@ end;
 constructor TPanamahAdmin.Create;
 begin
   inherited Create;
-//  FClient := TPanamahAdminClient.Create('https://172.16.33.109:7443', FConfig.SoftwareKey, '');
-end;
-
-destructor TPanamahAdmin.Destroy;
-begin
-
-  inherited;
 end;
 
 class procedure TPanamahAdmin.Free;
 begin
   if Assigned(_PanamahAdminInstance) then
     FreeAndNil(_PanamahAdminInstance);
+end;
+
+function TPanamahAdmin.GetAssinante(const AAssinanteId: string): IPanamahAssinante;
+var
+  Response: IPanamahResponse;
+begin
+  Response := FClient.Get(Format('/admin/assinantes/%s', [AAssinanteId]), nil, nil);
+  case Response.Status of
+    200: Result := TPanamahAssinante.FromJSON(Response.Content);
+    404: raise EPanamahSDKNotFoundException.Create('Assinante não encontrado');
+    else
+      raise EPanamahSDKUnknownException.Create(Response.Content);
+  end;
+end;
+
+function TPanamahAdmin.SaveAssinante(AAssinante: IPanamahAssinante): Boolean;
+var
+  Response: IPanamahResponse;
+begin
+  Response := FClient.Post('/admin/assinantes', AAssinante.SerializeToJSON, nil);
+  case Response.Status of
+    201: Result := True;
+    422: raise EPanamahSDKUnprocessableEntityException.Create(Response.Content);
+    400: raise EPanamahSDKBadRequestException.Create(Response.Content);
+    else
+      Result := False;
+  end;
 end;
 
 class function TPanamahAdmin.GetInstance: TPanamahAdmin;
@@ -568,18 +641,19 @@ begin
   Result := _PanamahAdminInstance;
 end;
 
-procedure TPanamahAdmin.Init(const ASoftwareKey: string);
+procedure TPanamahAdmin.Init(const AAuthorizationToken: string);
 var
   Config: IPanamahAdminConfig;
 begin
   Config := TPanamahAdminConfig.Create;
-  Config.SoftwareKey := ASoftwareKey;
+  Config.AuthorizationToken := AAuthorizationToken;
   Init(Config);
 end;
 
 procedure TPanamahAdmin.Init(AConfig: IPanamahAdminConfig);
 begin
   FConfig := AConfig;
+  FClient := TPanamahAdminClient.Create(API_BASE_URL, FConfig.AuthorizationToken);
 end;
 
 initialization

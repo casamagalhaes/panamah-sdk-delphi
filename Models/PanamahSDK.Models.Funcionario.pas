@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahFuncionario = interface(IPanamahModel)
-    ['{775987E0-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B0AB0-75CB-11E9-8B82-D97403569AFA}']
     function GetDataNascimento: TDateTime;
     function GetId: string;
     function GetLogin: variant;
@@ -17,7 +17,7 @@ type
     function GetNumeroDocumento: variant;
     function GetAtivo: Boolean;
     function GetSenha: variant;
-    function GetLojaIds: IPanamahStringValueList;
+    function GetLojaIds: IpanamahStringValueList;
     procedure SetDataNascimento(const ADataNascimento: TDateTime);
     procedure SetId(const AId: string);
     procedure SetLogin(const ALogin: variant);
@@ -25,7 +25,7 @@ type
     procedure SetNumeroDocumento(const ANumeroDocumento: variant);
     procedure SetAtivo(const AAtivo: Boolean);
     procedure SetSenha(const ASenha: variant);
-    procedure SetLojaIds(const ALojaIds: IPanamahStringValueList);
+    procedure SetLojaIds(const ALojaIds: IpanamahStringValueList);
     property DataNascimento: TDateTime read GetDataNascimento write SetDataNascimento;
     property Id: string read GetId write SetId;
     property Login: variant read GetLogin write SetLogin;
@@ -33,11 +33,11 @@ type
     property NumeroDocumento: variant read GetNumeroDocumento write SetNumeroDocumento;
     property Ativo: Boolean read GetAtivo write SetAtivo;
     property Senha: variant read GetSenha write SetSenha;
-    property LojaIds: IPanamahStringValueList read GetLojaIds write SetLojaIds;
+    property LojaIds: IpanamahStringValueList read GetLojaIds write SetLojaIds;
   end;
   
   IPanamahFuncionarioList = interface(IPanamahModelList)
-    ['{775987E1-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B0AB1-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahFuncionario;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFuncionario);
     procedure Add(const AItem: IPanamahFuncionario);
@@ -53,7 +53,7 @@ type
     FNumeroDocumento: variant;
     FAtivo: Boolean;
     FSenha: variant;
-    FLojaIds: IPanamahStringValueList;
+    FLojaIds: IpanamahStringValueList;
     function GetDataNascimento: TDateTime;
     function GetId: string;
     function GetLogin: variant;
@@ -61,7 +61,7 @@ type
     function GetNumeroDocumento: variant;
     function GetAtivo: Boolean;
     function GetSenha: variant;
-    function GetLojaIds: IPanamahStringValueList;
+    function GetLojaIds: IpanamahStringValueList;
     procedure SetDataNascimento(const ADataNascimento: TDateTime);
     procedure SetId(const AId: string);
     procedure SetLogin(const ALogin: variant);
@@ -69,7 +69,7 @@ type
     procedure SetNumeroDocumento(const ANumeroDocumento: variant);
     procedure SetAtivo(const AAtivo: Boolean);
     procedure SetSenha(const ASenha: variant);
-    procedure SetLojaIds(const ALojaIds: IPanamahStringValueList);
+    procedure SetLojaIds(const ALojaIds: IpanamahStringValueList);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -85,7 +85,7 @@ type
     property NumeroDocumento: variant read GetNumeroDocumento write SetNumeroDocumento;
     property Ativo: Boolean read GetAtivo write SetAtivo;
     property Senha: variant read GetSenha write SetSenha;
-    property LojaIds: IPanamahStringValueList read GetLojaIds write SetLojaIds;
+    property LojaIds: IpanamahStringValueList read GetLojaIds write SetLojaIds;
   end;
 
   TPanamahFuncionarioList = class(TInterfacedObject, IPanamahFuncionarioList)
@@ -193,12 +193,12 @@ begin
   FSenha := ASenha;
 end;
 
-function TPanamahFuncionario.GetLojaIds: IPanamahStringValueList;
+function TPanamahFuncionario.GetLojaIds: IpanamahStringValueList;
 begin
   Result := FLojaIds;
 end;
 
-procedure TPanamahFuncionario.SetLojaIds(const ALojaIds: IPanamahStringValueList);
+procedure TPanamahFuncionario.SetLojaIds(const ALojaIds: IpanamahStringValueList);
 begin
   FLojaIds := ALojaIds;
 end;
@@ -217,7 +217,7 @@ begin
     FAtivo := GetFieldValueAsBoolean(JSONObject, 'ativo');
     FSenha := GetFieldValue(JSONObject, 'senha');
     if JSONObject.Field['lojaIds'] is TlkJSONlist then
-      FLojaIds := TPanamahStringValueList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['lojaIds']));
+      FLojaIds := TpanamahStringValueList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['lojaIds']));
   finally
     JSONObject.Free;
   end;
@@ -251,7 +251,7 @@ end;
 
 function TPanamahFuncionario.GetModelName: string;
 begin
-  Result := 'PanamahFuncionario';
+  Result := 'FUNCIONARIO';
 end;
 
 function TPanamahFuncionario.Clone: IPanamahModel;
@@ -286,7 +286,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahFuncionario).Validate);
 end;
 
 class function TPanamahFuncionarioList.FromJSON(const AJSON: string): IPanamahFuncionarioList;

@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahLoja = interface(IPanamahModel)
-    ['{775912B4-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7ABC90-75CB-11E9-8B82-D97403569AFA}']
     function GetAtiva: Boolean;
     function GetId: string;
     function GetDescricao: string;
@@ -70,7 +70,7 @@ type
   end;
   
   IPanamahLojaList = interface(IPanamahModelList)
-    ['{775912B5-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7ABC91-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahLoja;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLoja);
     procedure Add(const AItem: IPanamahLoja);
@@ -459,7 +459,7 @@ end;
 
 function TPanamahLoja.GetModelName: string;
 begin
-  Result := 'PanamahLoja';
+  Result := 'LOJA';
 end;
 
 function TPanamahLoja.Clone: IPanamahModel;
@@ -494,7 +494,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahLoja).Validate);
 end;
 
 class function TPanamahLojaList.FromJSON(const AJSON: string): IPanamahLojaList;

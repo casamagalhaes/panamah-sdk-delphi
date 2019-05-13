@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahCompraItem = interface(IPanamahModel)
-    ['{775B83C0-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7D2DA0-75CB-11E9-8B82-D97403569AFA}']
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetProdutoId: string;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahCompraItemList = interface(IPanamahModelList)
-    ['{775B83C1-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7D2DA1-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahCompraItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompraItem);
     procedure Add(const AItem: IPanamahCompraItem);
@@ -39,7 +39,7 @@ type
   end;
   
   IPanamahCompra = interface(IPanamahModel)
-    ['{775B83B0-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7D2D90-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetLojaId: string;
     function GetFornecedorId: variant;
@@ -53,7 +53,7 @@ type
     function GetTipoDesconto: variant;
     function GetValor: Double;
     function GetAcrescimo: Double;
-    function GetItens: IPanamahCompraItemList;
+    function GetItens: IpanamahCompraItemList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetFornecedorId(const AFornecedorId: variant);
@@ -67,7 +67,7 @@ type
     procedure SetTipoDesconto(const ATipoDesconto: variant);
     procedure SetValor(const AValor: Double);
     procedure SetAcrescimo(const AAcrescimo: Double);
-    procedure SetItens(const AItens: IPanamahCompraItemList);
+    procedure SetItens(const AItens: IpanamahCompraItemList);
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
     property FornecedorId: variant read GetFornecedorId write SetFornecedorId;
@@ -81,11 +81,11 @@ type
     property TipoDesconto: variant read GetTipoDesconto write SetTipoDesconto;
     property Valor: Double read GetValor write SetValor;
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
-    property Itens: IPanamahCompraItemList read GetItens write SetItens;
+    property Itens: IpanamahCompraItemList read GetItens write SetItens;
   end;
   
   IPanamahCompraList = interface(IPanamahModelList)
-    ['{775B83B1-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7D2D91-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahCompra;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompra);
     procedure Add(const AItem: IPanamahCompra);
@@ -165,7 +165,7 @@ type
     FTipoDesconto: variant;
     FValor: Double;
     FAcrescimo: Double;
-    FItens: IPanamahCompraItemList;
+    FItens: IpanamahCompraItemList;
     function GetId: string;
     function GetLojaId: string;
     function GetFornecedorId: variant;
@@ -179,7 +179,7 @@ type
     function GetTipoDesconto: variant;
     function GetValor: Double;
     function GetAcrescimo: Double;
-    function GetItens: IPanamahCompraItemList;
+    function GetItens: IpanamahCompraItemList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetFornecedorId(const AFornecedorId: variant);
@@ -193,7 +193,7 @@ type
     procedure SetTipoDesconto(const ATipoDesconto: variant);
     procedure SetValor(const AValor: Double);
     procedure SetAcrescimo(const AAcrescimo: Double);
-    procedure SetItens(const AItens: IPanamahCompraItemList);
+    procedure SetItens(const AItens: IpanamahCompraItemList);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -215,7 +215,7 @@ type
     property TipoDesconto: variant read GetTipoDesconto write SetTipoDesconto;
     property Valor: Double read GetValor write SetValor;
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
-    property Itens: IPanamahCompraItemList read GetItens write SetItens;
+    property Itens: IpanamahCompraItemList read GetItens write SetItens;
   end;
 
   TPanamahCompraList = class(TInterfacedObject, IPanamahCompraList)
@@ -361,7 +361,7 @@ end;
 
 function TPanamahCompraItem.GetModelName: string;
 begin
-  Result := 'PanamahCompraItem';
+  Result := 'COMPRA_ITENS';
 end;
 
 function TPanamahCompraItem.Clone: IPanamahModel;
@@ -396,7 +396,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahCompraItem).Validate);
 end;
 
 class function TPanamahCompraItemList.FromJSON(const AJSON: string): IPanamahCompraItemList;
@@ -623,12 +623,12 @@ begin
   FAcrescimo := AAcrescimo;
 end;
 
-function TPanamahCompra.GetItens: IPanamahCompraItemList;
+function TPanamahCompra.GetItens: IpanamahCompraItemList;
 begin
   Result := FItens;
 end;
 
-procedure TPanamahCompra.SetItens(const AItens: IPanamahCompraItemList);
+procedure TPanamahCompra.SetItens(const AItens: IpanamahCompraItemList);
 begin
   FItens := AItens;
 end;
@@ -653,7 +653,7 @@ begin
     FValor := GetFieldValueAsDouble(JSONObject, 'valor');
     FAcrescimo := GetFieldValueAsDouble(JSONObject, 'acrescimo');
     if JSONObject.Field['itens'] is TlkJSONlist then
-      FItens := TPanamahCompraItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
+      FItens := TpanamahCompraItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
   finally
     JSONObject.Free;
   end;
@@ -693,7 +693,7 @@ end;
 
 function TPanamahCompra.GetModelName: string;
 begin
-  Result := 'PanamahCompra';
+  Result := 'COMPRA';
 end;
 
 function TPanamahCompra.Clone: IPanamahModel;
@@ -728,7 +728,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahCompra).Validate);
 end;
 
 class function TPanamahCompraList.FromJSON(const AJSON: string): IPanamahCompraList;

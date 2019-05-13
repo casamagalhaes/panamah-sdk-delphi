@@ -9,47 +9,47 @@ uses
 type
   
   IPanamahAssinante = interface(IPanamahModel)
-    ['{7757DA30-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E795D00-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
-    function GetNome: string;
+    function GetRazaoSocial: string;
     function GetFantasia: string;
     function GetRamo: string;
     function GetUf: string;
     function GetCidade: string;
     function GetRevendaId: variant;
     function GetBairro: string;
-    function GetSoftwaresAtivos: IPanamahSoftwareAtivoList;
-    function GetSoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList;
-    function GetSeries: IPanamahStringValueList;
+    function GetSoftwaresAtivos: IpanamahSoftwareAtivoList;
+    function GetSoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList;
+    function GetSeries: IpanamahStringValueList;
     function GetAtivo: Boolean;
     procedure SetId(const AId: string);
-    procedure SetNome(const ANome: string);
+    procedure SetRazaoSocial(const ARazaoSocial: string);
     procedure SetFantasia(const AFantasia: string);
     procedure SetRamo(const ARamo: string);
     procedure SetUf(const AUf: string);
     procedure SetCidade(const ACidade: string);
     procedure SetRevendaId(const ARevendaId: variant);
     procedure SetBairro(const ABairro: string);
-    procedure SetSoftwaresAtivos(const ASoftwaresAtivos: IPanamahSoftwareAtivoList);
-    procedure SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList);
-    procedure SetSeries(const ASeries: IPanamahStringValueList);
+    procedure SetSoftwaresAtivos(const ASoftwaresAtivos: IpanamahSoftwareAtivoList);
+    procedure SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList);
+    procedure SetSeries(const ASeries: IpanamahStringValueList);
     procedure SetAtivo(const AAtivo: Boolean);
     property Id: string read GetId write SetId;
-    property Nome: string read GetNome write SetNome;
+    property RazaoSocial: string read GetRazaoSocial write SetRazaoSocial;
     property Fantasia: string read GetFantasia write SetFantasia;
     property Ramo: string read GetRamo write SetRamo;
     property Uf: string read GetUf write SetUf;
     property Cidade: string read GetCidade write SetCidade;
     property RevendaId: variant read GetRevendaId write SetRevendaId;
     property Bairro: string read GetBairro write SetBairro;
-    property SoftwaresAtivos: IPanamahSoftwareAtivoList read GetSoftwaresAtivos write SetSoftwaresAtivos;
-    property SoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList read GetSoftwaresEmContratosDeManutencao write SetSoftwaresEmContratosDeManutencao;
-    property Series: IPanamahStringValueList read GetSeries write SetSeries;
+    property SoftwaresAtivos: IpanamahSoftwareAtivoList read GetSoftwaresAtivos write SetSoftwaresAtivos;
+    property SoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList read GetSoftwaresEmContratosDeManutencao write SetSoftwaresEmContratosDeManutencao;
+    property Series: IpanamahStringValueList read GetSeries write SetSeries;
     property Ativo: Boolean read GetAtivo write SetAtivo;
   end;
   
   IPanamahAssinanteList = interface(IPanamahModelList)
-    ['{7757DA31-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E795D01-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahAssinante;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAssinante);
     procedure Add(const AItem: IPanamahAssinante);
@@ -59,40 +59,40 @@ type
   TPanamahAssinante = class(TInterfacedObject, IPanamahAssinante)
   private
     FId: string;
-    FNome: string;
+    FRazaoSocial: string;
     FFantasia: string;
     FRamo: string;
     FUf: string;
     FCidade: string;
     FRevendaId: variant;
     FBairro: string;
-    FSoftwaresAtivos: IPanamahSoftwareAtivoList;
-    FSoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList;
-    FSeries: IPanamahStringValueList;
+    FSoftwaresAtivos: IpanamahSoftwareAtivoList;
+    FSoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList;
+    FSeries: IpanamahStringValueList;
     FAtivo: Boolean;
     function GetId: string;
-    function GetNome: string;
+    function GetRazaoSocial: string;
     function GetFantasia: string;
     function GetRamo: string;
     function GetUf: string;
     function GetCidade: string;
     function GetRevendaId: variant;
     function GetBairro: string;
-    function GetSoftwaresAtivos: IPanamahSoftwareAtivoList;
-    function GetSoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList;
-    function GetSeries: IPanamahStringValueList;
+    function GetSoftwaresAtivos: IpanamahSoftwareAtivoList;
+    function GetSoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList;
+    function GetSeries: IpanamahStringValueList;
     function GetAtivo: Boolean;
     procedure SetId(const AId: string);
-    procedure SetNome(const ANome: string);
+    procedure SetRazaoSocial(const ARazaoSocial: string);
     procedure SetFantasia(const AFantasia: string);
     procedure SetRamo(const ARamo: string);
     procedure SetUf(const AUf: string);
     procedure SetCidade(const ACidade: string);
     procedure SetRevendaId(const ARevendaId: variant);
     procedure SetBairro(const ABairro: string);
-    procedure SetSoftwaresAtivos(const ASoftwaresAtivos: IPanamahSoftwareAtivoList);
-    procedure SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList);
-    procedure SetSeries(const ASeries: IPanamahStringValueList);
+    procedure SetSoftwaresAtivos(const ASoftwaresAtivos: IpanamahSoftwareAtivoList);
+    procedure SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList);
+    procedure SetSeries(const ASeries: IpanamahStringValueList);
     procedure SetAtivo(const AAtivo: Boolean);
     function GetModelName: string;    
   public
@@ -103,16 +103,16 @@ type
     function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
-    property Nome: string read GetNome write SetNome;
+    property RazaoSocial: string read GetRazaoSocial write SetRazaoSocial;
     property Fantasia: string read GetFantasia write SetFantasia;
     property Ramo: string read GetRamo write SetRamo;
     property Uf: string read GetUf write SetUf;
     property Cidade: string read GetCidade write SetCidade;
     property RevendaId: variant read GetRevendaId write SetRevendaId;
     property Bairro: string read GetBairro write SetBairro;
-    property SoftwaresAtivos: IPanamahSoftwareAtivoList read GetSoftwaresAtivos write SetSoftwaresAtivos;
-    property SoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList read GetSoftwaresEmContratosDeManutencao write SetSoftwaresEmContratosDeManutencao;
-    property Series: IPanamahStringValueList read GetSeries write SetSeries;
+    property SoftwaresAtivos: IpanamahSoftwareAtivoList read GetSoftwaresAtivos write SetSoftwaresAtivos;
+    property SoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList read GetSoftwaresEmContratosDeManutencao write SetSoftwaresEmContratosDeManutencao;
+    property Series: IpanamahStringValueList read GetSeries write SetSeries;
     property Ativo: Boolean read GetAtivo write SetAtivo;
   end;
 
@@ -161,14 +161,14 @@ begin
   FId := AId;
 end;
 
-function TPanamahAssinante.GetNome: string;
+function TPanamahAssinante.GetRazaoSocial: string;
 begin
-  Result := FNome;
+  Result := FRazaoSocial;
 end;
 
-procedure TPanamahAssinante.SetNome(const ANome: string);
+procedure TPanamahAssinante.SetRazaoSocial(const ARazaoSocial: string);
 begin
-  FNome := ANome;
+  FRazaoSocial := ARazaoSocial;
 end;
 
 function TPanamahAssinante.GetFantasia: string;
@@ -231,32 +231,32 @@ begin
   FBairro := ABairro;
 end;
 
-function TPanamahAssinante.GetSoftwaresAtivos: IPanamahSoftwareAtivoList;
+function TPanamahAssinante.GetSoftwaresAtivos: IpanamahSoftwareAtivoList;
 begin
   Result := FSoftwaresAtivos;
 end;
 
-procedure TPanamahAssinante.SetSoftwaresAtivos(const ASoftwaresAtivos: IPanamahSoftwareAtivoList);
+procedure TPanamahAssinante.SetSoftwaresAtivos(const ASoftwaresAtivos: IpanamahSoftwareAtivoList);
 begin
   FSoftwaresAtivos := ASoftwaresAtivos;
 end;
 
-function TPanamahAssinante.GetSoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList;
+function TPanamahAssinante.GetSoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList;
 begin
   Result := FSoftwaresEmContratosDeManutencao;
 end;
 
-procedure TPanamahAssinante.SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IPanamahSoftwareContratoManutencaoList);
+procedure TPanamahAssinante.SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList);
 begin
   FSoftwaresEmContratosDeManutencao := ASoftwaresEmContratosDeManutencao;
 end;
 
-function TPanamahAssinante.GetSeries: IPanamahStringValueList;
+function TPanamahAssinante.GetSeries: IpanamahStringValueList;
 begin
   Result := FSeries;
 end;
 
-procedure TPanamahAssinante.SetSeries(const ASeries: IPanamahStringValueList);
+procedure TPanamahAssinante.SetSeries(const ASeries: IpanamahStringValueList);
 begin
   FSeries := ASeries;
 end;
@@ -278,7 +278,7 @@ begin
   JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
   try
     FId := GetFieldValueAsString(JSONObject, 'id');
-    FNome := GetFieldValueAsString(JSONObject, 'nome');
+    FRazaoSocial := GetFieldValueAsString(JSONObject, 'razaoSocial');
     FFantasia := GetFieldValueAsString(JSONObject, 'fantasia');
     FRamo := GetFieldValueAsString(JSONObject, 'ramo');
     FUf := GetFieldValueAsString(JSONObject, 'uf');
@@ -286,11 +286,11 @@ begin
     FRevendaId := GetFieldValue(JSONObject, 'revendaId');
     FBairro := GetFieldValueAsString(JSONObject, 'bairro');
     if JSONObject.Field['softwaresAtivos'] is TlkJSONlist then
-      FSoftwaresAtivos := TPanamahSoftwareAtivoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['softwaresAtivos']));
+      FSoftwaresAtivos := TpanamahSoftwareAtivoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['softwaresAtivos']));
     if JSONObject.Field['softwaresEmContratosDeManutencao'] is TlkJSONlist then
-      FSoftwaresEmContratosDeManutencao := TPanamahSoftwareContratoManutencaoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['softwaresEmContratosDeManutencao']));
+      FSoftwaresEmContratosDeManutencao := TpanamahSoftwareContratoManutencaoList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['softwaresEmContratosDeManutencao']));
     if JSONObject.Field['series'] is TlkJSONlist then
-      FSeries := TPanamahStringValueList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['series']));
+      FSeries := TpanamahStringValueList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['series']));
     FAtivo := GetFieldValueAsBoolean(JSONObject, 'ativo');
   finally
     JSONObject.Free;
@@ -304,7 +304,7 @@ begin
   JSONObject := TlkJSONobject.Create;
   try    
     SetFieldValue(JSONObject, 'id', FId);    
-    SetFieldValue(JSONObject, 'nome', FNome);    
+    SetFieldValue(JSONObject, 'razaoSocial', FRazaoSocial);    
     SetFieldValue(JSONObject, 'fantasia', FFantasia);    
     SetFieldValue(JSONObject, 'ramo', FRamo);    
     SetFieldValue(JSONObject, 'uf', FUf);    
@@ -329,7 +329,7 @@ end;
 
 function TPanamahAssinante.GetModelName: string;
 begin
-  Result := 'PanamahAssinante';
+  Result := 'ASSINANTE';
 end;
 
 function TPanamahAssinante.Clone: IPanamahModel;
@@ -364,7 +364,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahAssinante).Validate);
 end;
 
 class function TPanamahAssinanteList.FromJSON(const AJSON: string): IPanamahAssinanteList;
@@ -456,8 +456,8 @@ begin
   if ModelValueIsEmpty(Assinante.Id) then
     Validations.AddFailure('Assinante.Id obrigatorio(a)');
   
-  if ModelValueIsEmpty(Assinante.Nome) then
-    Validations.AddFailure('Assinante.Nome obrigatorio(a)');
+  if ModelValueIsEmpty(Assinante.RazaoSocial) then
+    Validations.AddFailure('Assinante.RazaoSocial obrigatorio(a)');
   
   if ModelValueIsEmpty(Assinante.Fantasia) then
     Validations.AddFailure('Assinante.Fantasia obrigatorio(a)');

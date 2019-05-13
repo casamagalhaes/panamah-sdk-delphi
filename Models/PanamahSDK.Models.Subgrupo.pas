@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahSubgrupo = interface(IPanamahModel)
-    ['{7758EBA6-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7A9580-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -28,7 +28,7 @@ type
   end;
   
   IPanamahSubgrupoList = interface(IPanamahModelList)
-    ['{7758EBA7-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7A9581-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahSubgrupo;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSubgrupo);
     procedure Add(const AItem: IPanamahSubgrupo);
@@ -193,7 +193,7 @@ end;
 
 function TPanamahSubgrupo.GetModelName: string;
 begin
-  Result := 'PanamahSubgrupo';
+  Result := 'SUBGRUPO';
 end;
 
 function TPanamahSubgrupo.Clone: IPanamahModel;
@@ -228,7 +228,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahSubgrupo).Validate);
 end;
 
 class function TPanamahSubgrupoList.FromJSON(const AJSON: string): IPanamahSubgrupoList;

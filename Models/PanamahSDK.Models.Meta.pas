@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahMeta = interface(IPanamahModel)
-    ['{775960D0-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7AE3A0-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetMes: Double;
     function GetAno: Double;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahMetaList = interface(IPanamahModelList)
-    ['{775960D1-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7AE3A1-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahMeta;
     procedure SetItem(AIndex: Integer; const Value: IPanamahMeta);
     procedure Add(const AItem: IPanamahMeta);
@@ -212,7 +212,7 @@ end;
 
 function TPanamahMeta.GetModelName: string;
 begin
-  Result := 'PanamahMeta';
+  Result := 'META';
 end;
 
 function TPanamahMeta.Clone: IPanamahModel;
@@ -247,7 +247,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahMeta).Validate);
 end;
 
 class function TPanamahMetaList.FromJSON(const AJSON: string): IPanamahMetaList;

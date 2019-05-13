@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahEan = interface(IPanamahModel)
-    ['{775A2424-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7BA6F0-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetProdutoId: string;
     function GetTributado: Boolean;
@@ -22,7 +22,7 @@ type
   end;
   
   IPanamahEanList = interface(IPanamahModelList)
-    ['{775A2425-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7BA6F1-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahEan;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEan);
     procedure Add(const AItem: IPanamahEan);
@@ -155,7 +155,7 @@ end;
 
 function TPanamahEan.GetModelName: string;
 begin
-  Result := 'PanamahEan';
+  Result := 'EAN';
 end;
 
 function TPanamahEan.Clone: IPanamahModel;
@@ -190,7 +190,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEan).Validate);
 end;
 
 class function TPanamahEanList.FromJSON(const AJSON: string): IPanamahEanList;

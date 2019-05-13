@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahEstoqueMovimentacao = interface(IPanamahModel)
-    ['{775BD1D3-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7D7BB0-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetLocalEstoqueId: string;
     function GetDataHora: TDateTime;
@@ -37,7 +37,7 @@ type
   end;
   
   IPanamahEstoqueMovimentacaoList = interface(IPanamahModelList)
-    ['{775BD1D4-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7D7BB1-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahEstoqueMovimentacao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEstoqueMovimentacao);
     procedure Add(const AItem: IPanamahEstoqueMovimentacao);
@@ -250,7 +250,7 @@ end;
 
 function TPanamahEstoqueMovimentacao.GetModelName: string;
 begin
-  Result := 'PanamahEstoqueMovimentacao';
+  Result := 'ESTOQUE_MOVIMENTACAO';
 end;
 
 function TPanamahEstoqueMovimentacao.Clone: IPanamahModel;
@@ -285,7 +285,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEstoqueMovimentacao).Validate);
 end;
 
 class function TPanamahEstoqueMovimentacaoList.FromJSON(const AJSON: string): IPanamahEstoqueMovimentacaoList;

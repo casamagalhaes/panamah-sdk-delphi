@@ -9,17 +9,17 @@ uses
 type
   
   IPanamahAcesso = interface(IPanamahModel)
-    ['{775987EA-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B0ABA-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
-    function GetFuncionarioIds: IPanamahStringValueList;
+    function GetFuncionarioIds: IpanamahStringValueList;
     procedure SetId(const AId: string);
-    procedure SetFuncionarioIds(const AFuncionarioIds: IPanamahStringValueList);
+    procedure SetFuncionarioIds(const AFuncionarioIds: IpanamahStringValueList);
     property Id: string read GetId write SetId;
-    property FuncionarioIds: IPanamahStringValueList read GetFuncionarioIds write SetFuncionarioIds;
+    property FuncionarioIds: IpanamahStringValueList read GetFuncionarioIds write SetFuncionarioIds;
   end;
   
   IPanamahAcessoList = interface(IPanamahModelList)
-    ['{775987EB-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7B0ABB-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahAcesso;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAcesso);
     procedure Add(const AItem: IPanamahAcesso);
@@ -29,11 +29,11 @@ type
   TPanamahAcesso = class(TInterfacedObject, IPanamahAcesso)
   private
     FId: string;
-    FFuncionarioIds: IPanamahStringValueList;
+    FFuncionarioIds: IpanamahStringValueList;
     function GetId: string;
-    function GetFuncionarioIds: IPanamahStringValueList;
+    function GetFuncionarioIds: IpanamahStringValueList;
     procedure SetId(const AId: string);
-    procedure SetFuncionarioIds(const AFuncionarioIds: IPanamahStringValueList);
+    procedure SetFuncionarioIds(const AFuncionarioIds: IpanamahStringValueList);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -43,7 +43,7 @@ type
     function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
-    property FuncionarioIds: IPanamahStringValueList read GetFuncionarioIds write SetFuncionarioIds;
+    property FuncionarioIds: IpanamahStringValueList read GetFuncionarioIds write SetFuncionarioIds;
   end;
 
   TPanamahAcessoList = class(TInterfacedObject, IPanamahAcessoList)
@@ -91,12 +91,12 @@ begin
   FId := AId;
 end;
 
-function TPanamahAcesso.GetFuncionarioIds: IPanamahStringValueList;
+function TPanamahAcesso.GetFuncionarioIds: IpanamahStringValueList;
 begin
   Result := FFuncionarioIds;
 end;
 
-procedure TPanamahAcesso.SetFuncionarioIds(const AFuncionarioIds: IPanamahStringValueList);
+procedure TPanamahAcesso.SetFuncionarioIds(const AFuncionarioIds: IpanamahStringValueList);
 begin
   FFuncionarioIds := AFuncionarioIds;
 end;
@@ -109,7 +109,7 @@ begin
   try
     FId := GetFieldValueAsString(JSONObject, 'id');
     if JSONObject.Field['funcionarioIds'] is TlkJSONlist then
-      FFuncionarioIds := TPanamahStringValueList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['funcionarioIds']));
+      FFuncionarioIds := TpanamahStringValueList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['funcionarioIds']));
   finally
     JSONObject.Free;
   end;
@@ -137,7 +137,7 @@ end;
 
 function TPanamahAcesso.GetModelName: string;
 begin
-  Result := 'PanamahAcesso';
+  Result := 'ACESSO';
 end;
 
 function TPanamahAcesso.Clone: IPanamahModel;
@@ -172,7 +172,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahAcesso).Validate);
 end;
 
 class function TPanamahAcessoList.FromJSON(const AJSON: string): IPanamahAcessoList;

@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahFormaPagamento = interface(IPanamahModel)
-    ['{775960D8-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7AE3A8-75CB-11E9-8B82-D97403569AFA}']
     function GetId: string;
     function GetDescricao: string;
     procedure SetId(const AId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahFormaPagamentoList = interface(IPanamahModelList)
-    ['{775960D9-7368-11E9-BBA3-6970D342FA48}']
+    ['{8E7AE3A9-75CB-11E9-8B82-D97403569AFA}']
     function GetItem(AIndex: Integer): IPanamahFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFormaPagamento);
     procedure Add(const AItem: IPanamahFormaPagamento);
@@ -136,7 +136,7 @@ end;
 
 function TPanamahFormaPagamento.GetModelName: string;
 begin
-  Result := 'PanamahFormaPagamento';
+  Result := 'FORMA_PAGAMENTO';
 end;
 
 function TPanamahFormaPagamento.Clone: IPanamahModel;
@@ -171,7 +171,7 @@ var
 begin
   Result := TPanamahValidationResult.CreateSuccess;
   for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahFormaPagamento).Validate);
 end;
 
 class function TPanamahFormaPagamentoList.FromJSON(const AJSON: string): IPanamahFormaPagamentoList;
