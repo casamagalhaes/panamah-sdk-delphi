@@ -515,8 +515,16 @@ begin
 end;
 
 function DateTimeToISO8601(const AInput: TDateTime): string;
+var
+  TimeZoneInformation: TTimeZoneInformation;
+  Hours: string;
+
 begin
-  Result := FormatDateTime('yyyy-mm-dd', AInput) + 'T' + FormatDateTime('hh:nn:ss', AInput) + '+0000';
+  GetTimeZoneInformation(TimeZoneInformation);
+  Hours := Format('%.*d',[4, -1 * Trunc(TimeZoneInformation.Bias / 60) * 100]);
+  if not StartsText('-', Hours) then
+    Hours := Concat('+', Hours);
+  Result := FormatDateTime('yyyy-mm-dd', AInput) + 'T' + FormatDateTime('hh:nn:ss', AInput) + Hours;
 end;
 
 function ISO8601ToDateTime(const AInput: string): TDateTime;

@@ -15,14 +15,6 @@ uses
 
 type
 
-  TPanamahBatchFilenameRec = class
-  public
-    CreatedAt: TDateTime;
-    Priority: Boolean;
-    class function FromFilename(const AFilename: string): TPanamahBatchFilenameRec;
-    function ToString: string; reintroduce;
-  end;
-
   IPanamahBatch = interface(IJSONSerializable)
     ['{97748D13-F5B3-48B8-AA21-19E769790589}']
     procedure SetCreatedAt(ACreatedAt: TDateTime);
@@ -114,6 +106,17 @@ type
     property Items[AIndex: Integer]: IPanamahBatch read GetItem write SetItem; default;
   end;
 
+  TPanamahBatchFilename = class
+  private
+    FCreatedAt: TDateTime;
+    FPriority: Boolean;
+  public
+    property CreatedAt: TDateTime read FCreatedAt write FCreatedAt;
+    property Priority: Boolean read FPriority write FPriority;
+    class function FromFilename(const AFilename: string): TPanamahBatchFilename;
+    function ToString: string; reintroduce;
+  end;
+
 implementation
 
 { TPanamahBatch }
@@ -146,9 +149,9 @@ end;
 
 function TPanamahBatch.SaveToDirectory(const ADirectory: string): string;
 var
-  BatchFilename: TPanamahBatchFilenameRec;
+  BatchFilename: TPanamahBatchFilename;
 begin
-  BatchFilename := TPanamahBatchFilenameRec.Create;
+  BatchFilename := TPanamahBatchFilename.Create;
   try
     BatchFilename.CreatedAt := FCreatedAt;
     BatchFilename.Priority := FPriority;
@@ -189,11 +192,11 @@ end;
 
 class function TPanamahBatch.FromFile(const AFilename: string): IPanamahBatch;
 var
-  BatchFilename: TPanamahBatchFilenameRec;
+  BatchFilename: TPanamahBatchFilename;
   BatchFile: TStrings;
 begin
   Result := TPanamahBatch.Create;
-  BatchFilename := TPanamahBatchFilenameRec.FromFilename(AFilename);
+  BatchFilename := TPanamahBatchFilename.FromFilename(AFilename);
   try
     Result.CreatedAt := BatchFilename.CreatedAt;
     Result.Priority := BatchFilename.Priority;
@@ -247,10 +250,10 @@ end;
 
 function TPanamahBatch.MoveToDirectory(const ASource, ADestiny: string): string;
 var
-  BatchFilename: TPanamahBatchFilenameRec;
+  BatchFilename: TPanamahBatchFilename;
   SourceFile, DestinyFile: string;
 begin
-  BatchFilename := TPanamahBatchFilenameRec.Create;
+  BatchFilename := TPanamahBatchFilename.Create;
   try
     BatchFilename.CreatedAt := FCreatedAt;
     BatchFilename.Priority := FPriority;
@@ -297,6 +300,7 @@ begin
   Result := TPanamahBatchList.Create;
   Batches := GetBatchesInDirectory(ADirectory);
   try
+
     for I := 0 to Batches.Count - 1 do
       Result.Add(TPanamahBatch.FromFile(Batches[I]));
   finally
@@ -358,6 +362,7 @@ var
 begin
   ForceDirectories(ADirectory);
   Result := TStringList.Create;
+  TStringList(Result).Sorted := True;
   if DirectoryExists(ADirectory) then
     begin
     if FindFirst(Format('%s\*.pbt', [ADirectory]), faAnyFile, SearchRec) = 0 then
@@ -401,41 +406,45 @@ begin
   end;
 end;
 
-{ TPanamahBatchFilenameRec }
+{ TPanamahBatchFilename }
 
-class function TPanamahBatchFilenameRec.FromFilename(const AFilename: string): TPanamahBatchFilenameRec;
+class function TPanamahBatchFilename.FromFilename(const AFilename: string): TPanamahBatchFilename;
 var
   Words: TStrings;
+  Offset: Integer;
 begin
-  Result := TPanamahBatchFilenameRec.Create;
+  Result := TPanamahBatchFilename.Create;
   Words := TStringList.Create;
   try
     Words.Delimiter := '_';
     Words.DelimitedText := ChangeFileExt(ExtractFilename(AFilename), EmptyStr);
+    if Words.Count >= 8 then
+      Result.Priority := SameText(Words[0], '0');
+    Offset := 0;
+    if Result.Priority then
+      Offset := 1;
     if Words.Count >= 7 then
     begin
       Result.CreatedAt := ISO8601ToDateTime(Format('%s-%s-%sT%s:%s:%s.%s', [
-        Words[0],
-        Words[1],
-        Words[2],
-        Words[3],
-        Words[4],
-        Words[5],
-        Words[6]
+        Words[Offset + 0],
+        Words[Offset + 1],
+        Words[Offset + 2],
+        Words[Offset + 3],
+        Words[Offset + 4],
+        Words[Offset + 5],
+        Words[Offset + 6]
       ]));
     end;
-    if Words.Count >= 8 then
-      Result.Priority := SameText(Words[7], 'P');
   finally
     Words.Free;
   end;
 end;
 
-function TPanamahBatchFilenameRec.ToString: string;
+function TPanamahBatchFilename.ToString: string;
 begin
   Result := FormatDateTime('YYYY_MM_DD_HH_NN_SS_ZZZ', CreatedAt);
   if Priority then
-    Result := Concat(Result, '_P');
+    Result := Concat('0_', Result);
 end;
 
 end.

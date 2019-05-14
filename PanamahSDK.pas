@@ -96,7 +96,6 @@ type
     procedure Flush;
     procedure Save(ANFeDocument: IPanamahNFeDocument); overload;
     procedure Save(AAcesso: IPanamahAcesso); overload;
-    procedure Save(AAssinante: IPanamahAssinante); overload;
     procedure Save(ACliente: IPanamahCliente); overload;
     procedure Save(ACompra: IPanamahCompra); overload;
     procedure Save(AEan: IPanamahEan); overload;
@@ -120,7 +119,6 @@ type
     procedure Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
     procedure Save(AVenda: IPanamahVenda); overload;
     procedure Delete(AAcesso: IPanamahAcesso); overload;
-    procedure Delete(AAssinante: IPanamahAssinante); overload;
     procedure Delete(ACliente: IPanamahCliente); overload;
     procedure Delete(ACompra: IPanamahCompra); overload;
     procedure Delete(AEan: IPanamahEan); overload;
@@ -184,7 +182,7 @@ end;
 
 function TPanamahStream.ReadNFe(const AFilename: string): IPanamahNFeDocument;
 begin
-  Result := ReadNFe(TPanamahNFeDocumentType.ndtDESCONHECIDO, AFilename);
+  Result := Self.ReadNFe(ndtDESCONHECIDO, AFilename);
 end;
 
 procedure TPanamahStream.Init;
@@ -240,11 +238,6 @@ end;
 procedure TPanamahStream.Save(AFornecedor: IPanamahFornecedor);
 begin
   FProcessor.Save(AFornecedor);
-end;
-
-procedure TPanamahStream.Save(AAssinante: IPanamahAssinante);
-begin
-  FProcessor.Save(AAssinante);
 end;
 
 procedure TPanamahStream.Save(AAcesso: IPanamahAcesso);
@@ -368,11 +361,6 @@ end;
 procedure TPanamahStream.Delete(AFornecedor: IPanamahFornecedor);
 begin
   FProcessor.Delete(AFornecedor);
-end;
-
-procedure TPanamahStream.Delete(AAssinante: IPanamahAssinante);
-begin
-  FProcessor.Delete(AAssinante);
 end;
 
 procedure TPanamahStream.Delete(AAcesso: IPanamahAcesso);

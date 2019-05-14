@@ -20,11 +20,14 @@ type
     function GetOperationType: TPanamahOperationType;
     function GetData: IPanamahModel;
     function GetDataType: string;
+    function GetId: Variant;
     procedure SetOperationType(AOperationType: TPanamahOperationType);
     procedure SetData(AData: IPanamahModel);
-    procedure SetDataType(ADataType: string);
+    procedure SetDataType(const ADataType: string);
+    procedure SetId(Id: Variant);
     property OperationType: TPanamahOperationType read GetOperationType write SetOperationType;
     property Data: IPanamahModel read GetData write SetData;
+    property Id: Variant read GetId write SetId;
   end;
 
   IPanamahOperationList = interface(IJSONSerializable)
@@ -52,12 +55,15 @@ type
     FOperationType: TPanamahOperationType;
     FData: IPanamahModel;
     FDataType: string;
+    FId: Variant;
     function GetOperationType: TPanamahOperationType;
     function GetData: IPanamahModel;
     function GetDataType: string;
+    function GetId: Variant;
     procedure SetOperationType(AOperationType: TPanamahOperationType);
     procedure SetData(AData: IPanamahModel);
-    procedure SetDataType(ADataType: string);
+    procedure SetDataType(const ADataType: string);
+    procedure SetId(AId: Variant);
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
@@ -68,6 +74,7 @@ type
     property OperationType: TPanamahOperationType read GetOperationType write SetOperationType;
     property Data: IPanamahModel read GetData write SetData;
     property DataType: string read GetDataType write SetDataType;
+    property Id: Variant read GetId write SetId;
   end;
 
   TPanamahOperationList = class(TInterfacedObject, IPanamahOperationList)
@@ -120,7 +127,8 @@ begin
     else
     if SameText(GetFieldValueAsString(JSONObject, 'op'), 'delete') then
       FOperationType := otDELETE;
-    FDataType := GetFieldValueAsString(JSONObject, 'tipoIdentificador');
+    FDataType := GetFieldValueAsString(JSONObject, 'tipo');
+    FId := GetFieldValueAsString(JSONObject, 'id');
     if JSONObject.Field['data'] is TlkJSONobject then
       FData := ParseJSONOfModelByDataType(FDataType, TlkJSON.GenerateText(JSONObject.Field['data']));
   finally
@@ -172,7 +180,8 @@ begin
         SetDataToId(JSONObject);
       end;
     end;
-    SetFieldValue(JSONObject, 'tipoIdentificador', GetDataTypeByModel(FData));
+    SetFieldValue(JSONObject, 'tipo', GetDataTypeByModel(FData));
+    SetFieldValue(JSONObject, 'id', FId);
     Result := TlkJSON.GenerateText(JSONObject);
   finally
     JSONObject.Free;
@@ -189,6 +198,11 @@ begin
   Result := FDataType;
 end;
 
+function TPanamahOperation.GetId: Variant;
+begin
+  Result := FId;
+end;
+
 function TPanamahOperation.GetOperationType: TPanamahOperationType;
 begin
   Result := FOperationType;
@@ -199,9 +213,14 @@ begin
   FData := AData;
 end;
 
-procedure TPanamahOperation.SetDataType(ADataType: string);
+procedure TPanamahOperation.SetDataType(const ADataType: string);
 begin
   FDataType := ADataType;
+end;
+
+procedure TPanamahOperation.SetId(AId: Variant);
+begin
+  FId := AId;
 end;
 
 procedure TPanamahOperation.SetOperationType(AOperationType: TPanamahOperationType);

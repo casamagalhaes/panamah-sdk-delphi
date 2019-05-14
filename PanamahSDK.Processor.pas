@@ -4,7 +4,8 @@ interface
 
 uses
   Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Enums,
-  PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Batch, PanamahSDK.Client, PanamahSDK.Consts;
+  PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Batch, PanamahSDK.Client,
+  PanamahSDK.Consts, uLkJSON;
 
 type
 
@@ -57,11 +58,64 @@ type
     procedure Flush;
   end;
 
+  IPanamahCountedOperations = interface(IJSONSerializable)
+    ['{6410783B-0596-422A-ABF4-827696C6BDDD}']
+    function GetTotal: Integer;
+    function GetItens: IPanamahOperationList;
+    procedure SetTotal(ATotal: Integer);
+    procedure SetItens(AItens: IPanamahOperationList);
+    property Total: Integer read GetTotal write SetTotal;
+    property Itens: IPanamahOperationList read GetItens write SetItens;
+  end;
+
+  IPanamahBatchResponse = interface(IJSONSerializable)
+    ['{12404D7B-9274-4F3D-BF35-2C17EAFB2C03}']
+    function GetSucessos: IPanamahCountedOperations;
+    function GetFalhas: IPanamahCountedOperations;
+    procedure SetSucessos(ASucessos: IPanamahCountedOperations);
+    procedure SetFalhas(AFalhas: IPanamahCountedOperations);
+    property Sucessos: IPanamahCountedOperations read GetSucessos write SetSucessos;
+    property Falhas: IPanamahCountedOperations read GetFalhas write SetFalhas;
+  end;
+
+  TPanamahCountedOperations = class(TInterfacedObject, IPanamahCountedOperations)
+  private
+    FTotal: Integer;
+    FItens: IPanamahOperationList;
+    function GetTotal: Integer;
+    function GetItens: IPanamahOperationList;
+    procedure SetTotal(ATotal: Integer);
+    procedure SetItens(AItens: IPanamahOperationList);
+  public
+    procedure DeserializeFromJSON(const AJSON: string);
+    function SerializeToJSON: string;
+    class function FromJSON(const AJSON: string): IPanamahCountedOperations;
+    property Total: Integer read GetTotal write SetTotal;
+    property Itens: IPanamahOperationList read GetItens write SetItens;
+  end;
+
+  TPanamahBatchResponse = class(TInterfacedObject, IPanamahBatchResponse)
+  private
+    FSucessos: IPanamahCountedOperations;
+    FFalhas: IPanamahCountedOperations;
+    function GetSucessos: IPanamahCountedOperations;
+    function GetFalhas: IPanamahCountedOperations;
+    procedure SetSucessos(ASucessos: IPanamahCountedOperations);
+    procedure SetFalhas(AFalhas: IPanamahCountedOperations);
+  public
+    procedure DeserializeFromJSON(const AJSON: string);
+    function SerializeToJSON: string;
+    class function FromJSON(const AJSON: string): IPanamahBatchResponse;
+    property Sucessos: IPanamahCountedOperations read GetSucessos write SetSucessos;
+    property Falhas: IPanamahCountedOperations read GetFalhas write SetFalhas;
+  end;
+
 implementation
 
-{ TPanamahBatchProcessor }
+uses
+  PanamahSDK.ValidationUtils, PanamahSDK.JsonUtils;
 
-uses PanamahSDK.ValidationUtils;
+{ TPanamahBatchProcessor }
 
 procedure TPanamahBatchProcessor.AccumulateCurrentBatch;
 begin
@@ -118,7 +172,9 @@ begin
     FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone));
     if BatchExpiredBySize(FConfig.BatchMaxSize) or
           BatchExpiredByCount(FConfig.BatchMaxCount) then
+    begin
       ExpireCurrentBatch;
+    end;
   finally
     FCriticalSection.Release;
   end;
@@ -263,6 +319,7 @@ procedure TPanamahBatchProcessor.SendAccumulatedBatches;
 var
   AccumulatedBatches: IPanamahBatchList;
   Response: IPanamahResponse;
+  BatchResponse: IPanamahBatchResponse;
   I: Integer;
 begin
   AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
@@ -272,6 +329,11 @@ begin
     Response := FClient.Post('/stream/data', AccumulatedBatches[I].SerializeToJSON, nil);
     if Response.Status = 200 then
     begin
+      BatchResponse := TPanamahBatchResponse.FromJSON(Response.Content);
+      if Assigned(BatchResponse.Falhas) and (BatchResponse.Falhas.Total > 0) then
+      begin
+
+      end;
       AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
     end;
   end;
@@ -282,13 +344,126 @@ begin
   FConfig := AConfig;
   FClient := TPanamahStreamClient.Create(API_BASE_URL, FConfig.AuthorizationToken, FConfig.Secret, FConfig.AssinanteId);
   FCurrentBatch := TPanamahBatch.Create;
-  inherited Start;
+  inherited {$IFDEF UNICODE}Start{$ELSE}Resume{$ENDIF};
 end;
 
 procedure TPanamahBatchProcessor.Stop;
 begin
   Terminate;
   WaitFor;
+end;
+
+{ TPanamahBatchResponse }
+
+procedure TPanamahBatchResponse.DeserializeFromJSON(const AJSON: string);
+var
+  JSONObject: TlkJSONobject;
+begin
+  JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
+  try
+    if JSONObject.Field['falhas'] is TlkJSONobject then
+      FFalhas := TPanamahCountedOperations.FromJSON(TlkJSON.GenerateText(JSONObject.Field['falhas']));
+    if JSONObject.Field['sucessos'] is TlkJSONobject then
+      FSucessos := TPanamahCountedOperations.FromJSON(TlkJSON.GenerateText(JSONObject.Field['sucessos']));
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+function TPanamahBatchResponse.SerializeToJSON: string;
+var
+  JSONObject: TlkJSONobject;
+begin
+  JSONObject := TlkJSONobject.Create;
+  try
+    SetFieldValue(JSONObject, 'falhas', FFalhas);
+    SetFieldValue(JSONObject, 'sucessos', FSucessos);
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+class function TPanamahBatchResponse.FromJSON(const AJSON: string): IPanamahBatchResponse;
+begin
+  Result := TPanamahBatchResponse.Create;
+  Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahBatchResponse.GetFalhas: IPanamahCountedOperations;
+begin
+  Result := FFalhas;
+end;
+
+function TPanamahBatchResponse.GetSucessos: IPanamahCountedOperations;
+begin
+  Result := FSucessos;
+end;
+
+procedure TPanamahBatchResponse.SetFalhas(AFalhas: IPanamahCountedOperations);
+begin
+  FFalhas := AFalhas;
+end;
+
+procedure TPanamahBatchResponse.SetSucessos(ASucessos: IPanamahCountedOperations);
+begin
+  FSucessos := ASucessos;
+end;
+
+{ TPanamahCountedOperations }
+
+procedure TPanamahCountedOperations.DeserializeFromJSON(const AJSON: string);
+var
+  JSONObject: TlkJSONobject;
+begin
+  JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
+  try
+    FTotal := GetFieldValueAsInteger(JSONObject, 'total');
+    if JSONObject.Field['itens'] is TlkJSONobject then
+      FItens := TPanamahOperationList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+function TPanamahCountedOperations.SerializeToJSON: string;
+var
+  JSONObject: TlkJSONobject;
+begin
+  JSONObject := TlkJSONobject.Create;
+  try
+    SetFieldValue(JSONObject, 'total', FTotal);
+    SetFieldValue(JSONObject, 'itens', FItens);
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+class function TPanamahCountedOperations.FromJSON(const AJSON: string): IPanamahCountedOperations;
+begin
+  Result := TPanamahCountedOperations.Create;
+  Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahCountedOperations.GetItens: IPanamahOperationList;
+begin
+  Result := FItens;
+end;
+
+function TPanamahCountedOperations.GetTotal: Integer;
+begin
+  Result := FTotal;
+end;
+
+procedure TPanamahCountedOperations.SetItens(AItens: IPanamahOperationList);
+begin
+  FItens := AItens;
+end;
+
+procedure TPanamahCountedOperations.SetTotal(ATotal: Integer);
+begin
+  FTotal := ATotal;
 end;
 
 end.

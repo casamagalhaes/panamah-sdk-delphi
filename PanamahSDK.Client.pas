@@ -3,9 +3,13 @@ unit PanamahSDK.Client;
 interface
 
 uses
-  SysUtils, StrUtils, Classes, IdHTTP, IdSSLOpenSSL, IdSSLOpenSSLHeaders,
-  {$IFDEF UNICODE}IdCTypes, {$ELSE}IdGlobal, {$ENDIF}IdStack, PanamahSDK.Types, PanamahSDK.Consts, uLkJSON,
-  PanamahSDK.JsonUtils, EncdDecd, DateUtils;
+  SysUtils, StrUtils, Classes,
+  {$IFDEF UNICODE}
+  IdHTTP, IdSSLOpenSSL, IdSSLOpenSSLHeaders, IdCTypes, IdStack,
+  {$ELSE}
+  ssl_openssl, ssl_openssl_lib, httpsend, blcksock, synautil,    
+  {$ENDIF}
+  PanamahSDK.Types, PanamahSDK.Consts, uLkJSON, PanamahSDK.JsonUtils, EncdDecd, DateUtils;
 
 type
 
@@ -95,7 +99,7 @@ type
       AParams, AHeaders: TStrings; AContent: string = ''; const ATokens: TPanamahTokenStorage = nil);
   end;
 
-  TResponse = class(TInterfacedObject, IPanamahResponse)
+  TPanamahResponse = class(TInterfacedObject, IPanamahResponse)
   private
     FStatus: Integer;
     FContent: string;
@@ -114,6 +118,7 @@ type
     property Status: Integer read GetStatus write SetStatus;
   end;
 
+  {$IFDEF UNICODE}
   TPanamahSDKIdHTTP = class(TIdCustomHTTP)
   public
     constructor Create(AOwner: TComponent);
@@ -121,8 +126,9 @@ type
     function Delete(const AURL: string; AResponseContent: TStream): string; overload;
     function Delete(const AURL: string): string; overload;
   end;
+  {$ENDIF}
 
-  TPanamahClient = class abstract(TInterfacedObject, IPanamahClient)
+  TPanamahClient = class(TInterfacedObject, IPanamahClient)
   protected
     FBaseUrl: string;
   public
@@ -176,6 +182,7 @@ implementation
 
 uses PanamahSDK.Crypto;
 
+{$IFDEF UNICODE}
 function TPanamahClient.MakeRequest(const ARequest: IPanamahRequest): IPanamahResponse;
 var
   ResponseContent: string;
@@ -218,21 +225,13 @@ begin
           case ARequest.Method of
             mtGET:
             begin
-              {$IFDEF UNICODE}
               ResponseContent := HTTP.Get(ARequest.URL);
-              {$ELSE}
-              ResponseContent := Utf8ToAnsi(HTTP.Get(ARequest.URL));
-              {$ENDIF}
             end;
             mtPOST:
             begin
               RequestContent := TStringStream.Create(ARequest.Content);
               try
-                {$IFDEF UNICODE}
                 ResponseContent := HTTP.Post(ARequest.URL, RequestContent);
-                {$ELSE}
-                ResponseContent := Utf8ToAnsi(HTTP.Post(ARequest.URL, RequestContent));
-                {$ENDIF}
               finally
                 FreeAndNil(RequestContent);
               end;
@@ -241,22 +240,14 @@ begin
             begin
               RequestContent := TStringStream.Create(ARequest.Content);
               try
-                {$IFDEF UNICODE}
                 ResponseContent := HTTP.Put(ARequest.URL, RequestContent);
-                {$ELSE}
-                ResponseContent := Utf8ToAnsi(HTTP.Put(ARequest.URL, RequestContent));
-                {$ENDIF}
               finally
                 FreeAndNil(RequestContent);
               end;
             end;
             mtDELETE:
             begin
-              {$IFDEF UNICODE}
               ResponseContent := HTTP.Delete(ARequest.URL);
-              {$ELSE}
-              ResponseContent := Utf8ToAnsi(HTTP.Delete(ARequest.URL));
-              {$ENDIF}
             end;
           end;
         except
@@ -288,11 +279,104 @@ begin
     finally
       HTTPIOHandler.Free;
     end;
-    Result := TResponse.Create(HTTP.ResponseCode, HTTP.Response.RawHeaders, ResponseContent);
+    Result := TPanamahResponse.Create(HTTP.ResponseCode, HTTP.Response.RawHeaders, ResponseContent);
   finally
     FreeAndNil(HTTP);
   end;
 end;
+{$ELSE}
+function TPanamahClient.MakeRequest(const ARequest: IPanamahRequest): IPanamahResponse;
+
+  function GetDocumentContent(HTTPClient: THttpSend): string;
+  var
+    ResponseDocument: TStrings;
+  begin
+    Result := EmptyStr;
+    if Assigned(HTTPClient) and Assigned(HTTPClient.Document) and (HTTPClient.Document.Size > 0) then
+    begin
+      HTTPClient.Document.Position := 0;
+      ResponseDocument := TStringList.Create;
+      try
+        ResponseDocument.LoadFromStream(HTTPClient.Document);
+        Result := ResponseDocument.Text;
+      finally
+        ResponseDocument.Free;
+      end;
+    end;
+  end;
+
+  function GetMethodAsString(AMethod: TMethod): string;
+  begin
+    Result := EmptyStr;
+    case AMethod of
+      mtGET: Result := 'GET';
+      mtPUT: Result := 'PUT';
+      mtDELETE: Result := 'DELETE';
+      mtPOST: Result := 'POST';
+    end;
+  end;
+
+  function CreateRequestHeaders(ARequest: IPanamahRequest): TStrings;
+  var
+    I: Integer;
+  begin
+    Result := TStringList.Create;
+    Result.NameValueSeparator := ':';
+    Result.Values['Content-Type'] := 'application/json';
+    Result.Values['Accept'] := 'application/json';
+    if Assigned(ARequest.Headers) then
+    begin
+      for I := 0 to ARequest.Headers.Count - 1 do
+        Result.Values[ARequest.Headers.Names[I]] := ARequest.Headers.Values[ARequest.Headers.Names[I]];
+    end;
+  end;
+
+var
+  HTTPClient: THttpSend;
+  RequestHeaders: TStrings;
+  Response: IPanamahResponse;
+begin
+  Result := nil;
+  HTTPClient := THttpSend.Create;
+  HTTPClient.Protocol := '1.1';
+  try
+    HTTPClient.Timeout := 60000;
+    RequestHeaders := CreateRequestHeaders(ARequest);
+    try
+      HTTPClient.Headers.AddStrings(RequestHeaders);
+    finally
+        RequestHeaders.Free;
+    end;
+    if ARequest.Content <> EmptyStr then
+    begin
+      HTTPClient.
+      HTTPClient.Document.Position := 0;
+      WriteStrToStream(HTTPClient.Document, ARequest.Content);
+    end;  
+    HTTPClient.HTTPMethod(GetMethodAsString(ARequest.Method), ARequest.URL);
+    Response := TPanamahResponse.Create(HTTPClient.ResultCode, HTTPClient.Headers, GetDocumentContent(HTTPClient));
+    case Response.Status of
+      500: raise EPanamahSDKServerInternalException.Create(Response.Content);
+      400: raise EPanamahSDKBadRequestException.Create(Response.Content);
+      else
+      begin
+        if HTTPClient.Sock.LastError > 0 then
+        begin
+          case HTTPClient.Sock.LastError of
+            10061: raise EPanamahSDKConnectionRefusedException.Create(Response.Content);
+            else
+              raise EPanamahSDKHTTPProtocolException.Create(Response.Content);
+          end;
+        end
+        else
+          Result := Response; 
+      end;
+    end;
+  finally
+    HTTPClient.Free;
+  end;
+end;
+{$ENDIF}
 
 constructor TPanamahClient.Create(const ABaseURL: string);
 begin
@@ -471,7 +555,8 @@ begin
   FSecret := ASecret;
 end;
 
-{ TSDKIdHTTP }
+{$IFDEF UNICODE}
+{ TPanamahSDKIdHTTP }
 
 constructor TPanamahSDKIdHTTP.Create(AOwner: TComponent);
 begin
@@ -505,7 +590,8 @@ end;
 function TPanamahSDKIdHTTP.Delete(const AURL: string; AResponseContent: TStream): string;
 begin
   DoRequest(DELETE_HTTP_METHOD, AURL, nil, AResponseContent, []);
-end;
+end; 
+{$ENDIF}
 
 { TRequest }
 
@@ -612,47 +698,48 @@ end;
 
 { TResponse }
 
-constructor TResponse.Create(AStatus: Integer; const AHeaders: TStrings; AContent: string);
+constructor TPanamahResponse.Create(AStatus: Integer; const AHeaders: TStrings; AContent: string);
 begin
   FHeaders := TStringList.Create;
-  FHeaders.AddStrings(AHeaders);
+  if Assigned(AHeaders) then
+    FHeaders.AddStrings(AHeaders);
   FHeaders.NameValueSeparator := ':';
   SetStatus(AStatus);
   SetContent(AContent);
 end;
 
-destructor TResponse.Destroy;
+destructor TPanamahResponse.Destroy;
 begin
   FHeaders.Free;
   inherited;
 end;
 
-function TResponse.GetContent: string;
+function TPanamahResponse.GetContent: string;
 begin
   Result := FContent;
 end;
 
-function TResponse.GetHeaders: TStrings;
+function TPanamahResponse.GetHeaders: TStrings;
 begin
   Result := FHeaders;
 end;
 
-function TResponse.GetStatus: Integer;
+function TPanamahResponse.GetStatus: Integer;
 begin
   Result := FStatus;
 end;
 
-procedure TResponse.SetContent(const Value: string);
+procedure TPanamahResponse.SetContent(const Value: string);
 begin
   FContent := Value;
 end;
 
-procedure TResponse.SetHeaders(Value: TStrings);
+procedure TPanamahResponse.SetHeaders(Value: TStrings);
 begin
   FHeaders := Value;
 end;
 
-procedure TResponse.SetStatus(Value: Integer);
+procedure TPanamahResponse.SetStatus(Value: Integer);
 begin
   FStatus := Value;
 end;

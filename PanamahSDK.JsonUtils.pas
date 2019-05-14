@@ -120,24 +120,22 @@ end;
 
 procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: Variant); overload;
 begin
-  if AValue <> Unassigned then
-  begin
-    case varType(AValue) of
-      varEmpty:
-        AJSONObject.Add(AName, TlkJSONstring.Generate(EmptyStr));
-      varSmallint, varInteger, varInt64, varDouble, varCurrency, varShortInt, varWord, varLongWord:
-        AJSONObject.Add(AName, TlkJSONnumber.Generate(AValue));
-      varDate:
+  case varType(AValue) of
+    varSmallint, varInteger, varInt64, varDouble, varCurrency, varShortInt, varWord, varLongWord:
+      AJSONObject.Add(AName, TlkJSONnumber.Generate(AValue));
+    varDate:
+      if AValue <> Unassigned then
         AJSONObject.Add(AName, TlkJSONstring.Generate(DateTimeToISO8601(VarToDateTime(AValue))));
-      varString, {$IFDEF VER130}varUString,{$ENDIF} varOleStr, varStrArg:
-        AJSONObject.Add(AName, TlkJSONstring.Generate(VarToStr(AValue)));
-      varBoolean:
-        AJSONObject.Add(AName, TlkJSONboolean.Generate(AValue <> 0));
-      varNull:
-        AJSONObject.Add(AName, TlkJSONnull.Create);
-      else
-        AJSONObject.Add(AName, TlkJSONstring.Generate(VarToStr(AValue)));
-    end;
+    varString, {$IFDEF VER130}varUString,{$ENDIF} varOleStr, varStrArg:
+      if AValue <> Unassigned then
+        AJSONObject.Add(AName, TlkJSONstring.Generate(UpperCase(VarToStr(AValue))));
+    varBoolean:
+      AJSONObject.Add(AName, TlkJSONboolean.Generate(AValue <> 0));
+    varNull:
+      AJSONObject.Add(AName, TlkJSONnull.Create);
+    else
+      if AValue <> Unassigned then
+         AJSONObject.Add(AName, TlkJSONstring.Generate(UpperCase(VarToStr(AValue))));
   end;
 end;
 
