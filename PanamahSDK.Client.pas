@@ -52,6 +52,7 @@ type
   public
     property AccessToken: string read FAccessToken write FAccessToken;
     property RefreshToken: string read FRefreshToken write FRefreshToken;
+    procedure DeserializeFromResponse(AResponse: IPanamahResponse);
     class function From(const AResponse: IPanamahResponse): TPanamahTokenStorage; overload;
     function Clone: TPanamahTokenStorage;
   end;
@@ -259,7 +260,7 @@ begin
             if HTTP.ResponseCode = 400 then
               raise EPanamahSDKBadRequestException.Create(E.Message)
             else
-            if HTTP.ResponseCode = 404 then
+            if (HTTP.ResponseCode = 403) or (HTTP.ResponseCode = 404) then
             else
             if HTTP.ResponseCode = 422 then
             begin
@@ -449,7 +450,7 @@ begin
         RefreshResponse := MakeRequest(RefreshRequest);
         if RefreshResponse.Status = 200 then
         begin
-          FTokens := TPanamahTokenStorage.From(RefreshResponse);
+          FTokens.DeserializeFromResponse(RefreshResponse);
           Result := ARequestFunction(AURL, AParams, AHeaders, AContent, FTokens);
         end
         else
@@ -750,18 +751,23 @@ begin
   Result.RefreshToken := FRefreshToken;
 end;
 
-class function TPanamahTokenStorage.From(const AResponse: IPanamahResponse): TPanamahTokenStorage;
+procedure TPanamahTokenStorage.DeserializeFromResponse(AResponse: IPanamahResponse);
 var
   JsonObject: TlkJSONobject;
 begin
   JsonObject := TlkJSON.ParseText(AResponse.Content) as TlkJSONobject;
   try
-    Result := TPanamahTokenStorage.Create;
-    Result.AccessToken := JsonObject.Field['accessToken'].Value;
-    Result.RefreshToken := JsonObject.Field['refreshToken'].Value;
+    FAccessToken := JsonObject.Field['accessToken'].Value;
+    FRefreshToken := JsonObject.Field['refreshToken'].Value;
   finally
     JsonObject.Free;
   end;
+end;
+
+class function TPanamahTokenStorage.From(const AResponse: IPanamahResponse): TPanamahTokenStorage;
+begin
+  Result := TPanamahTokenStorage.Create;
+  Result.DeserializeFromResponse(AResponse);
 end;
 
 { TPanamahAdminClient }
