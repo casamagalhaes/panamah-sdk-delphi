@@ -21,10 +21,13 @@ type
     function GetData: IPanamahModel;
     function GetDataType: string;
     function GetId: Variant;
+    function GetDataId: Variant;
+    function Clone: IPanamahOperation;
     procedure SetOperationType(AOperationType: TPanamahOperationType);
     procedure SetData(AData: IPanamahModel);
     procedure SetDataType(const ADataType: string);
     procedure SetId(Id: Variant);
+    property DataType: string read GetDataType write SetDataType;
     property OperationType: TPanamahOperationType read GetOperationType write SetOperationType;
     property Data: IPanamahModel read GetData write SetData;
     property Id: Variant read GetId write SetId;
@@ -65,7 +68,9 @@ type
     procedure SetDataType(const ADataType: string);
     procedure SetId(AId: Variant);
   public
+    function GetDataId: Variant;
     function SerializeToJSON: string;
+    function Clone: IPanamahOperation;
     procedure DeserializeFromJSON(const AJSON: string);
     constructor Create(AOperationType: TPanamahOperationType; AModel: IPanamahModel); reintroduce; overload;
     constructor Create; reintroduce; overload;
@@ -109,6 +114,11 @@ begin
   FOperationType := AOperationType;
   FData := AModel;
   FDataType := GetDataTypeByModel(FData);
+end;
+
+function TPanamahOperation.Clone: IPanamahOperation;
+begin
+  Result := TPanamahOperation.FromJSON(SerializeToJSON);
 end;
 
 constructor TPanamahOperation.Create;
@@ -191,6 +201,23 @@ end;
 function TPanamahOperation.GetData: IPanamahModel;
 begin
   Result := FData;
+end;
+
+function TPanamahOperation.GetDataId: Variant;
+var
+  DataJSONObject: TlkJSONobject;
+begin
+  Result := varEmpty;
+  if Assigned(FData) then
+  begin
+    DataJSONObject := TlkJSON.ParseText(FData.SerializeToJSON) as TlkJSONobject;
+    try
+      if DataJSONObject.Field['id'] <> nil then
+        Result := GetFieldValueAsString(DataJSONObject, 'id');
+    finally
+      DataJSONObject.Free;
+    end;
+  end;
 end;
 
 function TPanamahOperation.GetDataType: string;

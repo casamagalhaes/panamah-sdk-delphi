@@ -79,6 +79,12 @@ type
     function GetOnBeforeObjectAddedToBatch: TPanamahModelEvent;
     function GetOnBeforeOperationtSent: TPanamahOperationEvent;
     function GetOnBeforeBatchSent: TPanamahBatchEvent;
+    function GetOnBeforeSave: TPanamahCancelableModelEvent;
+    function GetOnBeforeDelete: TPanamahCancelableModelEvent;
+    function GetOnError: TPanamahErrorEvent;
+    procedure SetOnBeforeSave(AEvent: TPanamahCancelableModelEvent);
+    procedure SetOnBeforeDelete(AEvent: TPanamahCancelableModelEvent);
+    procedure SetOnError(AEvent: TPanamahErrorEvent);
     procedure SetOnCurrentBatchExpired(AEvent: TPanamahBatchEvent);
     procedure SetOnBeforeObjectAddedToBatch(AEvent: TPanamahModelEvent);
     procedure SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
@@ -145,6 +151,9 @@ type
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
     property OnBeforeOperationSent: TPanamahOperationEvent read GetOnBeforeOperationtSent write SetOnBeforeOperationSent;
+    property OnBeforeSave: TPanamahCancelableModelEvent read GetOnBeforeSave write SetOnBeforeSave;
+    property OnBeforeDelete: TPanamahCancelableModelEvent read GetOnBeforeDelete write SetOnBeforeDelete;
+    property OnError: TPanamahErrorEvent read GetOnError write SetOnError;
   end;
 
 var
@@ -195,6 +204,12 @@ begin
   FProcessor.OnBeforeBatchSent := AEvent;
 end;
 
+procedure TPanamahStream.SetOnBeforeDelete(
+  AEvent: TPanamahCancelableModelEvent);
+begin
+  FProcessor.OnBeforeDelete := AEvent;
+end;
+
 procedure TPanamahStream.SetOnBeforeObjectAddedToBatch(AEvent: TPanamahModelEvent);
 begin
   FProcessor.OnBeforeObjectAddedToBatch := AEvent;
@@ -205,9 +220,19 @@ begin
   FProcessor.OnBeforeOperationSent := AEvent;
 end;
 
+procedure TPanamahStream.SetOnBeforeSave(AEvent: TPanamahCancelableModelEvent);
+begin
+  FProcessor.OnBeforeSave := AEvent;
+end;
+
 procedure TPanamahStream.SetOnCurrentBatchExpired(AEvent: TPanamahBatchEvent);
 begin
   FProcessor.OnCurrentBatchExpired := AEvent;
+end;
+
+procedure TPanamahStream.SetOnError(AEvent: TPanamahErrorEvent);
+begin
+  FProcessor.OnError := AEvent;
 end;
 
 procedure TPanamahStream.Save(AFormaPagamento: IPanamahFormaPagamento);
@@ -484,6 +509,11 @@ begin
   Result := FProcessor.OnBeforeBatchSent;
 end;
 
+function TPanamahStream.GetOnBeforeDelete: TPanamahCancelableModelEvent;
+begin
+  Result := FProcessor.OnBeforeDelete;
+end;
+
 function TPanamahStream.GetOnBeforeObjectAddedToBatch: TPanamahModelEvent;
 begin
   Result := FProcessor.OnBeforeObjectAddedToBatch;
@@ -494,9 +524,19 @@ begin
   Result := FProcessor.OnBeforeOperationSent;
 end;
 
+function TPanamahStream.GetOnBeforeSave: TPanamahCancelableModelEvent;
+begin
+  Result := FProcessor.OnBeforeSave;
+end;
+
 function TPanamahStream.GetOnCurrentBatchExpired: TPanamahBatchEvent;
 begin
   Result := FProcessor.OnCurrentBatchExpired;
+end;
+
+function TPanamahStream.GetOnError: TPanamahErrorEvent;
+begin
+  Result := FProcessor.OnError;
 end;
 
 { TPanamahSDKConfig }

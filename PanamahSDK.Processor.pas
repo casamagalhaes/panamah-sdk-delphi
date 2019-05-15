@@ -9,6 +9,11 @@ uses
 
 type
 
+  TPanamahCancelableModelEvent = procedure(AModel: IPanamahModel;
+    var AContinue: Boolean) of object;
+
+  TPanamahErrorEvent = procedure(AError: Exception) of object;
+
   TPanamahBatchEvent = procedure(ABatch: IPanamahBatch) of object;
 
   TPanamahModelEvent = procedure(AModel: IPanamahModel) of object;
@@ -17,6 +22,9 @@ type
 
   TPanamahBatchProcessor = class(TThread)
   private
+    FOnBeforeSave: TPanamahCancelableModelEvent;
+    FOnBeforeDelete: TPanamahCancelableModelEvent;
+    FOnError: TPanamahErrorEvent;
     FCriticalSection: TCriticalSection;
     FOnCurrentBatchExpired: TPanamahBatchEvent;
     FOnBeforeObjectAddedToBatch: TPanamahModelEvent;
@@ -25,6 +33,7 @@ type
     FClient: IPanamahClient;
     FConfig: IPanamahStreamConfig;
     FCurrentBatch: IPanamahBatch;
+    FOnOnError: TPanamahErrorEvent;
     function GetBatchAccumulationDirectory: string;
     function GetBatchSentDirectory: string;
     function GetCurrentBatchFilename: string;
@@ -32,6 +41,9 @@ type
     function CurrentBatchExpiredByTime(ABatchTTL: Integer): Boolean;
     function BatchExpiredBySize(AMaxSize: Integer): Boolean;
     function BatchExpiredByCount(AMaxCount: Integer): Boolean;
+    procedure DoOnBeforeSave(AModel: IPanamahModel; var AContinue: Boolean);
+    procedure DoOnBeforeDelete(AModel: IPanamahModel; var AContinue: Boolean);
+    procedure DoOnError(AError: Exception);
     procedure AccumulateCurrentBatch;
     procedure DoOnCurrentBatchExpired;
     procedure DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
@@ -41,6 +53,7 @@ type
     procedure LoadCurrentBatch;
     procedure SaveCurrentBatch;
     procedure ExpireCurrentBatch;
+    procedure CreateBatchWithFailedOperations(ASourceBatch: IPanamahBatch; AFailedOperations: IPanamahOperationList);
     procedure Process;
     procedure AddOperationToCurrentBatch(AOperationType: TPanamahOperationType; AModel: IPanamahModel);
   public
@@ -53,6 +66,9 @@ type
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read FOnBeforeObjectAddedToBatch write FOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read FOnBeforeBatchSent write FOnBeforeBatchSent;
     property OnBeforeOperationSent: TPanamahOperationEvent read FOnBeforeOperationSent write FOnBeforeOperationSent;
+    property OnBeforeSave: TPanamahCancelableModelEvent read FOnBeforeSave write FOnBeforeSave;
+    property OnBeforeDelete: TPanamahCancelableModelEvent read FOnBeforeDelete write FOnBeforeDelete;
+    property OnError: TPanamahErrorEvent read FOnOnError write FOnOnError;
     procedure Save(AModel: IPanamahModel);
     procedure Delete(AModel: IPanamahModel);
     procedure Flush;
@@ -127,20 +143,33 @@ end;
 procedure TPanamahBatchProcessor.Save(AModel: IPanamahModel);
 var
   ValidationResult: IPanamahValidationResult;
+  KeepExecuting: Boolean;
 begin
-  ValidationResult := AModel.Validate;
-  if ValidationResult.Valid then
-    AddOperationToCurrentBatch(otUPDATE, AModel)
-  else
-    raise EPanamahSDKExceptionValidationFailed.Create(ValidationResult.Reasons.Text);
+  KeepExecuting := True;
+  DoOnBeforeSave(AModel, KeepExecuting);
+  if KeepExecuting then
+  begin
+    ValidationResult := AModel.Validate;
+    if ValidationResult.Valid then
+      AddOperationToCurrentBatch(otUPDATE, AModel)
+    else
+      raise EPanamahSDKExceptionValidationFailed.Create(ValidationResult.Reasons.Text);
+  end;
 end;
 
 procedure TPanamahBatchProcessor.Delete(AModel: IPanamahModel);
+var
+  KeepExecuting: Boolean;
 begin
-  if ModelHasId(AModel) then
-    AddOperationToCurrentBatch(otDELETE, AModel)
-  else
-    raise EPanamahSDKExceptionValidationFailed.Create(Format('Id obrigatorio para exclusao de %s', [AModel.ModelName]));
+  KeepExecuting := True;
+  DoOnBeforeDelete(AModel, KeepExecuting);
+  if KeepExecuting then
+  begin
+    if ModelHasId(AModel) then
+      AddOperationToCurrentBatch(otDELETE, AModel)
+    else
+      raise EPanamahSDKExceptionValidationFailed.Create(Format('Id obrigatorio para exclusao de %s', [AModel.ModelName]));
+  end;
 end;
 
 function TPanamahBatchProcessor.GetBatchAccumulationDirectory: string;
@@ -201,10 +230,64 @@ begin
   FCriticalSection := TCriticalSection.Create;
 end;
 
+procedure TPanamahBatchProcessor.CreateBatchWithFailedOperations(
+  ASourceBatch: IPanamahBatch; AFailedOperations: IPanamahOperationList);
+
+  function SameId(A, B: IPanamahOperation): Boolean;
+  var
+    ADataId, BDataId: Variant;
+  begin
+    ADataId := A.GetDataId;
+    BDataId := B.GetDataId;
+    Result := SameText(A.Id, B.Id) or
+                SameText(ADataId, BDataId) or
+                  SameText(A.Id, BDataId) or
+                     SameText(ADataId, B.Id);
+  end;
+
+  function SameOperationType(A, B: IPanamahOperation): Boolean;
+  begin
+    Result := A.OperationType = B.OperationType;
+  end;
+
+  function SameDataType(A, B: IPanamahOperation): Boolean;
+  begin
+    Result := SameText(A.DataType, B.DataType);
+  end;
+
+var
+  I, X: Integer;
+  BatchOperation, FailedOperation: IPanamahOperation;
+  PriorityBatch: IPanamahBatch;
+begin
+  PriorityBatch := TPanamahBatch.Create;
+  PriorityBatch.Priority := True;
+  for I := 0 to AFailedOperations.Count - 1 do
+  begin
+    FailedOperation := AFailedOperations[I];
+    for X := 0 to ASourceBatch.Count - 1 do
+    begin
+      BatchOperation := ASourceBatch.Items[I];
+      if SameId(BatchOperation, FailedOperation) and
+           SameOperationType(BatchOperation, FailedOperation) and
+              SameDataType(BatchOperation, FailedOperation) then
+                PriorityBatch.Add(BatchOperation.Clone);
+    end;
+  end;
+  PriorityBatch.SaveToDirectory(GetBatchAccumulationDirectory);
+  ASourceBatch.MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
+end;
+
 procedure TPanamahBatchProcessor.DoOnCurrentBatchExpired;
 begin
   if Assigned(FOnCurrentBatchExpired) then
     FOnCurrentBatchExpired(FCurrentBatch);
+end;
+
+procedure TPanamahBatchProcessor.DoOnError(AError: Exception);
+begin
+  if Assigned(FOnError) then
+    FOnError(AError);
 end;
 
 destructor TPanamahBatchProcessor.Destroy;
@@ -224,6 +307,12 @@ begin
       DoOnBeforeOperationSent(ABatch.Items[I]);
 end;
 
+procedure TPanamahBatchProcessor.DoOnBeforeDelete(AModel: IPanamahModel; var AContinue: Boolean);
+begin
+  if Assigned(FOnBeforeDelete) then
+    FOnBeforeDelete(AModel, AContinue);
+end;
+
 procedure TPanamahBatchProcessor.DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
 begin
   if Assigned(FOnBeforeObjectAddedToBatch) then
@@ -234,6 +323,12 @@ procedure TPanamahBatchProcessor.DoOnBeforeOperationSent(AOperation: IPanamahOpe
 begin
   if Assigned(FOnBeforeOperationSent) then
     FOnBeforeOperationSent(AOperation);
+end;
+
+procedure TPanamahBatchProcessor.DoOnBeforeSave(AModel: IPanamahModel; var AContinue: Boolean);
+begin
+  if Assigned(FOnBeforeSave) then
+    FOnBeforeSave(AModel, AContinue);
 end;
 
 procedure TPanamahBatchProcessor.Execute;
@@ -288,20 +383,25 @@ begin
   begin
     FCriticalSection.Acquire;
     try
-      if IsThereAccumulatedBatches then
-      begin
-        SendAccumulatedBatches;
-      end
-      else if FCurrentBatch.Count > 0 then
-      begin
-        if CurrentBatchExpiredByTime(FConfig.BatchTTL) then
-          ExpireCurrentBatch
-        else
-        if FCurrentBatch.Hash <> CurrentBatchLastHash then
+      try
+        if IsThereAccumulatedBatches then
         begin
-          SaveCurrentBatch;
-          CurrentBatchLastHash := FCurrentBatch.Hash;
+          SendAccumulatedBatches;
+        end
+        else if FCurrentBatch.Count > 0 then
+        begin
+          if CurrentBatchExpiredByTime(FConfig.BatchTTL) then
+            ExpireCurrentBatch
+          else
+          if FCurrentBatch.Hash <> CurrentBatchLastHash then
+          begin
+            SaveCurrentBatch;
+            CurrentBatchLastHash := FCurrentBatch.Hash;
+          end;
         end;
+      except
+        on E: Exception do
+          DoOnError(E);
       end;
     finally
       FCriticalSection.Release;
@@ -325,16 +425,21 @@ begin
   AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
   for I := 0 to AccumulatedBatches.Count - 1 do
   begin
-    DoOnBeforeBatchSent(AccumulatedBatches[I]);
+    DoOnBeforeBatchSent(AccumulatedBatches[I].Clone);
     Response := FClient.Post('/stream/data', AccumulatedBatches[I].SerializeToJSON, nil);
     if Response.Status = 200 then
     begin
       BatchResponse := TPanamahBatchResponse.FromJSON(Response.Content);
-      if Assigned(BatchResponse.Falhas) and (BatchResponse.Falhas.Total > 0) then
+      if Assigned(BatchResponse.Falhas) and
+          (BatchResponse.Falhas.Total > 0) then
       begin
-
+        CreateBatchWithFailedOperations(AccumulatedBatches[I], BatchResponse.Falhas.Itens);
+        Break;
+      end
+      else
+      begin
+        AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
       end;
-      AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
     end;
   end;
 end;
@@ -419,7 +524,7 @@ begin
   JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
   try
     FTotal := GetFieldValueAsInteger(JSONObject, 'total');
-    if JSONObject.Field['itens'] is TlkJSONobject then
+    if JSONObject.Field['itens'] is TlkJSONlist then
       FItens := TPanamahOperationList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
   finally
     JSONObject.Free;
