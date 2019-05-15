@@ -181,12 +181,12 @@ begin
     case FOperationType of
       otUPDATE:
       begin
-        SetFieldValue(JSONObject, 'op', 'update');
+        SetFieldValue(JSONObject, 'op', 'update', [sfoKEEPCASE]);
         SetFieldValue(JSONObject, 'data', FData);
       end;
       otDELETE:
       begin
-        SetFieldValue(JSONObject, 'op', 'delete');
+        SetFieldValue(JSONObject, 'op', 'delete', [sfoKEEPCASE]);
         SetDataToId(JSONObject);
       end;
     end;
@@ -357,13 +357,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahOperation).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahOperation).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

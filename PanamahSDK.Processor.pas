@@ -25,7 +25,6 @@ type
     FOnBeforeSave: TPanamahCancelableModelEvent;
     FOnBeforeDelete: TPanamahCancelableModelEvent;
     FOnError: TPanamahErrorEvent;
-    FCriticalSection: TCriticalSection;
     FOnCurrentBatchExpired: TPanamahBatchEvent;
     FOnBeforeObjectAddedToBatch: TPanamahModelEvent;
     FOnBeforeBatchSent: TPanamahBatchEvent;
@@ -194,17 +193,12 @@ end;
 procedure TPanamahBatchProcessor.AddOperationToCurrentBatch(AOperationType: TPanamahOperationType;
   AModel: IPanamahModel);
 begin
-  FCriticalSection.Acquire;
-  try
-    DoOnBeforeObjectAddedToBatch(AModel);
-    FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone));
-    if BatchExpiredBySize(FConfig.BatchMaxSize) or
-          BatchExpiredByCount(FConfig.BatchMaxCount) then
-    begin
-      ExpireCurrentBatch;
-    end;
-  finally
-    FCriticalSection.Release;
+  DoOnBeforeObjectAddedToBatch(AModel);
+  FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone));
+  if BatchExpiredBySize(FConfig.BatchMaxSize) or
+        BatchExpiredByCount(FConfig.BatchMaxCount) then
+  begin
+    ExpireCurrentBatch;
   end;
 end;
 
@@ -226,7 +220,6 @@ end;
 constructor TPanamahBatchProcessor.Create;
 begin
   inherited Create(True);
-  FCriticalSection := TCriticalSection.Create;
 end;
 
 procedure TPanamahBatchProcessor.CreateBatchWithFailedOperations(
@@ -291,7 +284,6 @@ end;
 
 destructor TPanamahBatchProcessor.Destroy;
 begin
-  FCriticalSection.Free;
   inherited;
 end;
 
@@ -345,15 +337,10 @@ end;
 
 procedure TPanamahBatchProcessor.Flush;
 begin
-  FCriticalSection.Acquire;
-  try
-    if FCurrentBatch.Count > 0 then
-    begin
-      AccumulateCurrentBatch;
-      SendAccumulatedBatches;
-    end;
-  finally
-    FCriticalSection.Release;
+  if FCurrentBatch.Count > 0 then
+  begin
+    AccumulateCurrentBatch;
+    SendAccumulatedBatches;
   end;
 end;
 
@@ -363,14 +350,9 @@ var
 begin
   if FileExists(GetCurrentBatchFilename) then
   begin
-    FCriticalSection.Acquire;
-    try
-      CurrentBatchFromFile := TPanamahBatch.FromFile(GetCurrentBatchFilename);
-      if CurrentBatchFromFile.Count > 0 then
-        FCurrentBatch := CurrentBatchFromFile.Clone;
-    finally
-      FCriticalSection.Release;
-    end;
+    CurrentBatchFromFile := TPanamahBatch.FromFile(GetCurrentBatchFilename);
+    if CurrentBatchFromFile.Count > 0 then
+      FCurrentBatch := CurrentBatchFromFile.Clone;
   end;
 end;
 
@@ -380,31 +362,27 @@ var
 begin
   while not Terminated do
   begin
-    FCriticalSection.Acquire;
     try
-      try
-        if IsThereAccumulatedBatches then
+      if IsThereAccumulatedBatches then
+      begin
+        SendAccumulatedBatches;
+      end
+      else if FCurrentBatch.Count > 0 then
+      begin
+        if CurrentBatchExpiredByTime(FConfig.BatchTTL) then
+          ExpireCurrentBatch
+        else
+        if FCurrentBatch.Hash <> CurrentBatchLastHash then
         begin
-          SendAccumulatedBatches;
-        end
-        else if FCurrentBatch.Count > 0 then
-        begin
-          if CurrentBatchExpiredByTime(FConfig.BatchTTL) then
-            ExpireCurrentBatch
-          else
-          if FCurrentBatch.Hash <> CurrentBatchLastHash then
-          begin
-            SaveCurrentBatch;
-            CurrentBatchLastHash := FCurrentBatch.Hash;
-          end;
+          SaveCurrentBatch;
+          CurrentBatchLastHash := FCurrentBatch.Hash;
         end;
-      except
-        on E: Exception do
-          DoOnError(E);
       end;
-    finally
-      FCriticalSection.Release;
+    except
+      on E: Exception do
+        DoOnError(E);
     end;
+    Sleep(500);
   end;
 end;
 

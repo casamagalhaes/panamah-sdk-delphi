@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahLocalEstoque = interface(IPanamahModel)
-    ['{8E7D54A3-75CB-11E9-8B82-D97403569AFA}']
+    ['{081E17C0-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetLojaId: string;
     function GetDescricao: string;
@@ -25,7 +25,7 @@ type
   end;
   
   IPanamahLocalEstoqueList = interface(IPanamahModelList)
-    ['{8E7D54A4-75CB-11E9-8B82-D97403569AFA}']
+    ['{081E17C1-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahLocalEstoque;
     procedure SetItem(AIndex: Integer; const Value: IPanamahLocalEstoque);
     procedure Add(const AItem: IPanamahLocalEstoque);
@@ -208,8 +208,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahLocalEstoque).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahLocalEstoque).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahLocalEstoqueList.FromJSON(const AJSON: string): IPanamahLocalEstoqueList;
@@ -278,13 +283,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahLocalEstoque).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahLocalEstoque).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

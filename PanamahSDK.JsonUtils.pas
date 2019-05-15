@@ -5,6 +5,11 @@ interface
 uses
   Classes, DateUtils, SysUtils, Variants, PanamahSDK.Types, uLkJSON;
 
+type
+
+  TSetFieldOption = (sfoKEEPCASE = 0);
+  TSetFieldOptions = set of TSetFieldOption;
+
   function GetFieldValue(AJSONObject: TlkJSONbase; const AName: string; const ADefault: Variant): Variant; overload;
   function GetFieldValue(AJSONObject: TlkJSONbase; const AName: string): Variant; overload;
   function GetFieldValueAsString(AJSONObject: TlkJSONbase; const AName, ADefault: string): string; overload;
@@ -18,6 +23,7 @@ uses
   function GetFieldValueAsDateTime(AJSONObject: TlkJSONbase; const AName: string; ADefault: TDateTime): Double; overload;
   function GetFieldValueAsDateTime(AJSONObject: TlkJSONbase; const AName: string): TDateTime; overload;
   procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: Variant); overload;
+  procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: Variant; const AOptions: TSetFieldOptions); overload;
   procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: IJSONSerializable); overload;
 
 implementation
@@ -120,22 +126,31 @@ end;
 
 procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: Variant); overload;
 begin
-  case varType(AValue) of
+  SetFieldValue(AJSONObject, AName, AValue, []);
+end;
+
+procedure SetFieldValue(AJSONObject: TlkJSONobject; const AName: string; AValue: Variant; const AOptions: TSetFieldOptions); overload;
+var
+  StringValue: string;
+begin
+case varType(AValue) of
     varSmallint, varInteger, varInt64, varDouble, varCurrency, varShortInt, varWord, varLongWord:
       AJSONObject.Add(AName, TlkJSONnumber.Generate(AValue));
     varDate:
       if AValue <> Unassigned then
         AJSONObject.Add(AName, TlkJSONstring.Generate(DateTimeToISO8601(VarToDateTime(AValue))));
-    varString, {$IFDEF VER130}varUString,{$ENDIF} varOleStr, varStrArg:
-      if AValue <> Unassigned then
-        AJSONObject.Add(AName, TlkJSONstring.Generate(UpperCase(VarToStr(AValue))));
     varBoolean:
       AJSONObject.Add(AName, TlkJSONboolean.Generate(AValue <> 0));
     varNull:
       AJSONObject.Add(AName, TlkJSONnull.Create);
     else
       if AValue <> Unassigned then
-         AJSONObject.Add(AName, TlkJSONstring.Generate(UpperCase(VarToStr(AValue))));
+      begin
+        StringValue := VarToStr(AValue);
+        if not (sfoKEEPCASE in AOptions) then
+          StringValue := UpperCase(StringValue);
+        AJSONObject.Add(AName, TlkJSONstring.Generate(StringValue));
+      end;
   end;
 end;
 

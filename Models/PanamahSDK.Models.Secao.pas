@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahSecao = interface(IPanamahModel)
-    ['{8E7A6E70-75CB-11E9-8B82-D97403569AFA}']
+    ['{081AE379-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -22,7 +22,7 @@ type
   end;
   
   IPanamahSecaoList = interface(IPanamahModelList)
-    ['{8E7A6E71-75CB-11E9-8B82-D97403569AFA}']
+    ['{081AE37A-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahSecao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahSecao);
     procedure Add(const AItem: IPanamahSecao);
@@ -189,8 +189,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahSecao).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahSecao).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahSecaoList.FromJSON(const AJSON: string): IPanamahSecaoList;
@@ -259,13 +264,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahSecao).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahSecao).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

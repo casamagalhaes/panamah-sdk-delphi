@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahTrocaDevolucaoItem = interface(IPanamahModel)
-    ['{8E7C1C27-75CB-11E9-8B82-D97403569AFA}']
+    ['{081D0656-7736-11E9-A131-EBAF8D88186A}']
     function GetDesconto: Double;
     function GetProdutoId: string;
     function GetQuantidade: Double;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahTrocaDevolucaoItemList = interface(IPanamahModelList)
-    ['{8E7C1C28-75CB-11E9-8B82-D97403569AFA}']
+    ['{081D0657-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucaoItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucaoItem);
     procedure Add(const AItem: IPanamahTrocaDevolucaoItem);
@@ -39,7 +39,7 @@ type
   end;
   
   IPanamahTrocaDevolucao = interface(IPanamahModel)
-    ['{8E7BCE04-75CB-11E9-8B82-D97403569AFA}']
+    ['{081C9120-7736-11E9-A131-EBAF8D88186A}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetVendaId: variant;
@@ -76,7 +76,7 @@ type
   end;
   
   IPanamahTrocaDevolucaoList = interface(IPanamahModelList)
-    ['{8E7BCE05-75CB-11E9-8B82-D97403569AFA}']
+    ['{081C9121-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahTrocaDevolucao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaDevolucao);
     procedure Add(const AItem: IPanamahTrocaDevolucao);
@@ -374,8 +374,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaDevolucaoItem).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaDevolucaoItem).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahTrocaDevolucaoItemList.FromJSON(const AJSON: string): IPanamahTrocaDevolucaoItemList;
@@ -444,13 +449,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTrocaDevolucaoItem).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTrocaDevolucaoItem).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 
@@ -670,8 +680,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaDevolucao).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaDevolucao).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahTrocaDevolucaoList.FromJSON(const AJSON: string): IPanamahTrocaDevolucaoList;
@@ -740,13 +755,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTrocaDevolucao).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTrocaDevolucao).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

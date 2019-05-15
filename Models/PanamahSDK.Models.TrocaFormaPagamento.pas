@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahTrocaFormaPagamento = interface(IPanamahModel)
-    ['{8E7BA6F5-75CB-11E9-8B82-D97403569AFA}']
+    ['{081C6A15-7736-11E9-A131-EBAF8D88186A}']
     function GetAutorizadorId: variant;
     function GetData: TDateTime;
     function GetFormaPagamentoDestinoId: string;
@@ -46,7 +46,7 @@ type
   end;
   
   IPanamahTrocaFormaPagamentoList = interface(IPanamahModelList)
-    ['{8E7BA6F6-75CB-11E9-8B82-D97403569AFA}']
+    ['{081C6A16-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahTrocaFormaPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTrocaFormaPagamento);
     procedure Add(const AItem: IPanamahTrocaFormaPagamento);
@@ -341,8 +341,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaFormaPagamento).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTrocaFormaPagamento).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahTrocaFormaPagamentoList.FromJSON(const AJSON: string): IPanamahTrocaFormaPagamentoList;
@@ -411,13 +416,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTrocaFormaPagamento).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTrocaFormaPagamento).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

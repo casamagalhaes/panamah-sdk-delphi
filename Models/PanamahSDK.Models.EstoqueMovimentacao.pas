@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahEstoqueMovimentacao = interface(IPanamahModel)
-    ['{8E7D7BB0-75CB-11E9-8B82-D97403569AFA}']
+    ['{081E17C6-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetLocalEstoqueId: string;
     function GetDataHora: TDateTime;
@@ -37,7 +37,7 @@ type
   end;
   
   IPanamahEstoqueMovimentacaoList = interface(IPanamahModelList)
-    ['{8E7D7BB1-75CB-11E9-8B82-D97403569AFA}']
+    ['{081E17C7-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahEstoqueMovimentacao;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEstoqueMovimentacao);
     procedure Add(const AItem: IPanamahEstoqueMovimentacao);
@@ -284,8 +284,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEstoqueMovimentacao).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEstoqueMovimentacao).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahEstoqueMovimentacaoList.FromJSON(const AJSON: string): IPanamahEstoqueMovimentacaoList;
@@ -354,13 +359,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahEstoqueMovimentacao).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahEstoqueMovimentacao).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

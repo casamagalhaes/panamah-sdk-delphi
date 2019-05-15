@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahTituloReceberPagamento = interface(IPanamahModel)
-    ['{8E7DF0E5-75CB-11E9-8B82-D97403569AFA}']
+    ['{081EB40E-7736-11E9-A131-EBAF8D88186A}']
     function GetDataHora: TDateTime;
     function GetValor: Double;
     procedure SetDataHora(const ADataHora: TDateTime);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahTituloReceberPagamentoList = interface(IPanamahModelList)
-    ['{8E7DF0E6-75CB-11E9-8B82-D97403569AFA}']
+    ['{081EB40F-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahTituloReceberPagamento;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTituloReceberPagamento);
     procedure Add(const AItem: IPanamahTituloReceberPagamento);
@@ -27,7 +27,7 @@ type
   end;
   
   IPanamahTituloReceber = interface(IPanamahModel)
-    ['{8E7DC9D8-75CB-11E9-8B82-D97403569AFA}']
+    ['{081EB400-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetLojaId: string;
     function GetClienteId: string;
@@ -67,7 +67,7 @@ type
   end;
   
   IPanamahTituloReceberList = interface(IPanamahModelList)
-    ['{8E7DC9D9-75CB-11E9-8B82-D97403569AFA}']
+    ['{081EB401-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahTituloReceber;
     procedure SetItem(AIndex: Integer; const Value: IPanamahTituloReceber);
     procedure Add(const AItem: IPanamahTituloReceber);
@@ -305,8 +305,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTituloReceberPagamento).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTituloReceberPagamento).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahTituloReceberPagamentoList.FromJSON(const AJSON: string): IPanamahTituloReceberPagamentoList;
@@ -375,13 +380,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTituloReceberPagamento).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTituloReceberPagamento).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 
@@ -610,8 +620,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTituloReceber).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahTituloReceber).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahTituloReceberList.FromJSON(const AJSON: string): IPanamahTituloReceberList;
@@ -680,13 +695,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTituloReceber).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahTituloReceber).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

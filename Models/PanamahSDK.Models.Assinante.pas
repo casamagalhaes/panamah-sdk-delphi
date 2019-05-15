@@ -7,11 +7,11 @@ uses
   Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
-  
+
   IPanamahAssinante = interface(IPanamahModel)
-    ['{8E795D00-75CB-11E9-8B82-D97403569AFA}']
+    ['{26FDB010-7736-11E9-87F3-29090178B5DF}']
     function GetId: string;
-    function GetRazaoSocial: string;
+    function GetNome: string;
     function GetFantasia: string;
     function GetRamo: string;
     function GetUf: string;
@@ -23,7 +23,7 @@ type
     function GetSeries: IpanamahStringValueList;
     function GetAtivo: Boolean;
     procedure SetId(const AId: string);
-    procedure SetRazaoSocial(const ARazaoSocial: string);
+    procedure SetNome(const ANome: string);
     procedure SetFantasia(const AFantasia: string);
     procedure SetRamo(const ARamo: string);
     procedure SetUf(const AUf: string);
@@ -35,7 +35,7 @@ type
     procedure SetSeries(const ASeries: IpanamahStringValueList);
     procedure SetAtivo(const AAtivo: Boolean);
     property Id: string read GetId write SetId;
-    property RazaoSocial: string read GetRazaoSocial write SetRazaoSocial;
+    property Nome: string read GetNome write SetNome;
     property Fantasia: string read GetFantasia write SetFantasia;
     property Ramo: string read GetRamo write SetRamo;
     property Uf: string read GetUf write SetUf;
@@ -47,19 +47,19 @@ type
     property Series: IpanamahStringValueList read GetSeries write SetSeries;
     property Ativo: Boolean read GetAtivo write SetAtivo;
   end;
-  
+
   IPanamahAssinanteList = interface(IPanamahModelList)
-    ['{8E795D01-75CB-11E9-8B82-D97403569AFA}']
+    ['{26FDB011-7736-11E9-87F3-29090178B5DF}']
     function GetItem(AIndex: Integer): IPanamahAssinante;
     procedure SetItem(AIndex: Integer; const Value: IPanamahAssinante);
     procedure Add(const AItem: IPanamahAssinante);
     property Items[AIndex: Integer]: IPanamahAssinante read GetItem write SetItem; default;
   end;
-  
+
   TPanamahAssinante = class(TInterfacedObject, IPanamahAssinante)
   private
     FId: string;
-    FRazaoSocial: string;
+    FNome: string;
     FFantasia: string;
     FRamo: string;
     FUf: string;
@@ -71,7 +71,7 @@ type
     FSeries: IpanamahStringValueList;
     FAtivo: Boolean;
     function GetId: string;
-    function GetRazaoSocial: string;
+    function GetNome: string;
     function GetFantasia: string;
     function GetRamo: string;
     function GetUf: string;
@@ -83,7 +83,7 @@ type
     function GetSeries: IpanamahStringValueList;
     function GetAtivo: Boolean;
     procedure SetId(const AId: string);
-    procedure SetRazaoSocial(const ARazaoSocial: string);
+    procedure SetNome(const ANome: string);
     procedure SetFantasia(const AFantasia: string);
     procedure SetRamo(const ARamo: string);
     procedure SetUf(const AUf: string);
@@ -94,7 +94,7 @@ type
     procedure SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList);
     procedure SetSeries(const ASeries: IpanamahStringValueList);
     procedure SetAtivo(const AAtivo: Boolean);
-    function GetModelName: string;    
+    function GetModelName: string;
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
@@ -103,7 +103,7 @@ type
     function Validate: IPanamahValidationResult;
   published
     property Id: string read GetId write SetId;
-    property RazaoSocial: string read GetRazaoSocial write SetRazaoSocial;
+    property Nome: string read GetNome write SetNome;
     property Fantasia: string read GetFantasia write SetFantasia;
     property Ramo: string read GetRamo write SetRamo;
     property Uf: string read GetUf write SetUf;
@@ -137,13 +137,13 @@ type
     property Items[AIndex: Integer]: IPanamahAssinante read GetItem write SetItem; default;
     property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
-  
-  
+
+
   TPanamahAssinanteValidator = class(TInterfacedObject, IPanamahModelValidator)
   public
     function Validate(AModel: IPanamahModel): IPanamahValidationResult;
   end;
-  
+
 implementation
 
 uses
@@ -161,14 +161,14 @@ begin
   FId := AId;
 end;
 
-function TPanamahAssinante.GetRazaoSocial: string;
+function TPanamahAssinante.GetNome: string;
 begin
-  Result := FRazaoSocial;
+  Result := FNome;
 end;
 
-procedure TPanamahAssinante.SetRazaoSocial(const ARazaoSocial: string);
+procedure TPanamahAssinante.SetNome(const ANome: string);
 begin
-  FRazaoSocial := ARazaoSocial;
+  FNome := ANome;
 end;
 
 function TPanamahAssinante.GetFantasia: string;
@@ -278,7 +278,7 @@ begin
   JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
   try
     FId := GetFieldValueAsString(JSONObject, 'id');
-    FRazaoSocial := GetFieldValueAsString(JSONObject, 'razaoSocial');
+    FNome := GetFieldValueAsString(JSONObject, 'nome');
     FFantasia := GetFieldValueAsString(JSONObject, 'fantasia');
     FRamo := GetFieldValueAsString(JSONObject, 'ramo');
     FUf := GetFieldValueAsString(JSONObject, 'uf');
@@ -302,18 +302,18 @@ var
   JSONObject: TlkJSONobject;
 begin
   JSONObject := TlkJSONobject.Create;
-  try    
-    SetFieldValue(JSONObject, 'id', FId);    
-    SetFieldValue(JSONObject, 'razaoSocial', FRazaoSocial);    
-    SetFieldValue(JSONObject, 'fantasia', FFantasia);    
-    SetFieldValue(JSONObject, 'ramo', FRamo);    
-    SetFieldValue(JSONObject, 'uf', FUf);    
-    SetFieldValue(JSONObject, 'cidade', FCidade);    
-    SetFieldValue(JSONObject, 'revendaId', FRevendaId);    
-    SetFieldValue(JSONObject, 'bairro', FBairro);    
-    SetFieldValue(JSONObject, 'softwaresAtivos', FSoftwaresAtivos);    
-    SetFieldValue(JSONObject, 'softwaresEmContratosDeManutencao', FSoftwaresEmContratosDeManutencao);    
-    SetFieldValue(JSONObject, 'series', FSeries);    
+  try
+    SetFieldValue(JSONObject, 'id', FId);
+    SetFieldValue(JSONObject, 'nome', FNome);
+    SetFieldValue(JSONObject, 'fantasia', FFantasia);
+    SetFieldValue(JSONObject, 'ramo', FRamo);
+    SetFieldValue(JSONObject, 'uf', FUf);
+    SetFieldValue(JSONObject, 'cidade', FCidade);
+    SetFieldValue(JSONObject, 'revendaId', FRevendaId);
+    SetFieldValue(JSONObject, 'bairro', FBairro);
+    SetFieldValue(JSONObject, 'softwaresAtivos', FSoftwaresAtivos);
+    SetFieldValue(JSONObject, 'softwaresEmContratosDeManutencao', FSoftwaresEmContratosDeManutencao);
+    SetFieldValue(JSONObject, 'series', FSeries);
     SetFieldValue(JSONObject, 'ativo', FAtivo);
     Result := TlkJSON.GenerateText(JSONObject);
   finally
@@ -363,8 +363,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahAssinante).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahAssinante).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahAssinanteList.FromJSON(const AJSON: string): IPanamahAssinanteList;
@@ -433,13 +438,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahAssinante).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahAssinante).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 
@@ -452,34 +462,34 @@ var
 begin
   Assinante := AModel as IPanamahAssinante;
   Validations := TPanamahValidationResultList.Create;
-  
+
   if ModelValueIsEmpty(Assinante.Id) then
     Validations.AddFailure('Assinante.Id obrigatorio(a)');
-  
-  if ModelValueIsEmpty(Assinante.RazaoSocial) then
-    Validations.AddFailure('Assinante.RazaoSocial obrigatorio(a)');
-  
+
+  if ModelValueIsEmpty(Assinante.Nome) then
+    Validations.AddFailure('Assinante.Nome obrigatorio(a)');
+
   if ModelValueIsEmpty(Assinante.Fantasia) then
     Validations.AddFailure('Assinante.Fantasia obrigatorio(a)');
-  
+
   if ModelValueIsEmpty(Assinante.Ramo) then
     Validations.AddFailure('Assinante.Ramo obrigatorio(a)');
-  
+
   if ModelValueIsEmpty(Assinante.Uf) then
     Validations.AddFailure('Assinante.Uf obrigatorio(a)');
-  
+
   if ModelValueIsEmpty(Assinante.Cidade) then
     Validations.AddFailure('Assinante.Cidade obrigatorio(a)');
-  
+
   if ModelValueIsEmpty(Assinante.Bairro) then
     Validations.AddFailure('Assinante.Bairro obrigatorio(a)');
-  
+
   if ModelListIsEmpty(Assinante.SoftwaresAtivos) then
     Validations.AddFailure('Assinante.SoftwaresAtivos obrigatorio(a)');
-  
+
   if ModelListIsEmpty(Assinante.SoftwaresEmContratosDeManutencao) then
     Validations.AddFailure('Assinante.SoftwaresEmContratosDeManutencao obrigatorio(a)');
-  
+
   Result := Validations.GetAggregate;
 end;
 

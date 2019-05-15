@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahFornecedor = interface(IPanamahModel)
-    ['{8E7B31C9-75CB-11E9-8B82-D97403569AFA}']
+    ['{081BF4E9-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetNome: string;
     function GetNumeroDocumento: string;
@@ -34,7 +34,7 @@ type
   end;
   
   IPanamahFornecedorList = interface(IPanamahModelList)
-    ['{8E7B31CA-75CB-11E9-8B82-D97403569AFA}']
+    ['{081BF4EA-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahFornecedor;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFornecedor);
     procedure Add(const AItem: IPanamahFornecedor);
@@ -265,8 +265,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahFornecedor).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahFornecedor).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahFornecedorList.FromJSON(const AJSON: string): IPanamahFornecedorList;
@@ -335,13 +340,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahFornecedor).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahFornecedor).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

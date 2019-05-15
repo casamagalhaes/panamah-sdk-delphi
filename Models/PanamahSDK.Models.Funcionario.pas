@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahFuncionario = interface(IPanamahModel)
-    ['{8E7B0AB0-75CB-11E9-8B82-D97403569AFA}']
+    ['{081BA6C0-7736-11E9-A131-EBAF8D88186A}']
     function GetDataNascimento: TDateTime;
     function GetId: string;
     function GetLogin: variant;
@@ -37,7 +37,7 @@ type
   end;
   
   IPanamahFuncionarioList = interface(IPanamahModelList)
-    ['{8E7B0AB1-75CB-11E9-8B82-D97403569AFA}']
+    ['{081BA6C1-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahFuncionario;
     procedure SetItem(AIndex: Integer; const Value: IPanamahFuncionario);
     procedure Add(const AItem: IPanamahFuncionario);
@@ -285,8 +285,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahFuncionario).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahFuncionario).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahFuncionarioList.FromJSON(const AJSON: string): IPanamahFuncionarioList;
@@ -355,13 +360,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahFuncionario).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahFuncionario).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

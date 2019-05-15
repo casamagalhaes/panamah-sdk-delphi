@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahEventoCaixaValoresDeclarados = interface(IPanamahModel)
-    ['{8E7C4339-75CB-11E9-8B82-D97403569AFA}']
+    ['{081D2D69-7736-11E9-A131-EBAF8D88186A}']
     function GetFormaPagamentoId: string;
     function GetValor: Double;
     procedure SetFormaPagamentoId(const AFormaPagamentoId: string);
@@ -19,7 +19,7 @@ type
   end;
   
   IPanamahEventoCaixaValoresDeclaradosList = interface(IPanamahModelList)
-    ['{8E7C433A-75CB-11E9-8B82-D97403569AFA}']
+    ['{081D2D6A-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixaValoresDeclarados;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixaValoresDeclarados);
     procedure Add(const AItem: IPanamahEventoCaixaValoresDeclarados);
@@ -27,7 +27,7 @@ type
   end;
   
   IPanamahEventoCaixa = interface(IPanamahModel)
-    ['{8E7C4330-75CB-11E9-8B82-D97403569AFA}']
+    ['{081D2D60-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetLojaId: string;
     function GetNumeroCaixa: string;
@@ -52,7 +52,7 @@ type
   end;
   
   IPanamahEventoCaixaList = interface(IPanamahModelList)
-    ['{8E7C4331-75CB-11E9-8B82-D97403569AFA}']
+    ['{081D2D61-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahEventoCaixa;
     procedure SetItem(AIndex: Integer; const Value: IPanamahEventoCaixa);
     procedure Add(const AItem: IPanamahEventoCaixa);
@@ -270,8 +270,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEventoCaixaValoresDeclarados).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEventoCaixaValoresDeclarados).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahEventoCaixaValoresDeclaradosList.FromJSON(const AJSON: string): IPanamahEventoCaixaValoresDeclaradosList;
@@ -340,13 +345,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahEventoCaixaValoresDeclarados).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahEventoCaixaValoresDeclarados).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 
@@ -518,8 +528,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEventoCaixa).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahEventoCaixa).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahEventoCaixaList.FromJSON(const AJSON: string): IPanamahEventoCaixaList;
@@ -588,13 +603,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahEventoCaixa).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahEventoCaixa).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

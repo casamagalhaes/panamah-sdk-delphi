@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahCompraItem = interface(IPanamahModel)
-    ['{8E7D2DA0-75CB-11E9-8B82-D97403569AFA}']
+    ['{081DF0B4-7736-11E9-A131-EBAF8D88186A}']
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetProdutoId: string;
@@ -31,7 +31,7 @@ type
   end;
   
   IPanamahCompraItemList = interface(IPanamahModelList)
-    ['{8E7D2DA1-75CB-11E9-8B82-D97403569AFA}']
+    ['{081DF0B5-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahCompraItem;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompraItem);
     procedure Add(const AItem: IPanamahCompraItem);
@@ -39,7 +39,7 @@ type
   end;
   
   IPanamahCompra = interface(IPanamahModel)
-    ['{8E7D2D90-75CB-11E9-8B82-D97403569AFA}']
+    ['{081DC9A0-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetLojaId: string;
     function GetFornecedorId: variant;
@@ -85,7 +85,7 @@ type
   end;
   
   IPanamahCompraList = interface(IPanamahModelList)
-    ['{8E7D2D91-75CB-11E9-8B82-D97403569AFA}']
+    ['{081DC9A1-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahCompra;
     procedure SetItem(AIndex: Integer; const Value: IPanamahCompra);
     procedure Add(const AItem: IPanamahCompra);
@@ -395,8 +395,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahCompraItem).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahCompraItem).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahCompraItemList.FromJSON(const AJSON: string): IPanamahCompraItemList;
@@ -465,13 +470,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahCompraItem).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahCompraItem).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 
@@ -727,8 +737,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahCompra).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahCompra).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahCompraList.FromJSON(const AJSON: string): IPanamahCompraList;
@@ -797,13 +812,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahCompra).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahCompra).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 

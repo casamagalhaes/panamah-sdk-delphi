@@ -305,7 +305,6 @@ begin
   FList.Add(Elem.Value);
 end;
 
-
 { TPanamahValidationResult }
 
 procedure TPanamahValidationResult.Concat(AResult: IPanamahValidationResult);
@@ -412,9 +411,14 @@ function TPanamahValidationResultList.GetAggregate: IPanamahValidationResult;
 var
   I: Integer;
 begin
-  Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(FList[I] as IPanamahValidationResult);
+  FList.Lock;
+  try
+    Result := TPanamahValidationResult.CreateSuccess;
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(FList[I] as IPanamahValidationResult);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 function TPanamahValidationResultList.GetItem(AIndex: Integer): IPanamahValidationResult;
@@ -482,13 +486,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahModel).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahModel).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 
@@ -502,9 +511,14 @@ function TPanamahModelList.Validate: IPanamahValidationResult;
 var
   I: Integer;
 begin
-  Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+  FList.Lock;
+  try
+    Result := TPanamahValidationResult.CreateSuccess;
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 function CoalesceText(const AText, ATextIfNull: string): string;

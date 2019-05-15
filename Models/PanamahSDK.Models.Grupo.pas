@@ -9,7 +9,7 @@ uses
 type
   
   IPanamahGrupo = interface(IPanamahModel)
-    ['{8E7A6E75-75CB-11E9-8B82-D97403569AFA}']
+    ['{081B0A80-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetCodigo: string;
     function GetDescricao: string;
@@ -25,7 +25,7 @@ type
   end;
   
   IPanamahGrupoList = interface(IPanamahModelList)
-    ['{8E7A6E76-75CB-11E9-8B82-D97403569AFA}']
+    ['{081B0A81-7736-11E9-A131-EBAF8D88186A}']
     function GetItem(AIndex: Integer): IPanamahGrupo;
     procedure SetItem(AIndex: Integer; const Value: IPanamahGrupo);
     procedure Add(const AItem: IPanamahGrupo);
@@ -208,8 +208,13 @@ var
   I: Integer;
 begin
   Result := TPanamahValidationResult.CreateSuccess;
-  for I := 0 to FList.Count - 1 do
-    Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahGrupo).Validate);
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahGrupo).Validate);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 class function TPanamahGrupoList.FromJSON(const AJSON: string): IPanamahGrupoList;
@@ -278,13 +283,18 @@ var
   JSONObject: TlkJSONlist;
   I: Integer;
 begin
-  JSONObject := TlkJSONlist.Create;
+  FList.Lock;
   try
-    for I := 0 to FList.Count - 1 do
-      JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahGrupo).SerializeToJSON));
-    Result := TlkJSON.GenerateText(JSONObject);
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahGrupo).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
   finally
-    JSONObject.Free;
+    FList.Unlock;
   end;
 end;
 
