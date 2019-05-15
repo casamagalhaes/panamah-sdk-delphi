@@ -33,7 +33,6 @@ type
     FClient: IPanamahClient;
     FConfig: IPanamahStreamConfig;
     FCurrentBatch: IPanamahBatch;
-    FOnOnError: TPanamahErrorEvent;
     function GetBatchAccumulationDirectory: string;
     function GetBatchSentDirectory: string;
     function GetCurrentBatchFilename: string;
@@ -68,7 +67,7 @@ type
     property OnBeforeOperationSent: TPanamahOperationEvent read FOnBeforeOperationSent write FOnBeforeOperationSent;
     property OnBeforeSave: TPanamahCancelableModelEvent read FOnBeforeSave write FOnBeforeSave;
     property OnBeforeDelete: TPanamahCancelableModelEvent read FOnBeforeDelete write FOnBeforeDelete;
-    property OnError: TPanamahErrorEvent read FOnOnError write FOnOnError;
+    property OnError: TPanamahErrorEvent read FOnError write FOnError;
     procedure Save(AModel: IPanamahModel);
     procedure Delete(AModel: IPanamahModel);
     procedure Flush;

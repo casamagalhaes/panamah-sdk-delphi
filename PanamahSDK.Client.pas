@@ -401,7 +401,7 @@ function TPanamahClient.Post(const AURL, AContent: string; AHeaders: TStrings): 
 var
   Request: IPanamahRequest;
 begin
-  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtPOST, nil, nil, AContent, nil);
+  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtPOST, nil, AHeaders, AContent, nil);
   Result := MakeRequest(Request);
 end;
 
@@ -409,7 +409,7 @@ function TPanamahClient.Put(const AURL, AContent: string; AHeaders: TStrings): I
 var
   Request: IPanamahRequest;
 begin
-  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtPUT, nil, nil, AContent, nil);
+  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtPUT, nil, AHeaders, AContent, nil);
   Result := MakeRequest(Request);
 end;
 

@@ -686,8 +686,10 @@ end;
 
 initialization
   TPanamahStream.GetInstance;
+  TPanamahAdmin.GetInstance;
   
 finalization
   TPanamahStream.Free;
+  TPanamahAdmin.Free;
 
 end.
