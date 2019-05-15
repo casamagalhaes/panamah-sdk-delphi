@@ -348,12 +348,9 @@ begin
         RequestHeaders.Free;
     end;
     if ARequest.Content <> EmptyStr then
-    begin
-      HTTPClient.
-      HTTPClient.Document.Position := 0;
-      WriteStrToStream(HTTPClient.Document, ARequest.Content);
-    end;  
-    HTTPClient.HTTPMethod(GetMethodAsString(ARequest.Method), ARequest.URL);
+      HTTPClient.Document.Write(Pointer(ARequest.Content)^, Length(ARequest.Content));
+    HTTPClient.MimeType := CoalesceText(HTTPClient.Headers.Values['Content-Type'], 'application/json');
+    HTTPClient.HTTPMethod(GetMethodAsString(ARequest.Method), ARequest.URL);    
     Response := TPanamahResponse.Create(HTTPClient.ResultCode, HTTPClient.Headers, GetDocumentContent(HTTPClient));
     case Response.Status of
       500: raise EPanamahSDKServerInternalException.Create(Response.Content);
