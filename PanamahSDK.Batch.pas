@@ -74,8 +74,8 @@ type
     function GetHash: string;
     class function FromJSON(const AJSON: string): IPanamahBatch;
     class function FromFile(const AFilename: string): IPanamahBatch;
-    property Items[AIndex: Integer]: IPanamahOperation read GetItem;
     procedure Add(AOperation: IPanamahOperation); overload;
+    property Items[AIndex: Integer]: IPanamahOperation read GetItem;
   published
     property CreatedAt: TDateTime read GetCreatedAt write SetCreatedAt;
     property Size: Integer read GetSize;
@@ -276,6 +276,8 @@ end;
 
 procedure TPanamahBatch.Add(AOperation: IPanamahOperation);
 begin
+  if FOperationList.Exists(AOperation) then
+    FOperationList.Remove(AOperation);
   FOperationList.Add(AOperation);
 end;
 

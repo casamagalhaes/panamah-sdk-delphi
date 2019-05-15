@@ -224,29 +224,6 @@ end;
 
 procedure TPanamahBatchProcessor.CreateBatchWithFailedOperations(
   ASourceBatch: IPanamahBatch; AFailedOperations: IPanamahOperationList);
-
-  function SameId(A, B: IPanamahOperation): Boolean;
-  var
-    ADataId, BDataId: Variant;
-  begin
-    ADataId := A.GetDataId;
-    BDataId := B.GetDataId;
-    Result := SameText(A.Id, B.Id) or
-                SameText(ADataId, BDataId) or
-                  SameText(A.Id, BDataId) or
-                     SameText(ADataId, B.Id);
-  end;
-
-  function SameOperationType(A, B: IPanamahOperation): Boolean;
-  begin
-    Result := A.OperationType = B.OperationType;
-  end;
-
-  function SameDataType(A, B: IPanamahOperation): Boolean;
-  begin
-    Result := SameText(A.DataType, B.DataType);
-  end;
-
 var
   I, X: Integer;
   BatchOperation, FailedOperation: IPanamahOperation;
@@ -260,10 +237,8 @@ begin
     for X := 0 to ASourceBatch.Count - 1 do
     begin
       BatchOperation := ASourceBatch.Items[I];
-      if SameId(BatchOperation, FailedOperation) and
-           SameOperationType(BatchOperation, FailedOperation) and
-              SameDataType(BatchOperation, FailedOperation) then
-                PriorityBatch.Add(BatchOperation.Clone);
+      if BatchOperation.Equals(FailedOperation) then
+        PriorityBatch.Add(BatchOperation.Clone);
     end;
   end;
   PriorityBatch.SaveToDirectory(GetBatchAccumulationDirectory);

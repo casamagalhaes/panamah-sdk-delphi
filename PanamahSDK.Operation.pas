@@ -22,7 +22,9 @@ type
     function GetDataType: string;
     function GetId: Variant;
     function GetDataId: Variant;
+    function GetHash: string;
     function Clone: IPanamahOperation;
+    function Equals(AAnotherOperation: IPanamahOperation): Boolean;
     procedure SetOperationType(AOperationType: TPanamahOperationType);
     procedure SetData(AData: IPanamahModel);
     procedure SetDataType(const ADataType: string);
@@ -40,6 +42,9 @@ type
     procedure Add(const AItem: IPanamahOperation);
     procedure Clear;
     function Count: Integer;
+    function Exists(AItem: IPanamahOperation): Boolean;
+    function IndexOf(AItem: IPanamahOperation): Integer;
+    procedure Remove(AItem: IPanamahOperation);
     property Items[AIndex: Integer]: IPanamahOperation read GetItem write SetItem; default;
   end;
 
@@ -68,13 +73,18 @@ type
     procedure SetDataType(const ADataType: string);
     procedure SetId(AId: Variant);
   public
+    function GetHash: string;
     function GetDataId: Variant;
     function SerializeToJSON: string;
     function Clone: IPanamahOperation;
+    function Equals(AAnotherOperation: IPanamahOperation): Boolean; reintroduce;
     procedure DeserializeFromJSON(const AJSON: string);
     constructor Create(AOperationType: TPanamahOperationType; AModel: IPanamahModel); reintroduce; overload;
     constructor Create; reintroduce; overload;
     class function FromJSON(const AJSON: string): IPanamahOperation;
+    class function SameId(A, B: IPanamahOperation): Boolean;
+    class function SameOperationType(A, B: IPanamahOperation): Boolean;
+    class function SameDataType(A, B: IPanamahOperation): Boolean;
   published
     property OperationType: TPanamahOperationType read GetOperationType write SetOperationType;
     property Data: IPanamahModel read GetData write SetData;
@@ -89,6 +99,10 @@ type
     procedure SetItem(AIndex: Integer; const Value: IPanamahOperation);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
   public
+    function IndexOf(AItem: IPanamahOperation; AThreadLocked: Boolean): Integer; overload;
+    function IndexOf(AItem: IPanamahOperation): Integer; overload;
+    function Exists(AItem: IPanamahOperation): Boolean;
+    procedure Remove(AItem: IPanamahOperation);
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahOperationList;
@@ -105,6 +119,9 @@ type
   function GetDataTypeByModel(AModel: IPanamahModel): string;
 
 implementation
+
+uses
+  PanamahSDK.Crypto;
 
 { TPanamahOperation }
 
@@ -146,10 +163,39 @@ begin
   end;
 end;
 
+function TPanamahOperation.Equals(AAnotherOperation: IPanamahOperation): Boolean;
+begin
+  Result := TPanamahOperation.SameId(Self, AAnotherOperation) and
+              TPanamahOperation.SameOperationType(Self, AAnotherOperation) and
+                 TPanamahOperation.SameDataType(Self, AAnotherOperation);
+end;
+
 class function TPanamahOperation.FromJSON(const AJSON: string): IPanamahOperation;
 begin
   Result := TPanamahOperation.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+class function TPanamahOperation.SameId(A, B: IPanamahOperation): Boolean;
+var
+  ADataId, BDataId: Variant;
+begin
+  ADataId := A.GetDataId;
+  BDataId := B.GetDataId;
+  Result := SameText(A.Id, B.Id) or
+              SameText(ADataId, BDataId) or
+                SameText(A.Id, BDataId) or
+                   SameText(ADataId, B.Id);
+end;
+
+class function TPanamahOperation.SameOperationType(A, B: IPanamahOperation): Boolean;
+begin
+  Result := A.OperationType = B.OperationType;
+end;
+
+class function TPanamahOperation.SameDataType(A, B: IPanamahOperation): Boolean;
+begin
+  Result := SameText(A.DataType, B.DataType);
 end;
 
 function TPanamahOperation.SerializeToJSON: string;
@@ -223,6 +269,11 @@ end;
 function TPanamahOperation.GetDataType: string;
 begin
   Result := FDataType;
+end;
+
+function TPanamahOperation.GetHash: string;
+begin
+  Result := SHA1Base64(SerializeToJSON);
 end;
 
 function TPanamahOperation.GetId: Variant;
@@ -301,6 +352,11 @@ begin
   inherited;
 end;
 
+function TPanamahOperationList.Exists(AItem: IPanamahOperation): Boolean;
+begin
+  Result := IndexOf(AItem) > -1;
+end;
+
 class function TPanamahOperationList.FromJSON(const AJSON: string): IPanamahOperationList;
 begin
   Result := TPanamahOperationList.Create;
@@ -335,6 +391,45 @@ end;
 function TPanamahOperationList.GetItem(AIndex: Integer): IPanamahOperation;
 begin
   Result := FList.Items[AIndex] as IPanamahOperation;
+end;
+
+function TPanamahOperationList.IndexOf(AItem: IPanamahOperation; AThreadLocked: Boolean): Integer;
+var
+  I: Integer;
+begin
+  if not AThreadLocked then
+    FList.Lock;
+  try
+    Result := -1;
+    for I := 0 to FList.Count - 1 do
+      if AItem.Equals(FList[I] as IPanamahOperation) then
+      begin
+        Result := I;
+        Exit;
+      end;
+  finally
+    if not AThreadLocked then
+      FList.Unlock;
+  end;
+end;
+
+function TPanamahOperationList.IndexOf(AItem: IPanamahOperation): Integer;
+begin
+  Result := IndexOf(AItem, False);
+end;
+
+procedure TPanamahOperationList.Remove(AItem: IPanamahOperation);
+var
+  Index: Integer;
+begin
+  FList.Lock;
+  Index := IndexOf(AItem, True);
+  try
+    if Index > -1 then
+      FList.Remove(FList[Index]);
+  finally
+    FList.Unlock;
+  end;
 end;
 
 procedure TPanamahOperationList.SetItem(AIndex: Integer;
