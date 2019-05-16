@@ -674,6 +674,7 @@ begin
     201: Result := True;
     422: raise EPanamahSDKUnprocessableEntityException.Create(Response.Content);
     400: raise EPanamahSDKBadRequestException.Create(Response.Content);
+    409: raise EPanamahSDKConflictException.Create(Response.Content);
     else
       Result := False;
   end;

@@ -187,6 +187,7 @@ type
   EPanamahSDKHTTPProtocolException = class(Exception);
   EPanamahSDKInvalidSortParamException = class(Exception);
   EPanamahSDKNotFoundException = class(Exception);
+  EPanamahSDKConflictException = class(Exception);
   EPanamahSDKUnknownException = class(Exception);
   EPanamahSDKIOException = class(Exception);
   EPanamahSDKExceptionValidationFailed = class(Exception);

@@ -259,7 +259,7 @@ begin
             if HTTP.ResponseCode = 400 then
               raise EPanamahSDKBadRequestException.Create(E.Message)
             else
-            if (HTTP.ResponseCode = 403) or (HTTP.ResponseCode = 404) then
+            if (HTTP.ResponseCode = 403) or (HTTP.ResponseCode = 404) or (HTTP.ResponseCode = 409) then
             else
             if HTTP.ResponseCode = 422 then
             begin
