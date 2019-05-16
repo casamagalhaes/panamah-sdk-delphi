@@ -221,6 +221,7 @@ begin
         if not MatchText(HTTP.Request.Accept, ['application/xml', 'application/json']) then
           HTTP.Request.Accept := 'application/json';
         HTTP.HandleRedirects := True;
+        HTTP.Request.CustomHeaders.Values['x-sdk-identity'] := SDK_IDENTITY;
         try
           case ARequest.Method of
             mtGET:
@@ -324,6 +325,7 @@ function TPanamahClient.MakeRequest(const ARequest: IPanamahRequest): IPanamahRe
     Result.NameValueSeparator := ':';
     Result.Values['Content-Type'] := 'application/json';
     Result.Values['Accept'] := 'application/json';
+    Result.Values['x-sdk-identity'] := SDK_IDENTITY;
     if Assigned(ARequest.Headers) then
     begin
       for I := 0 to ARequest.Headers.Count - 1 do
