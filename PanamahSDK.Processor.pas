@@ -400,7 +400,7 @@ begin
   SentBatches :=  TPanamahBatchList.FromDirectory(GetBatchSentDirectory);
   for I := 0 to SentBatches.Count - 1 do
   begin
-    if (SentBatches[I].CreatedAt - Now) > 1 then
+    if (Now - SentBatches[I].CreatedAt) > 1 then
       SentBatches[I].RemoveFromDirectory(GetBatchSentDirectory);
   end;
 end;
