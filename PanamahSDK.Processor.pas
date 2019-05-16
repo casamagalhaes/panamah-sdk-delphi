@@ -36,7 +36,7 @@ type
     function GetBatchAccumulationDirectory: string;
     function GetBatchSentDirectory: string;
     function GetCurrentBatchFilename: string;
-    function IsThereAccumulatedBatches: Boolean;
+    function AccumulatedBatchesExists: Boolean;
     function CurrentBatchExpiredByTime(ABatchTTL: Integer): Boolean;
     function BatchExpiredBySize(AMaxSize: Integer): Boolean;
     function BatchExpiredByCount(AMaxCount: Integer): Boolean;
@@ -192,7 +192,7 @@ begin
   Result := (FConfig.BaseDirectory + '\current.pbt');
 end;
 
-function TPanamahBatchProcessor.IsThereAccumulatedBatches: Boolean;
+function TPanamahBatchProcessor.AccumulatedBatchesExists: Boolean;
 begin
   Result := TPanamahBatchList.CountBatchesInDirectory(GetBatchAccumulationDirectory) > 0;
 end;
@@ -361,7 +361,7 @@ begin
   while not Terminated do
   begin
     try
-      if IsThereAccumulatedBatches then
+      if AccumulatedBatchesExists then
       begin
         SendAccumulatedBatches;
       end
