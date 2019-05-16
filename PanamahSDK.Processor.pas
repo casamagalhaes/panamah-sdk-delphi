@@ -22,6 +22,7 @@ type
 
   TPanamahBatchProcessor = class(TThread)
   private
+    FCriticalSection: TCriticalSection;
     FOnBeforeSave: TPanamahCancelableModelEvent;
     FOnBeforeDelete: TPanamahCancelableModelEvent;
     FOnError: TPanamahErrorEvent;
@@ -51,6 +52,7 @@ type
     procedure LoadCurrentBatch;
     procedure SaveCurrentBatch;
     procedure ExpireCurrentBatch;
+    procedure RemoveOldSentBatches;
     procedure CreateBatchWithFailedOperations(ASourceBatch: IPanamahBatch; AFailedOperations: IPanamahOperationList);
     procedure Process;
     procedure AddOperationToCurrentBatch(AOperationType: TPanamahOperationType; AModel: IPanamahModel);
@@ -133,9 +135,14 @@ uses
 
 procedure TPanamahBatchProcessor.AccumulateCurrentBatch;
 begin
-  FCurrentBatch.SaveToDirectory(GetBatchAccumulationDirectory);
-  FCurrentBatch.Reset;
-  DeleteFile(GetCurrentBatchFilename);
+  FCriticalSection.Acquire;
+  try
+    FCurrentBatch.SaveToDirectory(GetBatchAccumulationDirectory);
+    FCurrentBatch.Reset;
+    DeleteFile(GetCurrentBatchFilename);
+  finally
+    FCriticalSection.Release;
+  end;
 end;
 
 procedure TPanamahBatchProcessor.Save(AModel: IPanamahModel);
@@ -195,10 +202,14 @@ procedure TPanamahBatchProcessor.AddOperationToCurrentBatch(AOperationType: TPan
 begin
   DoOnBeforeObjectAddedToBatch(AModel);
   FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone));
-  if BatchExpiredBySize(FConfig.BatchMaxSize) or
-        BatchExpiredByCount(FConfig.BatchMaxCount) then
-  begin
-    ExpireCurrentBatch;
+  FCriticalSection.Acquire;
+  try
+    if BatchExpiredByCount(FConfig.BatchMaxCount) then
+    begin
+      ExpireCurrentBatch;
+    end;
+  finally
+    FCriticalSection.Release;
   end;
 end;
 
@@ -220,6 +231,7 @@ end;
 constructor TPanamahBatchProcessor.Create;
 begin
   inherited Create(True);
+  FCriticalSection := TCriticalSection.Create;
 end;
 
 procedure TPanamahBatchProcessor.CreateBatchWithFailedOperations(
@@ -259,6 +271,7 @@ end;
 
 destructor TPanamahBatchProcessor.Destroy;
 begin
+  FCriticalSection.Free;
   inherited;
 end;
 
@@ -328,11 +341,16 @@ procedure TPanamahBatchProcessor.LoadCurrentBatch;
 var
   CurrentBatchFromFile: IPanamahBatch;
 begin
-  if FileExists(GetCurrentBatchFilename) then
-  begin
-    CurrentBatchFromFile := TPanamahBatch.FromFile(GetCurrentBatchFilename);
-    if CurrentBatchFromFile.Count > 0 then
-      FCurrentBatch := CurrentBatchFromFile.Clone;
+  FCriticalSection.Acquire;
+  try
+    if FileExists(GetCurrentBatchFilename) then
+    begin
+      CurrentBatchFromFile := TPanamahBatch.FromFile(GetCurrentBatchFilename);
+      if CurrentBatchFromFile.Count > 0 then
+        FCurrentBatch := CurrentBatchFromFile.Clone;
+    end;
+  finally
+    FCriticalSection.Release;
   end;
 end;
 
@@ -354,10 +372,18 @@ begin
         else
         if FCurrentBatch.Hash <> CurrentBatchLastHash then
         begin
-          SaveCurrentBatch;
-          CurrentBatchLastHash := FCurrentBatch.Hash;
+          if BatchExpiredBySize(FConfig.BatchMaxSize) then
+          begin
+            ExpireCurrentBatch
+          end
+          else
+          begin
+            SaveCurrentBatch;
+            CurrentBatchLastHash := FCurrentBatch.Hash;
+          end;
         end;
       end;
+      RemoveOldSentBatches;
     except
       on E: Exception do
         DoOnError(E);
@@ -366,10 +392,30 @@ begin
   end;
 end;
 
+procedure TPanamahBatchProcessor.RemoveOldSentBatches;
+var
+  SentBatches: IPanamahBatchList;
+  I: Integer;
+begin
+  SentBatches :=  TPanamahBatchList.FromDirectory(GetBatchSentDirectory);
+  for I := 0 to SentBatches.Count - 1 do
+  begin
+    if (SentBatches[I].CreatedAt - Now) > 1 then
+      SentBatches[I].RemoveFromDirectory(GetBatchSentDirectory);
+  end;
+end;
+
 procedure TPanamahBatchProcessor.SaveCurrentBatch;
 begin
   if FCurrentBatch.Count > 0 then
-    FCurrentBatch.SaveToFile(GetCurrentBatchFilename);
+  begin
+    FCriticalSection.Acquire;
+    try
+      FCurrentBatch.SaveToFile(GetCurrentBatchFilename);
+    finally
+      FCriticalSection.Release;
+    end;
+  end;
 end;
 
 procedure TPanamahBatchProcessor.SendAccumulatedBatches;
@@ -379,7 +425,12 @@ var
   BatchResponse: IPanamahBatchResponse;
   I: Integer;
 begin
-  AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
+  FCriticalSection.Acquire;
+  try
+    AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
+  finally
+    FCriticalSection.Release;
+  end;
   for I := 0 to AccumulatedBatches.Count - 1 do
   begin
     DoOnBeforeBatchSent(AccumulatedBatches[I].Clone);

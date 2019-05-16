@@ -23,6 +23,7 @@ type
     procedure Clear;
     procedure Reset;
     procedure Add(AOperation: IPanamahOperation); overload;
+    procedure RemoveFromDirectory(const ADirectory: string);
     function GetSize: Integer;
     function GetCreatedAt: TDateTime;
     function GetPriority: Boolean;
@@ -75,6 +76,7 @@ type
     class function FromJSON(const AJSON: string): IPanamahBatch;
     class function FromFile(const AFilename: string): IPanamahBatch;
     procedure Add(AOperation: IPanamahOperation); overload;
+    procedure RemoveFromDirectory(const ADirectory: string);
     property Items[AIndex: Integer]: IPanamahOperation read GetItem;
   published
     property CreatedAt: TDateTime read GetCreatedAt write SetCreatedAt;
@@ -260,6 +262,25 @@ begin
     DestinyFile := Format('%s\%s.pbt', [ADestiny, BatchFilename.ToString]);
     MoveFile(PChar(SourceFile), PChar(DestinyFile));
     Result := DestinyFile;
+  finally
+    BatchFilename.Free;
+  end;
+end;
+
+procedure TPanamahBatch.RemoveFromDirectory(const ADirectory: string);
+var
+  BatchFilename: TPanamahBatchFilename;
+  FilenameString: string;
+begin
+  BatchFilename := TPanamahBatchFilename.Create;
+  try
+    BatchFilename.CreatedAt := FCreatedAt;
+    BatchFilename.Priority := FPriority;
+    FilenameString := Format('%s\%s.pbt', [ADirectory, BatchFilename.ToString]);
+    try
+      DeleteFile(PChar(FilenameString));
+    except
+    end;
   finally
     BatchFilename.Free;
   end;
