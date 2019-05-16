@@ -45,17 +45,10 @@ type
     property Content: string read GetContent write SetContent;
   end;
 
-  TPanamahTokenStorage = class
-  private
-    FAccessToken: string;
-    FRefreshToken: string;
-  public
-    property AccessToken: string read FAccessToken write FAccessToken;
-    property RefreshToken: string read FRefreshToken write FRefreshToken;
-    procedure DeserializeFromResponse(AResponse: IPanamahResponse);
-    class function From(const AResponse: IPanamahResponse): TPanamahTokenStorage; overload;
-    function Clone: TPanamahTokenStorage;
-  end;
+  TPanamahTokenStorage = record
+    AccessToken: string;
+    RefreshToken: string;
+  end;    
 
   TPanamahAuthenticatedRequest = function(const AURL: string; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage): IPanamahResponse of object;
 
@@ -90,14 +83,16 @@ type
     procedure SetMethod(AMethod: TMethod);
     procedure SetParams(AParams: TStrings);
     procedure SetURL(const AURL: string);
-    procedure SetTokens(const ATokens: TPanamahTokenStorage);
+    procedure SetTokens(var ATokens: TPanamahTokenStorage);
     property URL: string read GetURL write SetURL;
     property Method: TMethod read GetMethod write SetMethod;
     property Params: TStrings read GetParams write SetParams;
     property Headers: TStrings read GetHeaders write SetHeaders;
     property Content: string read GetContent write SetContent;
     constructor Create(AURL: string; AMethod: TMethod;
-      AParams, AHeaders: TStrings; AContent: string = ''; const ATokens: TPanamahTokenStorage = nil);
+      AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage); overload;
+    constructor Create(AURL: string; AMethod: TMethod;
+      AParams, AHeaders: TStrings; AContent: string); overload;
   end;
 
   TPanamahResponse = class(TInterfacedObject, IPanamahResponse)
@@ -173,6 +168,10 @@ type
     constructor Create(const ABaseURL, AAuthorizationToken, ASecret, AAssinanteId: string); reintroduce;
     destructor Destroy; override;
   end;
+
+  procedure PanamahTokenStorageDeserializeResponse(var ATokens: TPanamahTokenStorage; AResponse: IPanamahResponse);
+  function PanamahTokenStorageClone(var ATokens: TPanamahTokenStorage): TPanamahTokenStorage;
+  function PanamahTokenStorageIsEmpty(var ATokens: TPanamahTokenStorage): Boolean;
 
 const
   DELETE_HTTP_METHOD = 'DELETE';
@@ -353,21 +352,18 @@ begin
     HTTPClient.MimeType := CoalesceText(HTTPClient.Headers.Values['Content-Type'], 'application/json');
     HTTPClient.HTTPMethod(GetMethodAsString(ARequest.Method), ARequest.URL);    
     Response := TPanamahResponse.Create(HTTPClient.ResultCode, HTTPClient.Headers, GetDocumentContent(HTTPClient));
+    if HTTPClient.Sock.LastError > 0 then
+    begin
+      case HTTPClient.Sock.LastError of
+        10061: raise EPanamahSDKConnectionRefusedException.Create(Response.Content);
+      end;
+    end;
     case Response.Status of
       500: raise EPanamahSDKServerInternalException.Create(Response.Content);
       400: raise EPanamahSDKBadRequestException.Create(Response.Content);
       else
       begin
-        if HTTPClient.Sock.LastError > 0 then
-        begin
-          case HTTPClient.Sock.LastError of
-            10061: raise EPanamahSDKConnectionRefusedException.Create(Response.Content);
-            else
-              raise EPanamahSDKHTTPProtocolException.Create(Response.Content);
-          end;
-        end
-        else
-          Result := Response; 
+        Result := Response; 
       end;
     end;
   finally
@@ -386,7 +382,7 @@ function TPanamahClient.Delete(const AURL: string; AParams, AHeaders: TStrings):
 var
   Request: IPanamahRequest;
 begin
-  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtDELETE, AParams, AHeaders, EmptyStr, nil);
+  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtDELETE, AParams, AHeaders, EmptyStr);
   Result := MakeRequest(Request);
 end;
 
@@ -394,7 +390,7 @@ function TPanamahClient.Get(const AURL: string; AParams, AHeaders: TStrings): IP
 var
   Request: IPanamahRequest;
 begin
-  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtGET, AParams, AHeaders, EmptyStr, nil);
+  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtGET, AParams, AHeaders, EmptyStr);
   Result := MakeRequest(Request);
 end;
 
@@ -402,7 +398,7 @@ function TPanamahClient.Post(const AURL, AContent: string; AHeaders: TStrings): 
 var
   Request: IPanamahRequest;
 begin
-  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtPOST, nil, AHeaders, AContent, nil);
+  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtPOST, nil, AHeaders, AContent);
   Result := MakeRequest(Request);
 end;
 
@@ -410,7 +406,7 @@ function TPanamahClient.Put(const AURL, AContent: string; AHeaders: TStrings): I
 var
   Request: IPanamahRequest;
 begin
-  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtPUT, nil, AHeaders, AContent, nil);
+  Request := TPanamahRequest.Create(Concat(FBaseURL, AURL), mtPUT, nil, AHeaders, AContent);
   Result := MakeRequest(Request);
 end;
 
@@ -437,7 +433,7 @@ var
   RefreshHeaders: TStrings;
   Timestamp: TDateTime;
 begin
-  if Assigned(FTokens) then
+  if not PanamahTokenStorageIsEmpty(FTokens) then
   begin
     Result := ARequestFunction(AURL, AParams, AHeaders, AContent, FTokens);
     if (Result.Status = 403) then
@@ -450,7 +446,7 @@ begin
         RefreshResponse := MakeRequest(RefreshRequest);
         if RefreshResponse.Status = 200 then
         begin
-          FTokens.DeserializeFromResponse(RefreshResponse);
+          PanamahTokenStorageDeserializeResponse(FTokens, RefreshResponse);
           Result := ARequestFunction(AURL, AParams, AHeaders, AContent, FTokens);
         end
         else
@@ -476,7 +472,7 @@ begin
       AuthResponse := MakeRequest(AuthRequest);
       if AuthResponse.Status = 200 then
       begin
-        FTokens := TPanamahTokenStorage.From(AuthResponse);
+        PanamahTokenStorageDeserializeResponse(FTokens, AuthResponse);
         Result := ARequestFunction(AURL, AParams, AHeaders, AContent, FTokens);
       end
       else
@@ -494,8 +490,6 @@ end;
 
 destructor TPanamahStreamClient.Destroy;
 begin
-  if Assigned(FTokens) then
-    FreeAndNil(FTokens);
   inherited;
 end;
 
@@ -593,7 +587,7 @@ end;
 
 { TRequest }
 
-constructor TPanamahRequest.Create(AURL: string; AMethod: TMethod; AParams, AHeaders: TStrings; AContent: string; const ATokens: TPanamahTokenStorage);
+constructor TPanamahRequest.Create(AURL: string; AMethod: TMethod; AParams, AHeaders: TStrings; AContent: string; ATokens: TPanamahTokenStorage);
 begin
   FOwnedObjects := TStringList.Create;
   SetTokens(ATokens);
@@ -604,6 +598,13 @@ begin
   SetContent(AContent);
 end;
 
+constructor TPanamahRequest.Create(AURL: string; AMethod: TMethod; AParams, AHeaders: TStrings; AContent: string);
+var
+  Tokens: TPanamahTokenStorage;
+begin
+  Create(AURL, AMethod, AParams, AHeaders, AContent, Tokens);
+end;
+
 destructor TPanamahRequest.Destroy;
 var
   I: Integer;
@@ -611,8 +612,6 @@ begin
   for I := 0 to FOwnedObjects.Count - 1 do
     FOwnedObjects.Objects[I].Free;
   FOwnedObjects.Free;
-  if Assigned(FTokens) then
-    FTokens.Free;
   inherited;
 end;
 
@@ -643,7 +642,7 @@ end;
 
 procedure TPanamahRequest.SetAuthorizationHeaders;
 begin
-  if Assigned(FTokens) then
+  if not PanamahTokenStorageIsEmpty(FTokens) then
   begin
     if not Assigned(FHeaders) then
     begin
@@ -683,10 +682,10 @@ begin
   FParams := AParams;
 end;
 
-procedure TPanamahRequest.SetTokens(const ATokens: TPanamahTokenStorage);
+procedure TPanamahRequest.SetTokens(var ATokens: TPanamahTokenStorage);
 begin
-  if Assigned(ATokens) then
-    FTokens := ATokens.Clone;
+  if not PanamahTokenStorageIsEmpty(ATokens) then
+    FTokens := PanamahTokenStorageClone(ATokens);
 end;
 
 procedure TPanamahRequest.SetURL(const AURL: string);
@@ -740,34 +739,6 @@ end;
 procedure TPanamahResponse.SetStatus(Value: Integer);
 begin
   FStatus := Value;
-end;
-
-{ TTokenStorage }
-
-function TPanamahTokenStorage.Clone: TPanamahTokenStorage;
-begin
-  Result := TPanamahTokenStorage.Create;
-  Result.AccessToken := FAccessToken;
-  Result.RefreshToken := FRefreshToken;
-end;
-
-procedure TPanamahTokenStorage.DeserializeFromResponse(AResponse: IPanamahResponse);
-var
-  JsonObject: TlkJSONobject;
-begin
-  JsonObject := TlkJSON.ParseText(AResponse.Content) as TlkJSONobject;
-  try
-    FAccessToken := JsonObject.Field['accessToken'].Value;
-    FRefreshToken := JsonObject.Field['refreshToken'].Value;
-  finally
-    JsonObject.Free;
-  end;
-end;
-
-class function TPanamahTokenStorage.From(const AResponse: IPanamahResponse): TPanamahTokenStorage;
-begin
-  Result := TPanamahTokenStorage.Create;
-  Result.DeserializeFromResponse(AResponse);
 end;
 
 { TPanamahAdminClient }
@@ -837,5 +808,33 @@ begin
     Headers.Free;
   end;
 end;
+
+
+{ TTokenStorage }
+
+function PanamahTokenStorageClone(var ATokens: TPanamahTokenStorage): TPanamahTokenStorage;
+begin
+  Result.AccessToken := ATokens.AccessToken;
+  Result.RefreshToken := ATokens.RefreshToken;
+end;
+
+procedure PanamahTokenStorageDeserializeResponse(var ATokens: TPanamahTokenStorage; AResponse: IPanamahResponse);
+var
+  JsonObject: TlkJSONobject;
+begin
+  JsonObject := TlkJSON.ParseText(AResponse.Content) as TlkJSONobject;
+  try
+    ATokens.AccessToken := JsonObject.Field['accessToken'].Value;
+    ATokens.RefreshToken := JsonObject.Field['refreshToken'].Value;
+  finally
+    JsonObject.Free;
+  end;
+end;
+
+function PanamahTokenStorageIsEmpty(var ATokens: TPanamahTokenStorage): Boolean;
+begin
+  Result := SameText(ATokens.AccessToken, EmptyStr) and SameText(ATokens.RefreshToken, EmptyStr);
+end;
+
 
 end.

@@ -5,7 +5,7 @@ interface
 uses
   Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Enums,
   PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Batch, PanamahSDK.Client,
-  PanamahSDK.Consts, uLkJSON;
+  PanamahSDK.Consts, uLkJSON, ActiveX;
 
 type
 
@@ -300,8 +300,13 @@ end;
 procedure TPanamahBatchProcessor.Execute;
 begin
   inherited;
-  LoadCurrentBatch;
-  Process;
+  CoInitialize(nil);
+  try
+    LoadCurrentBatch;
+    Process;
+  finally
+    CoUninitialize;
+  end;
 end;
 
 procedure TPanamahBatchProcessor.ExpireCurrentBatch;

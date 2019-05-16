@@ -83,8 +83,6 @@ type
     constructor Create; reintroduce;
   end;
 
-  TBatchFileIterationProcedure = procedure(const ABatchFilename: string);
-
   TPanamahBatchList = class(TInterfacedObject, IPanamahBatchList)
   private
     FList: TInterfaceList;

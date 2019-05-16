@@ -94,12 +94,14 @@ type
     destructor Destroy; override;
     class procedure Free;
     class function GetInstance: TPanamahStream;
+    function ReadNFeDirectory(const ADirectory: string): IPanamahNFeDocumentList; overload;
     function ReadNFe(const AFilename: string): IPanamahNFeDocument; overload;
     function ReadNFe(ADocumentType: TPanamahNFeDocumentType; const AFilename: string): IPanamahNFeDocument; overload;
     procedure Init; overload;
     procedure Init(AConfig: IPanamahStreamConfig); overload;
     procedure Init(const AAuthorizationToken, ASecret, AAssinanteId: string); overload;
     procedure Flush;
+    procedure Save(ANFeDocumentList: IPanamahNFeDocumentList); overload;
     procedure Save(ANFeDocument: IPanamahNFeDocument); overload;
     procedure Save(AAcesso: IPanamahAcesso); overload;
     procedure Save(ACliente: IPanamahCliente); overload;
@@ -170,7 +172,8 @@ uses
 procedure TPanamahStream.Init(AConfig: IPanamahStreamConfig);
 begin
   FConfig := AConfig;
-  FProcessor.Start(FConfig);
+  if not {$IFDEF UNICODE}FProcessor.Started{$ELSE}not FProcessor.Suspended{$ENDIF} then
+    FProcessor.Start(FConfig);
 end;
 
 procedure TPanamahStream.Init(const AAuthorizationToken, ASecret, AAssinanteId: string);
@@ -189,9 +192,15 @@ begin
   Result := TPanamahNFeDocument.FromFile(ADocumentType, AFilename);
 end;
 
+function TPanamahStream.ReadNFeDirectory(const ADirectory: string): IPanamahNFeDocumentList;
+begin
+  Result := TPanamahNFeDocumentList.Create;
+  Result.LoadFromDirectory(ADirectory);
+end;
+
 function TPanamahStream.ReadNFe(const AFilename: string): IPanamahNFeDocument;
 begin
-  Result := Self.ReadNFe(ndtDESCONHECIDO, AFilename);
+  Result := ReadNFe(ndtDESCONHECIDO, AFilename);
 end;
 
 procedure TPanamahStream.Init;
@@ -310,12 +319,20 @@ begin
   FProcessor.Save(AVenda);
 end;
 
+procedure TPanamahStream.Save(ANFeDocumentList: IPanamahNFeDocumentList);
+var
+  I: Integer;
+begin
+  for I := 0 to ANFeDocumentList.Count - 1 do
+    Save(ANFeDocumentList[I]);
+end;
+
 procedure TPanamahStream.Save(ANFeDocument: IPanamahNFeDocument);
 var
   I: Integer;
 begin
-  for I := 0 to ANFeDocument.Models.Count - 1 do
-    FProcessor.Save(ANFeDocument.Models[I]);
+  for I := 0 to ANFeDocument.Count - 1 do
+    FProcessor.Save(ANFeDocument[I]);
 end;
 
 procedure TPanamahStream.Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);

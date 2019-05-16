@@ -195,8 +195,10 @@ type
   function MatchText(const AText: string; const AValues: array of string): Boolean; overload;
   function IndexText(const AText: string; const AValues: array of string): Integer; overload;
   function StartsText(const ASubText, AText: string): Boolean; overload;
+  function ContainsText(const AText, ASubText: string): Boolean;
   {$ENDIF}
 
+  function OnlyNumbers(const AText: string): string;
   function CoalesceText(const AText, ATextIfNull: string): string;
   function DateTimeToISO8601(const AInput: TDateTime): string;
   function ISO8601ToDateTime(const AInput: string): TDateTime;
@@ -223,6 +225,11 @@ end;
 function StartsText(const ASubText, AText: string): Boolean;
 begin
   Result := AnsiStartsText(ASubText, AText);
+end;
+
+function ContainsText(const AText, ASubText: string): Boolean;
+begin
+  Result := AnsiContainsText(AText, ASubText);
 end;
 {$ENDIF}
 
@@ -591,6 +598,18 @@ begin
   DateTimeToSystemTime(Now, LocalTime);
   TzSpecificLocalTimeToSystemTime(@TimeZoneInformation, LocalTime, UniversalTime);
   Result := SystemTimeToDateTime(UniversalTime);
+end;
+
+function OnlyNumbers(const AText: string): string;
+var
+  I: Integer;
+begin
+  Result := EmptyStr;
+  for I := 1 to Length(AText) do
+  begin
+    if {$IFDEF UNICODE}CharInSet(AText[I], ['0'..'9']){$ELSE}AText[I] in ['0'..'9']{$ENDIF} then
+      Result := Result + AText[I];
+  end;
 end;
 
 end.

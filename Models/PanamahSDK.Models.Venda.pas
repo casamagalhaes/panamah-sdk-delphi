@@ -386,6 +386,7 @@ type
     function Clone: IPanamahModel;
     class function FromJSON(const AJSON: string): IPanamahVenda;
     function Validate: IPanamahValidationResult;
+    constructor Create; reintroduce;
   published
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
@@ -1254,6 +1255,12 @@ end;
 procedure TPanamahVenda.SetPagamentos(const APagamentos: IpanamahVendaPagamentoList);
 begin
   FPagamentos := APagamentos;
+end;
+
+constructor TPanamahVenda.Create;
+begin
+  inherited;
+  FEfetiva := True;
 end;
 
 procedure TPanamahVenda.DeserializeFromJSON(const AJSON: string);
