@@ -355,9 +355,7 @@ begin
     for I := 0 to Length(Nodes) - 1 do
     begin
       Produto := TPanamahProduto.Create;
-      Id := GetProdValue(I, Nodes[I], 'cEAN');
-      if SameText(Id, EmptyStr) or SameText(Id, 'SEM GTIN') then
-        Id := GetProdValue(I, Nodes[I], 'cProd');
+      Id := GetProdValue(I, Nodes[I], 'cProd');
       Produto.Id := Id;
       Produto.Descricao := GetProdValue(I, Nodes[I], 'xProd');
       Produto.Ativo := True;
