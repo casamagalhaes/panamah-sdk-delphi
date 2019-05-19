@@ -151,7 +151,14 @@ var
   KeepExecuting: Boolean;
 begin
   KeepExecuting := True;
-  DoOnBeforeSave(AModel, KeepExecuting);
+  try
+    DoOnBeforeSave(AModel, KeepExecuting);
+  except
+    on EAbort do
+      KeepExecuting := False;
+    on E: Exception do
+      raise E;
+  end;
   if KeepExecuting then
   begin
     ValidationResult := AModel.Validate;
@@ -167,7 +174,14 @@ var
   KeepExecuting: Boolean;
 begin
   KeepExecuting := True;
-  DoOnBeforeDelete(AModel, KeepExecuting);
+  try
+    DoOnBeforeDelete(AModel, KeepExecuting);
+  except
+    on EAbort do
+      KeepExecuting := False;
+    on E: Exception do
+      raise E;
+  end;
   if KeepExecuting then
   begin
     if ModelHasId(AModel) then
@@ -386,7 +400,12 @@ begin
       RemoveOldSentBatches;
     except
       on E: Exception do
-        DoOnError(E);
+      begin
+        try
+          DoOnError(E);
+        except
+        end;
+      end;
     end;
     Sleep(500);
   end;
