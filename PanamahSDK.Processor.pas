@@ -158,7 +158,7 @@ begin
     if ValidationResult.Valid then
       AddOperationToCurrentBatch(otUPDATE, AModel)
     else
-      raise EPanamahSDKExceptionValidationFailed.Create(ValidationResult.Reasons.Text);
+      raise EPanamahSDKValidationException.Create(ValidationResult.Reasons.Text);
   end;
 end;
 
@@ -173,7 +173,7 @@ begin
     if ModelHasId(AModel) then
       AddOperationToCurrentBatch(otDELETE, AModel)
     else
-      raise EPanamahSDKExceptionValidationFailed.Create(Format('Id obrigatorio para exclusao de %s', [AModel.ModelName]));
+      raise EPanamahSDKValidationException.Create(Format('Id obrigatorio para exclusao de %s', [AModel.ModelName]));
   end;
 end;
 

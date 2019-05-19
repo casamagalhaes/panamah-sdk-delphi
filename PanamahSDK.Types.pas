@@ -190,7 +190,7 @@ type
   EPanamahSDKConflictException = class(Exception);
   EPanamahSDKUnknownException = class(Exception);
   EPanamahSDKIOException = class(Exception);
-  EPanamahSDKExceptionValidationFailed = class(Exception);
+  EPanamahSDKValidationException = class(Exception);
 
   {$IFNDEF UNICODE}
   function MatchText(const AText: string; const AValues: array of string): Boolean; overload;
@@ -568,7 +568,7 @@ begin
     except
       on E: Exception do
       begin
-        raise e.Create('Falha na conversão de data');
+        raise e.Create('Falha na conversï¿½o de data');
       end;
     end;
 end;
