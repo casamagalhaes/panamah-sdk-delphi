@@ -75,6 +75,7 @@ class function TPanamahPendingResourcesList.Obtain(AClient: IPanamahClient): IPa
     JSONObject: TlkJSONobject;
     I: Integer;
   begin
+    Result := nil;
     if not Assigned(AResult) then
       AResult := TStringList.Create;
     Response := AClient.Get(Format('/stream/pending-resources?start=%d&count=%d', [AStart, ACount]), nil, nil);
