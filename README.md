@@ -8,7 +8,7 @@
     {CAMINHO_DO_REPOSITORIO}\panamah-sdk-delphi
     ```
 
-    **Importante**: Para versões do Delphi iguais ou anteriores ao 2009, também é necessário incluir a seguinte path:
+    **Importante**: Para versões do Delphi anteriores ao 2009, também é necessário incluir a seguinte path:
     ```cmd
     {CAMINHO_DO_REPOSITORIO}\panamah-sdk-delphi\Lib\synapse
     ```
