@@ -86,6 +86,52 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="..\Lib\DCPbase64.pas"/>
+        <DCCReference Include="..\Lib\DCPconst.pas"/>
+        <DCCReference Include="..\Lib\DCPcrypt2.pas"/>
+        <DCCReference Include="..\Lib\DCPsha1.pas"/>
+        <DCCReference Include="..\Lib\DCPsha256.pas"/>
+        <DCCReference Include="..\Lib\MD5.pas"/>
+        <DCCReference Include="..\Lib\uLkJSON.pas"/>
+        <DCCReference Include="..\Lib\uSHA1.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Acesso.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Assinante.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Cliente.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Compra.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Ean.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.EstoqueMovimentacao.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.EventoCaixa.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.FormaPagamento.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Fornecedor.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Funcionario.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Grupo.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Holding.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.LocalEstoque.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Loja.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Meta.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Produto.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Revenda.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Secao.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Subgrupo.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.TituloPagar.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.TituloReceber.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.TrocaDevolucao.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.TrocaFormaPagamento.pas"/>
+        <DCCReference Include="..\Models\PanamahSDK.Models.Venda.pas"/>
+        <DCCReference Include="..\PanamahSDK.Batch.pas"/>
+        <DCCReference Include="..\PanamahSDK.Client.pas"/>
+        <DCCReference Include="..\PanamahSDK.Consts.pas"/>
+        <DCCReference Include="..\PanamahSDK.Crypto.pas"/>
+        <DCCReference Include="..\PanamahSDK.Enums.pas"/>
+        <DCCReference Include="..\PanamahSDK.JsonUtils.pas"/>
+        <DCCReference Include="..\PanamahSDK.NFe.pas"/>
+        <DCCReference Include="..\PanamahSDK.Operation.pas"/>
+        <DCCReference Include="..\PanamahSDK.pas"/>
+        <DCCReference Include="..\PanamahSDK.PendingResources.pas"/>
+        <DCCReference Include="..\PanamahSDK.Processor.pas"/>
+        <DCCReference Include="..\PanamahSDK.Types.pas"/>
+        <DCCReference Include="..\PanamahSDK.ValidationUtils.pas"/>
+        <DCCReference Include="..\PanamahSDK.XMLUtils.pas"/>
         <DCCReference Include="NFe\PanamahSDKTests.NFe.pas"/>
         <DCCReference Include="Models\PanamahSDKTests.Models.Acesso.pas"/>
         <DCCReference Include="Models\PanamahSDKTests.Models.Assinante.pas"/>
@@ -505,14 +551,14 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
                 <Platform value="Win32">True</Platform>
