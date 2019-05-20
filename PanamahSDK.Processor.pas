@@ -482,7 +482,8 @@ end;
 procedure TPanamahBatchProcessor.Stop;
 begin
   Terminate;
-  WaitFor;
+  if not Terminated then
+    WaitFor;
 end;
 
 { TPanamahBatchResponse }
