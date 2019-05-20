@@ -33,6 +33,7 @@ type
     FClient: IPanamahClient;
     FConfig: IPanamahStreamConfig;
     FCurrentBatch: IPanamahBatch;
+    FStarted: Boolean;
     function GetBatchAccumulationDirectory: string;
     function GetBatchSentDirectory: string;
     function GetCurrentBatchFilename: string;
@@ -476,14 +477,18 @@ begin
   FConfig := AConfig;
   FClient := TPanamahStreamClient.Create(API_BASE_URL, FConfig.AuthorizationToken, FConfig.Secret, FConfig.AssinanteId);
   FCurrentBatch := TPanamahBatch.Create;
+  FStarted := True;
   inherited {$IFDEF UNICODE}Start{$ELSE}Resume{$ENDIF};
 end;
 
 procedure TPanamahBatchProcessor.Stop;
 begin
   Terminate;
-  if not Terminated then
+  if FStarted then
+  begin
     WaitFor;
+    FStarted := False;
+  end;
 end;
 
 { TPanamahBatchResponse }
