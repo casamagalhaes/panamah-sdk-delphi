@@ -71,7 +71,7 @@ class function TPanamahPendingResourcesList.Obtain(AClient: IPanamahClient): IPa
   begin
     Values := TStringList.Create;
     try
-      Values.LineBreak := ',';
+      Values.Delimiter := ',';
       Values.DelimitedText := AItems;
       with AField as TlkJSONlist do
       begin
@@ -82,7 +82,7 @@ class function TPanamahPendingResourcesList.Obtain(AClient: IPanamahClient): IPa
             Values.Add(anJSON.Value);
         end;
       end;
-      Result := Values.Text;
+      Result := Values.DelimitedText;
       if Result[Length(Result)] = ',' then
         Result := Copy(Result, 1, Length(Result) - 1);
     finally
@@ -126,7 +126,7 @@ class function TPanamahPendingResourcesList.Obtain(AClient: IPanamahClient): IPa
   function SplitByComma(const AValue: string): TStrings;
   begin
     Result := TStringList.Create;
-    Result.LineBreak := ',';
+    Result.Delimiter := ',';
     Result.DelimitedText := AValue;
   end;
 

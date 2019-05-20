@@ -1,4 +1,4 @@
-﻿unit PanamahSDK.Types;
+unit PanamahSDK.Types;
 
 interface
 
