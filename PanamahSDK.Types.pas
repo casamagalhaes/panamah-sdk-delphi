@@ -1,4 +1,4 @@
-unit PanamahSDK.Types;
+﻿unit PanamahSDK.Types;
 
 interface
 
@@ -159,24 +159,6 @@ type
     destructor Destroy; override;
     function GetAggregate: IPanamahValidationResult;
     property Items[AIndex: Integer]: IPanamahValidationResult read GetItem write SetItem; default;
-  end;
-
-  TPanamahModelList = class(TInterfacedObject, IPanamahModelList)
-  private
-    FList: TInterfaceList;
-  public
-    procedure AddModel(AModel: IPanamahModel);
-    procedure AddModels(AModels: IPanamahModelList);
-    function SerializeToJSON: string;
-    procedure DeserializeFromJSON(const AJSON: string);
-    function Count: Integer;
-    function Validate: IPanamahValidationResult;
-    function GetModel(AIndex: Integer): IPanamahModel;
-    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
-    procedure Clear;
-    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel; default;
-    constructor Create; reintroduce;
-    destructor Destroy; override;
   end;
 
   {Exceptions}
@@ -437,96 +419,6 @@ end;
 procedure TPanamahValidationResultList.SetItem(AIndex: Integer; const Value: IPanamahValidationResult);
 begin
   FList[AIndex] := Value;
-end;
-
-{ TPanamahModelList }
-
-procedure TPanamahModelList.AddModel(AModel: IPanamahModel);
-begin
-  FList.Add(AModel);
-end;
-
-procedure TPanamahModelList.AddModels(AModels: IPanamahModelList);
-var
-  I: Integer;
-begin
-  if Assigned(AModels) then
-  begin
-    for I := 0 to AModels.Count - 1 do
-      AddModel(AModels[I]);
-  end;
-end;
-
-procedure TPanamahModelList.Clear;
-begin
-  FList.Clear;
-end;
-
-function TPanamahModelList.Count: Integer;
-begin
-  Result := FList.Count;
-end;
-
-constructor TPanamahModelList.Create;
-begin
-  inherited Create;
-  FList := TInterfaceList.Create;
-end;
-
-procedure TPanamahModelList.DeserializeFromJSON(const AJSON: string);
-begin
-  raise EPanamahSDKUnknownException.Create('Impossivel deserializar usando a classe TPanamahModelList');
-end;
-
-destructor TPanamahModelList.Destroy;
-begin
-  FreeAndNil(FList);
-  inherited;
-end;
-
-function TPanamahModelList.GetModel(AIndex: Integer): IPanamahModel;
-begin
-  Result := FList[AIndex] as IPanamahModel;
-end;
-
-function TPanamahModelList.SerializeToJSON: string;
-var
-  JSONObject: TlkJSONlist;
-  I: Integer;
-begin
-  FList.Lock;
-  try
-    JSONObject := TlkJSONlist.Create;
-    try
-      for I := 0 to FList.Count - 1 do
-        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahModel).SerializeToJSON));
-      Result := TlkJSON.GenerateText(JSONObject);
-    finally
-      JSONObject.Free;
-    end;
-  finally
-    FList.Unlock;
-  end;
-end;
-
-procedure TPanamahModelList.SetModel(AIndex: Integer;
-  const Value: IPanamahModel);
-begin
-  FList[AIndex] := Value;
-end;
-
-function TPanamahModelList.Validate: IPanamahValidationResult;
-var
-  I: Integer;
-begin
-  FList.Lock;
-  try
-    Result := TPanamahValidationResult.CreateSuccess;
-    for I := 0 to FList.Count - 1 do
-      Result.Concat(Format('[%d]', [FList[I]]), (FList[I] as IPanamahModel).Validate);
-  finally
-    FList.Unlock;
-  end;
 end;
 
 function CoalesceText(const AText, ATextIfNull: string): string;
