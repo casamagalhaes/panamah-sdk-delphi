@@ -5,7 +5,7 @@ interface
 uses
   Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Enums,
   PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Batch, PanamahSDK.Client,
-  PanamahSDK.Consts, uLkJSON, ActiveX;
+  PanamahSDK.Consts, uLkJSON, ActiveX, PanamahSDK.PendingResources;
 
 type
 
@@ -73,6 +73,7 @@ type
     procedure Save(AModel: IPanamahModel);
     procedure Delete(AModel: IPanamahModel);
     procedure Flush;
+    function GetPendingResources: IPanamahPendingResourcesList;
   end;
 
   IPanamahCountedOperations = interface(IJSONSerializable)
@@ -205,6 +206,13 @@ end;
 function TPanamahBatchProcessor.GetCurrentBatchFilename: string;
 begin
   Result := (FConfig.BaseDirectory + '\current.pbt');
+end;
+
+function TPanamahBatchProcessor.GetPendingResources: IPanamahPendingResourcesList;
+begin
+  Result := nil;
+  if Assigned(FClient) then
+    Result := TPanamahPendingResourcesList.Obtain(FClient);
 end;
 
 function TPanamahBatchProcessor.AccumulatedBatchesExists: Boolean;

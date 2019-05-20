@@ -12,7 +12,7 @@ uses
   PanamahSDK.Models.Meta, PanamahSDK.Models.Produto, PanamahSDK.Models.Revenda, PanamahSDK.Models.Secao,
   PanamahSDK.Models.Subgrupo, PanamahSDK.Models.TituloPagar, PanamahSDK.Models.TituloReceber,
   PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento, PanamahSDK.Models.Venda, PanamahSDK.Processor,
-  PanamahSDK.NFe, PanamahSDK.Consts;
+  PanamahSDK.NFe, PanamahSDK.Consts, PanamahSDK.PendingResources;
 
 type
 
@@ -97,6 +97,7 @@ type
     function ReadNFeDirectory(const ADirectory: string): IPanamahNFeDocumentList; overload;
     function ReadNFe(const AFilename: string): IPanamahNFeDocument; overload;
     function ReadNFe(ADocumentType: TPanamahNFeDocumentType; const AFilename: string): IPanamahNFeDocument; overload;
+    function GetPendingResources: IPanamahPendingResourcesList;
     procedure Init; overload;
     procedure Init(AConfig: IPanamahStreamConfig); overload;
     procedure Init(const AAuthorizationToken, ASecret, AAssinanteId: string); overload;
@@ -554,6 +555,11 @@ end;
 function TPanamahStream.GetOnError: TPanamahErrorEvent;
 begin
   Result := FProcessor.OnError;
+end;
+
+function TPanamahStream.GetPendingResources: IPanamahPendingResourcesList;
+begin
+  Result := FProcessor.GetPendingResources;
 end;
 
 { TPanamahSDKConfig }

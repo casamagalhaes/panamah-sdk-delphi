@@ -6,38 +6,59 @@ uses
   Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Client;
 
 type
-
   IPanamahPendingResourcesList = interface
-    ['{2F5E0741-402B-4AF7-80B9-C73C88CE4B1E}']
-    procedure SetModels(AModels: IPanamahModelList);
-    function GetModels: IPanamahModelList;
-    property Models: IPanamahModelList read GetModels write SetModels;
+    ['{B9CFD6CC-3989-4CCC-A186-EFEDFE1EF619}']
+    function GetModel(AIndex: Integer): IPanamahModel;
+    function GetCount: Integer;
+    procedure Add(AModel: IPanamahModel);
+    property Models[AIndex: Integer]: IPanamahModel read GetModel; default;
+    property Count: Integer read GetCount;
   end;
 
   TPanamahPendingResourcesList = class(TInterfacedObject, IPanamahPendingResourcesList)
   private
-    FModels: IPanamahModelList;
-    function GetModels: IPanamahModelList;
-    procedure SetModels(AModels: IPanamahModelList);
+    FModels: TInterfaceList;
+    function GetModel(AIndex: Integer): IPanamahModel;
+    function GetCount: Integer;
   public
     class function Obtain(AClient: IPanamahClient): IPanamahPendingResourcesList;
-    property Models: IPanamahModelList read GetModels write SetModels;
+    constructor Create; reintroduce;
+    procedure Add(AModel: IPanamahModel);
+    destructor Destroy; override;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel; default;
+    property Count: Integer read GetCount;
   end;
 
 implementation
 
-uses PanamahSDK.Operation, uLkJSON;
+uses PanamahSDK.Operation, uLkJSON, PanamahSDK.ModelUtils;
 
 { TPanamahPendingResourcesList }
 
-function TPanamahPendingResourcesList.GetModels: IPanamahModelList;
+procedure TPanamahPendingResourcesList.Add(AModel: IPanamahModel);
 begin
-  Result := FModels;
+  FModels.Add(AModel);
 end;
 
-procedure TPanamahPendingResourcesList.SetModels(AModels: IPanamahModelList);
+constructor TPanamahPendingResourcesList.Create;
 begin
-  FModels := AModels;
+  FModels := TInterfaceList.Create;
+end;
+
+destructor TPanamahPendingResourcesList.Destroy;
+begin
+  FreeAndNil(FModels);
+  inherited;
+end;
+
+function TPanamahPendingResourcesList.GetCount: Integer;
+begin
+  Result := FModels.Count;
+end;
+
+function TPanamahPendingResourcesList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := GetModelFromInterfaceList(FModels, AIndex);
 end;
 
 class function TPanamahPendingResourcesList.Obtain(AClient: IPanamahClient): IPanamahPendingResourcesList;
@@ -82,22 +103,22 @@ class function TPanamahPendingResourcesList.Obtain(AClient: IPanamahClient): IPa
     if Response.Status = 200 then
     begin
       JSONObject := TlkJSON.ParseText(Response.Content) as TlkJSONobject;
-      if JSONObject.Count > 0 then
-      begin
-        try
+      try
+        if JSONObject.Count > 0 then
+        begin
           for I := 0 to JSONObject.Count - 1 do
             AResult.Values[JSONObject.NameOf[I]] := ConcatWithJSON(
               AResult.Values[JSONObject.NameOf[I]],
               JSONObject.Field[JSONObject.NameOf[I]]
             );
           Result := Paginate(AStart + ACount, ACount, AResult);
-        finally
-          JSONObject.Free;
+        end
+        else
+        begin
+          Result := AResult;
         end;
-      end
-      else
-      begin
-        Result := AResult;
+      finally
+        JSONObject.Free;
       end;
     end;
   end;
@@ -119,14 +140,13 @@ begin
     if PendingResources.Count > 0 then
     begin
       Result := TPanamahPendingResourcesList.Create;
-      Result.Models := TPanamahModelList.Create;
       for I := 0 to PendingResources.Count - 1 do
       begin
         Ids := SplitByComma(PendingResources.Values[PendingResources.Names[I]]);
         try
           for X := 0 to Ids.Count - 1 do
           begin
-            TPanamahModelList(Result.Models).AddModel(
+            Result.Add(
               ParseJSONOfModelByDataType(PendingResources.Names[I], Format('{"id":"%s"}', [Ids[X]]))
             );
           end;

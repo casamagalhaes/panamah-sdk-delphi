@@ -101,7 +101,7 @@ implementation
 
 { TPanamahNFeDocument }
 
-uses PanamahSDK.XMLUtils, XMLIntf;
+uses PanamahSDK.XMLUtils, XMLIntf, PanamahSDK.ModelUtils;
 
 procedure TPanamahNFeDocument.Add(AModel: IPanamahModel);
 begin
@@ -213,16 +213,7 @@ end;
 
 function TPanamahNFeDocument.GetItem(AIndex: Integer): IPanamahModel;
 begin
-  if SameText(FDataTypes[AIndex], 'LOJA') then
-    Result := FModels[AIndex] as IPanamahLoja
-  else if SameText(FDataTypes[AIndex], 'CLIENTE') then
-    Result := FModels[AIndex] as IPanamahCliente
-  else if SameText(FDataTypes[AIndex], 'FORNECEDOR') then
-    Result := FModels[AIndex] as IPanamahFornecedor
-  else if SameText(FDataTypes[AIndex], 'PRODUTO') then
-    Result := FModels[AIndex] as IPanamahProduto
-  else if SameText(FDataTypes[AIndex], 'VENDA') then
-    Result := FModels[AIndex] as IPanamahVenda;
+  Result := GetModelFromInterfaceList(FModels, AIndex);
 end;
 
 procedure TPanamahNFeDocument.SetDocumentType(AType: TPanamahNFeDocumentType);
