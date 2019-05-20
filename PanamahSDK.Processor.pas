@@ -466,7 +466,12 @@ begin
       end
       else
       begin
-        AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
+        FCriticalSection.Acquire;
+        try
+          AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
+        finally
+          FCriticalSection.Release;
+        end;
       end;
     end;
   end;

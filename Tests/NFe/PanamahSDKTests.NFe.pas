@@ -101,7 +101,7 @@ begin
   );
   Assert(Produtos.Count = 6, 'Número incorreto de produtos lidos do xml');
 
-  Assert(Produtos[0].Id = '00854011370054', 'Id do produto 0 lido incorretamente do xml');
+  Assert(Produtos[0].Id = '00000075', 'Id do produto 0 lido incorretamente do xml');
   Assert(Produtos[0].Descricao = 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL', 'Descrição do produto 0 lido incorretamente do xml');
 
   Assert(Produtos[1].Id = '00000005', 'Id do produto 1 lido incorretamente do xml');
@@ -113,7 +113,7 @@ begin
   Assert(Produtos[3].Id = '00000075', 'Id do produto 3 lido incorretamente do xml');
   Assert(Produtos[3].Descricao = 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL', 'Descrição do produto 3 lido incorretamente do xml');
 
-  Assert(Produtos[4].Id = '00854011370054', 'Id do produto 4 lido incorretamente do xml');
+  Assert(Produtos[4].Id = '00000075', 'Id do produto 4 lido incorretamente do xml');
   Assert(Produtos[4].Descricao = 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL', 'Descrição do produto 4 lido incorretamente do xml');
 
   Assert(Produtos[5].Id = '00000005', 'Id do produto 5 lido incorretamente do xml');
@@ -133,7 +133,7 @@ begin
   Assert(Venda.QuantidadeItens = 6, 'Quantidade de itens não lida corretamente do xml');
   Assert(Venda.Data = ISO8601ToDateTime('2019-05-03T18:54:23-03:00'), 'Data não lida corretamente do xml');
 
-  Assert(Venda.Itens[0].ProdutoId = '00854011370054', 'Id do produto 0 lido incorretamente do xml');
+  Assert(Venda.Itens[0].ProdutoId = '00000075', 'Id do produto 0 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[0].Quantidade, 1), 'Quantidade do produto 0 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[0].Preco, 12), 'Preco do produto 0 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[0].ValorTotal, 12), 'Valor Total do produto 0 lido incorretamente do xml');
@@ -157,7 +157,7 @@ begin
   Assert(SameValue(Venda.Itens[3].ValorTotal, 12), 'Valor Total do produto 3 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[3].Desconto, 0.45), 'Desconto do produto 3 lido incorretamente do xml');
 
-  Assert(Venda.Itens[4].ProdutoId = '00854011370054', 'Id do produto 4 lido incorretamente do xml');
+  Assert(Venda.Itens[4].ProdutoId = '00000075', 'Id do produto 4 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[4].Quantidade, 75), 'Quantidade do produto 4 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[4].Preco, 900), 'Preco do produto 4 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[4].ValorTotal, 67500), 'Valor Total do produto 4 lido incorretamente do xml');

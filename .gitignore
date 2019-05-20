@@ -7,3 +7,5 @@ Win32/
 *.dpk
 *.exe
 dunit.ini
+*.env
+.panamah

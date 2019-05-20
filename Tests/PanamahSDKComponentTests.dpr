@@ -86,7 +86,8 @@ uses
   PanamahSDKTests.Models.TituloReceber in 'Models\PanamahSDKTests.Models.TituloReceber.pas',
   PanamahSDKTests.Models.TrocaDevolucao in 'Models\PanamahSDKTests.Models.TrocaDevolucao.pas',
   PanamahSDKTests.Models.TrocaFormaPagamento in 'Models\PanamahSDKTests.Models.TrocaFormaPagamento.pas',
-  PanamahSDKTests.Models.Venda in 'Models\PanamahSDKTests.Models.Venda.pas';
+  PanamahSDKTests.Models.Venda in 'Models\PanamahSDKTests.Models.Venda.pas',
+  PanamahSDKTestCase in 'PanamahSDKTestCase.pas';
 
 {$R *.RES}
 

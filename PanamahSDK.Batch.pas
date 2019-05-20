@@ -321,7 +321,6 @@ begin
   Result := TPanamahBatchList.Create;
   Batches := GetBatchesInDirectory(ADirectory);
   try
-
     for I := 0 to Batches.Count - 1 do
       Result.Add(TPanamahBatch.FromFile(Batches[I]));
   finally
