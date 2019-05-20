@@ -135,7 +135,7 @@ var
   I: Integer;
   X: Integer;
 begin
-  PendingResources := Paginate();
+  PendingResources := Paginate;
   try
     if PendingResources.Count > 0 then
     begin
