@@ -460,7 +460,7 @@ begin
     except
       on E: Exception do
       begin
-        raise e.Create('Falha na convers�o de data');
+        raise e.Create('Falha na conversao de data');
       end;
     end;
 end;
