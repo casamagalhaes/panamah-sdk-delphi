@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingVenda;
+    procedure TestSendingVendaMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(Venda);
+    Flush;
+  end;
+end;
+
+procedure TTestVendaTestCase.TestSendingVendaMultitenancy;
+var
+  JSON: string;
+  Venda: IPanamahVenda;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('venda.json'));
+  Venda := TPanamahVenda.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(Venda, '03992843467');
+    Save(Venda, '02541926375');
+    Save(Venda, '00934509022');
     Flush;
   end;
 end;

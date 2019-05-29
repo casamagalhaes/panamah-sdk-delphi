@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingTrocaDevolucao;
+    procedure TestSendingTrocaDevolucaoMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(TrocaDevolucao);
+    Flush;
+  end;
+end;
+
+procedure TTestTrocaDevolucaoTestCase.TestSendingTrocaDevolucaoMultitenancy;
+var
+  JSON: string;
+  TrocaDevolucao: IPanamahTrocaDevolucao;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('troca-devolucao.json'));
+  TrocaDevolucao := TPanamahTrocaDevolucao.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(TrocaDevolucao, '03992843467');
+    Save(TrocaDevolucao, '02541926375');
+    Save(TrocaDevolucao, '00934509022');
     Flush;
   end;
 end;

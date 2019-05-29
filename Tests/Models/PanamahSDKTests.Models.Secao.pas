@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingSecao;
+    procedure TestSendingSecaoMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(Secao);
+    Flush;
+  end;
+end;
+
+procedure TTestSecaoTestCase.TestSendingSecaoMultitenancy;
+var
+  JSON: string;
+  Secao: IPanamahSecao;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('secao.json'));
+  Secao := TPanamahSecao.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(Secao, '03992843467');
+    Save(Secao, '02541926375');
+    Save(Secao, '00934509022');
     Flush;
   end;
 end;

@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingTrocaFormaPagamento;
+    procedure TestSendingTrocaFormaPagamentoMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(TrocaFormaPagamento);
+    Flush;
+  end;
+end;
+
+procedure TTestTrocaFormaPagamentoTestCase.TestSendingTrocaFormaPagamentoMultitenancy;
+var
+  JSON: string;
+  TrocaFormaPagamento: IPanamahTrocaFormaPagamento;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('troca-forma-pagamento.json'));
+  TrocaFormaPagamento := TPanamahTrocaFormaPagamento.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(TrocaFormaPagamento, '03992843467');
+    Save(TrocaFormaPagamento, '02541926375');
+    Save(TrocaFormaPagamento, '00934509022');
     Flush;
   end;
 end;

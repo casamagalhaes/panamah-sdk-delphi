@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingEventoCaixa;
+    procedure TestSendingEventoCaixaMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(EventoCaixa);
+    Flush;
+  end;
+end;
+
+procedure TTestEventoCaixaTestCase.TestSendingEventoCaixaMultitenancy;
+var
+  JSON: string;
+  EventoCaixa: IPanamahEventoCaixa;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('evento-caixa.json'));
+  EventoCaixa := TPanamahEventoCaixa.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(EventoCaixa, '03992843467');
+    Save(EventoCaixa, '02541926375');
+    Save(EventoCaixa, '00934509022');
     Flush;
   end;
 end;

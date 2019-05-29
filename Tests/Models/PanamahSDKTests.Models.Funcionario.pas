@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingFuncionario;
+    procedure TestSendingFuncionarioMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(Funcionario);
+    Flush;
+  end;
+end;
+
+procedure TTestFuncionarioTestCase.TestSendingFuncionarioMultitenancy;
+var
+  JSON: string;
+  Funcionario: IPanamahFuncionario;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('funcionario.json'));
+  Funcionario := TPanamahFuncionario.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(Funcionario, '03992843467');
+    Save(Funcionario, '02541926375');
+    Save(Funcionario, '00934509022');
     Flush;
   end;
 end;

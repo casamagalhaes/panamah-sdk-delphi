@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingEstoqueMovimentacao;
+    procedure TestSendingEstoqueMovimentacaoMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(EstoqueMovimentacao);
+    Flush;
+  end;
+end;
+
+procedure TTestEstoqueMovimentacaoTestCase.TestSendingEstoqueMovimentacaoMultitenancy;
+var
+  JSON: string;
+  EstoqueMovimentacao: IPanamahEstoqueMovimentacao;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('estoque-movimentacao.json'));
+  EstoqueMovimentacao := TPanamahEstoqueMovimentacao.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(EstoqueMovimentacao, '03992843467');
+    Save(EstoqueMovimentacao, '02541926375');
+    Save(EstoqueMovimentacao, '00934509022');
     Flush;
   end;
 end;

@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingHolding;
+    procedure TestSendingHoldingMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(Holding);
+    Flush;
+  end;
+end;
+
+procedure TTestHoldingTestCase.TestSendingHoldingMultitenancy;
+var
+  JSON: string;
+  Holding: IPanamahHolding;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('holding.json'));
+  Holding := TPanamahHolding.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(Holding, '03992843467');
+    Save(Holding, '02541926375');
+    Save(Holding, '00934509022');
     Flush;
   end;
 end;

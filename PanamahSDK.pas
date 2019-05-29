@@ -102,6 +102,56 @@ type
     procedure Init(AConfig: IPanamahStreamConfig); overload;
     procedure Init(const AAuthorizationToken, ASecret, AAssinanteId: string); overload;
     procedure Flush;
+
+    procedure Save(ANFeDocumentList: IPanamahNFeDocumentList; AAssinanteId: Variant); overload;
+    procedure Save(ANFeDocument: IPanamahNFeDocument; AAssinanteId: Variant); overload;
+    procedure Save(AAcesso: IPanamahAcesso; AAssinanteId: Variant); overload;
+    procedure Save(ACliente: IPanamahCliente; AAssinanteId: Variant); overload;
+    procedure Save(ACompra: IPanamahCompra; AAssinanteId: Variant); overload;
+    procedure Save(AEan: IPanamahEan; AAssinanteId: Variant); overload;
+    procedure Save(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao; AAssinanteId: Variant); overload;
+    procedure Save(AEventoCaixa: IPanamahEventoCaixa; AAssinanteId: Variant); overload;
+    procedure Save(AFormaPagamento: IPanamahFormaPagamento; AAssinanteId: Variant); overload;
+    procedure Save(AFornecedor: IPanamahFornecedor; AAssinanteId: Variant); overload;
+    procedure Save(AFuncionario: IPanamahFuncionario; AAssinanteId: Variant); overload;
+    procedure Save(AGrupo: IPanamahGrupo; AAssinanteId: Variant); overload;
+    procedure Save(AHolding: IPanamahHolding; AAssinanteId: Variant); overload;
+    procedure Save(ALocalEstoque: IPanamahLocalEstoque; AAssinanteId: Variant); overload;
+    procedure Save(ALoja: IPanamahLoja; AAssinanteId: Variant); overload;
+    procedure Save(AMeta: IPanamahMeta; AAssinanteId: Variant); overload;
+    procedure Save(AProduto: IPanamahProduto; AAssinanteId: Variant); overload;
+    procedure Save(ARevenda: IPanamahRevenda; AAssinanteId: Variant); overload;
+    procedure Save(ASecao: IPanamahSecao; AAssinanteId: Variant); overload;
+    procedure Save(ASubgrupo: IPanamahSubgrupo; AAssinanteId: Variant); overload;
+    procedure Save(ATituloPagar: IPanamahTituloPagar; AAssinanteId: Variant); overload;
+    procedure Save(ATituloReceber: IPanamahTituloReceber; AAssinanteId: Variant); overload;
+    procedure Save(ATrocaDevolucao: IPanamahTrocaDevolucao; AAssinanteId: Variant); overload;
+    procedure Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento; AAssinanteId: Variant); overload;
+    procedure Save(AVenda: IPanamahVenda; AAssinanteId: Variant); overload;
+    procedure Delete(AAcesso: IPanamahAcesso; AAssinanteId: Variant); overload;
+    procedure Delete(ACliente: IPanamahCliente; AAssinanteId: Variant); overload;
+    procedure Delete(ACompra: IPanamahCompra; AAssinanteId: Variant); overload;
+    procedure Delete(AEan: IPanamahEan; AAssinanteId: Variant); overload;
+    procedure Delete(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao; AAssinanteId: Variant); overload;
+    procedure Delete(AEventoCaixa: IPanamahEventoCaixa; AAssinanteId: Variant); overload;
+    procedure Delete(AFormaPagamento: IPanamahFormaPagamento; AAssinanteId: Variant); overload;
+    procedure Delete(AFornecedor: IPanamahFornecedor; AAssinanteId: Variant); overload;
+    procedure Delete(AFuncionario: IPanamahFuncionario; AAssinanteId: Variant); overload;
+    procedure Delete(AGrupo: IPanamahGrupo; AAssinanteId: Variant); overload;
+    procedure Delete(AHolding: IPanamahHolding; AAssinanteId: Variant); overload;
+    procedure Delete(ALocalEstoque: IPanamahLocalEstoque; AAssinanteId: Variant); overload;
+    procedure Delete(ALoja: IPanamahLoja; AAssinanteId: Variant); overload;
+    procedure Delete(AMeta: IPanamahMeta; AAssinanteId: Variant); overload;
+    procedure Delete(AProduto: IPanamahProduto; AAssinanteId: Variant); overload;
+    procedure Delete(ARevenda: IPanamahRevenda; AAssinanteId: Variant); overload;
+    procedure Delete(ASecao: IPanamahSecao; AAssinanteId: Variant); overload;
+    procedure Delete(ASubgrupo: IPanamahSubgrupo; AAssinanteId: Variant); overload;
+    procedure Delete(ATituloPagar: IPanamahTituloPagar; AAssinanteId: Variant); overload;
+    procedure Delete(ATituloReceber: IPanamahTituloReceber; AAssinanteId: Variant); overload;
+    procedure Delete(ATrocaDevolucao: IPanamahTrocaDevolucao; AAssinanteId: Variant); overload;
+    procedure Delete(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento; AAssinanteId: Variant); overload;
+    procedure Delete(AVenda: IPanamahVenda; AAssinanteId: Variant); overload;
+
     procedure Save(ANFeDocumentList: IPanamahNFeDocumentList); overload;
     procedure Save(ANFeDocument: IPanamahNFeDocument); overload;
     procedure Save(AAcesso: IPanamahAcesso); overload;
@@ -150,6 +200,7 @@ type
     procedure Delete(ATrocaDevolucao: IPanamahTrocaDevolucao); overload;
     procedure Delete(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
     procedure Delete(AVenda: IPanamahVenda); overload;
+
     property OnCurrentBatchExpired: TPanamahBatchEvent read GetOnCurrentBatchExpired write SetOnCurrentBatchExpired;
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
@@ -245,250 +296,490 @@ begin
   FProcessor.OnError := AEvent;
 end;
 
-procedure TPanamahStream.Save(AFormaPagamento: IPanamahFormaPagamento);
+procedure TPanamahStream.Save(AFormaPagamento: IPanamahFormaPagamento; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AFormaPagamento);
+  FProcessor.Save(AFormaPagamento, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AEventoCaixa: IPanamahEventoCaixa);
+procedure TPanamahStream.Save(AEventoCaixa: IPanamahEventoCaixa; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AEventoCaixa);
+  FProcessor.Save(AEventoCaixa, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao);
+procedure TPanamahStream.Save(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AEstoqueMovimentacao);
+  FProcessor.Save(AEstoqueMovimentacao, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AGrupo: IPanamahGrupo);
+procedure TPanamahStream.Save(AGrupo: IPanamahGrupo; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AGrupo);
+  FProcessor.Save(AGrupo, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AFuncionario: IPanamahFuncionario);
+procedure TPanamahStream.Save(AFuncionario: IPanamahFuncionario; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AFuncionario);
+  FProcessor.Save(AFuncionario, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AFornecedor: IPanamahFornecedor);
+procedure TPanamahStream.Save(AFornecedor: IPanamahFornecedor; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AFornecedor);
+  FProcessor.Save(AFornecedor, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AAcesso: IPanamahAcesso);
+procedure TPanamahStream.Save(AAcesso: IPanamahAcesso; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AAcesso);
+  FProcessor.Save(AAcesso, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AEan: IPanamahEan);
+procedure TPanamahStream.Save(AEan: IPanamahEan; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AEan);
+  FProcessor.Save(AEan, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ACompra: IPanamahCompra);
+procedure TPanamahStream.Save(ACompra: IPanamahCompra; AAssinanteId: Variant);
 begin
-  FProcessor.Save(ACompra);
+  FProcessor.Save(ACompra, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ACliente: IPanamahCliente);
+procedure TPanamahStream.Save(ACliente: IPanamahCliente; AAssinanteId: Variant);
 begin
-  FProcessor.Save(ACliente);
+  FProcessor.Save(ACliente, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AHolding: IPanamahHolding);
+procedure TPanamahStream.Save(AHolding: IPanamahHolding; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AHolding);
+  FProcessor.Save(AHolding, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ATituloReceber: IPanamahTituloReceber);
+procedure TPanamahStream.Save(ATituloReceber: IPanamahTituloReceber; AAssinanteId: Variant);
 begin
-  FProcessor.Save(ATituloReceber);
+  FProcessor.Save(ATituloReceber, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ATituloPagar: IPanamahTituloPagar);
+procedure TPanamahStream.Save(ATituloPagar: IPanamahTituloPagar; AAssinanteId: Variant);
 begin
-  FProcessor.Save(ATituloPagar);
+  FProcessor.Save(ATituloPagar, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ASubgrupo: IPanamahSubgrupo);
+procedure TPanamahStream.Save(ASubgrupo: IPanamahSubgrupo; AAssinanteId: Variant);
 begin
-  FProcessor.Save(ASubgrupo);
+  FProcessor.Save(ASubgrupo, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AVenda: IPanamahVenda);
+procedure TPanamahStream.Save(AVenda: IPanamahVenda; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AVenda);
+  FProcessor.Save(AVenda, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ANFeDocumentList: IPanamahNFeDocumentList);
+procedure TPanamahStream.Save(ANFeDocumentList: IPanamahNFeDocumentList; AAssinanteId: Variant);
 var
   I: Integer;
 begin
   for I := 0 to ANFeDocumentList.Count - 1 do
-    Save(ANFeDocumentList[I]);
+    Save(ANFeDocumentList[I], AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ANFeDocument: IPanamahNFeDocument);
+procedure TPanamahStream.Save(ANFeDocument: IPanamahNFeDocument; AAssinanteId: Variant);
 var
   I: Integer;
 begin
   for I := 0 to ANFeDocument.Count - 1 do
-    FProcessor.Save(ANFeDocument[I]);
+    FProcessor.Save(ANFeDocument[I], AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
+procedure TPanamahStream.Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento; AAssinanteId: Variant);
 begin
-  FProcessor.Save(ATrocaFormaPagamento);
+  FProcessor.Save(ATrocaFormaPagamento, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ATrocaDevolucao: IPanamahTrocaDevolucao);
+procedure TPanamahStream.Save(ATrocaDevolucao: IPanamahTrocaDevolucao; AAssinanteId: Variant);
 begin
-  FProcessor.Save(ATrocaDevolucao);
+  FProcessor.Save(ATrocaDevolucao, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(AMeta: IPanamahMeta);
+procedure TPanamahStream.Save(AMeta: IPanamahMeta; AAssinanteId: Variant);
 begin
-  FProcessor.Save(AMeta);
+  FProcessor.Save(AMeta, AAssinanteId);
 end;
 
-procedure TPanamahStream.Save(ALoja: IPanamahLoja);
+procedure TPanamahStream.Save(ALoja: IPanamahLoja; AAssinanteId: Variant);
 begin
-  FProcessor.Save(ALoja);
+  FProcessor.Save(ALoja, AAssinanteId);
+end;
+
+procedure TPanamahStream.Save(ALocalEstoque: IPanamahLocalEstoque; AAssinanteId: Variant);
+begin
+  FProcessor.Save(ALocalEstoque, AAssinanteId);
+end;
+
+procedure TPanamahStream.Save(ASecao: IPanamahSecao; AAssinanteId: Variant);
+begin
+  FProcessor.Save(ASecao, AAssinanteId);
+end;
+
+procedure TPanamahStream.Save(ARevenda: IPanamahRevenda; AAssinanteId: Variant);
+begin
+  FProcessor.Save(ARevenda, AAssinanteId);
+end;
+
+procedure TPanamahStream.Save(AProduto: IPanamahProduto; AAssinanteId: Variant);
+begin
+  FProcessor.Save(AProduto, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AFormaPagamento: IPanamahFormaPagamento; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AFormaPagamento, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AEventoCaixa: IPanamahEventoCaixa; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AEventoCaixa, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AEstoqueMovimentacao, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AGrupo: IPanamahGrupo; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AGrupo, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AFuncionario: IPanamahFuncionario; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AFuncionario, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AFornecedor: IPanamahFornecedor; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AFornecedor, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AAcesso: IPanamahAcesso; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AAcesso, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AEan: IPanamahEan; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AEan, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ACompra: IPanamahCompra; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ACompra, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ACliente: IPanamahCliente; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ACliente, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AHolding: IPanamahHolding; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AHolding, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ATituloReceber: IPanamahTituloReceber; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ATituloReceber, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ATituloPagar: IPanamahTituloPagar; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ATituloPagar, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ASubgrupo: IPanamahSubgrupo; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ASubgrupo, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AVenda: IPanamahVenda; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AVenda, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ATrocaFormaPagamento, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ATrocaDevolucao: IPanamahTrocaDevolucao; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ATrocaDevolucao, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AMeta: IPanamahMeta; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AMeta, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ALoja: IPanamahLoja; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ALoja, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ALocalEstoque: IPanamahLocalEstoque; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ALocalEstoque, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ASecao: IPanamahSecao; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ASecao, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(ARevenda: IPanamahRevenda; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(ARevenda, AAssinanteId);
+end;
+
+procedure TPanamahStream.Delete(AProduto: IPanamahProduto; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(AProduto, AAssinanteId);
+end;
+
+procedure TPanamahStream.Save(ANFeDocumentList: IPanamahNFeDocumentList);
+begin
+  Save(ANFeDocumentList, varEmpty);
+end;
+
+procedure TPanamahStream.Save(ANFeDocument: IPanamahNFeDocument);
+begin
+  Save(ANFeDocument, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AAcesso: IPanamahAcesso);
+begin
+  Save(AAcesso, varEmpty);
+end;
+
+procedure TPanamahStream.Save(ACliente: IPanamahCliente);
+begin
+  Save(ACliente, varEmpty);
+end;
+
+procedure TPanamahStream.Save(ACompra: IPanamahCompra);
+begin
+  Save(ACompra, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AEan: IPanamahEan);
+begin
+  Save(AEan, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao);
+begin
+  Save(AEstoqueMovimentacao, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AEventoCaixa: IPanamahEventoCaixa);
+begin
+  Save(AEventoCaixa, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AFormaPagamento: IPanamahFormaPagamento);
+begin
+  Save(AFormaPagamento, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AFornecedor: IPanamahFornecedor);
+begin
+  Save(AFornecedor, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AFuncionario: IPanamahFuncionario);
+begin
+  Save(AFuncionario, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AGrupo: IPanamahGrupo);
+begin
+  Save(AGrupo, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AHolding: IPanamahHolding);
+begin
+  Save(AHolding, varEmpty);
 end;
 
 procedure TPanamahStream.Save(ALocalEstoque: IPanamahLocalEstoque);
 begin
-  FProcessor.Save(ALocalEstoque);
+  Save(ALocalEstoque, varEmpty);
 end;
 
-procedure TPanamahStream.Save(ASecao: IPanamahSecao);
+procedure TPanamahStream.Save(ALoja: IPanamahLoja);
 begin
-  FProcessor.Save(ASecao);
+  Save(ALoja, varEmpty);
 end;
 
-procedure TPanamahStream.Save(ARevenda: IPanamahRevenda);
+procedure TPanamahStream.Save(AMeta: IPanamahMeta);
 begin
-  FProcessor.Save(ARevenda);
+  Save(AMeta, varEmpty);
 end;
 
 procedure TPanamahStream.Save(AProduto: IPanamahProduto);
 begin
-  FProcessor.Save(AProduto);
+  Save(AProduto, varEmpty);
 end;
 
-procedure TPanamahStream.Delete(AFormaPagamento: IPanamahFormaPagamento);
+procedure TPanamahStream.Save(ARevenda: IPanamahRevenda);
 begin
-  FProcessor.Delete(AFormaPagamento);
+  Save(ARevenda, varEmpty);
 end;
 
-procedure TPanamahStream.Delete(AEventoCaixa: IPanamahEventoCaixa);
+procedure TPanamahStream.Save(ASecao: IPanamahSecao);
 begin
-  FProcessor.Delete(AEventoCaixa);
+  Save(ASecao, varEmpty);
 end;
 
-procedure TPanamahStream.Delete(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao);
+procedure TPanamahStream.Save(ASubgrupo: IPanamahSubgrupo);
 begin
-  FProcessor.Delete(AEstoqueMovimentacao);
+  Save(ASubgrupo, varEmpty);
 end;
 
-procedure TPanamahStream.Delete(AGrupo: IPanamahGrupo);
+procedure TPanamahStream.Save(ATituloPagar: IPanamahTituloPagar);
 begin
-  FProcessor.Delete(AGrupo);
+  Save(ATituloPagar, varEmpty);
 end;
 
-procedure TPanamahStream.Delete(AFuncionario: IPanamahFuncionario);
+procedure TPanamahStream.Save(ATituloReceber: IPanamahTituloReceber);
 begin
-  FProcessor.Delete(AFuncionario);
+  Save(ATituloReceber, varEmpty);
 end;
 
-procedure TPanamahStream.Delete(AFornecedor: IPanamahFornecedor);
+procedure TPanamahStream.Save(ATrocaDevolucao: IPanamahTrocaDevolucao);
 begin
-  FProcessor.Delete(AFornecedor);
+  Save(ATrocaDevolucao, varEmpty);
+end;
+
+procedure TPanamahStream.Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
+begin
+  Save(ATrocaFormaPagamento, varEmpty);
+end;
+
+procedure TPanamahStream.Save(AVenda: IPanamahVenda);
+begin
+  Save(AVenda, varEmpty);
 end;
 
 procedure TPanamahStream.Delete(AAcesso: IPanamahAcesso);
 begin
-  FProcessor.Delete(AAcesso);
-end;
-
-procedure TPanamahStream.Delete(AEan: IPanamahEan);
-begin
-  FProcessor.Delete(AEan);
-end;
-
-procedure TPanamahStream.Delete(ACompra: IPanamahCompra);
-begin
-  FProcessor.Delete(ACompra);
+  Delete(AAcesso, varEmpty);
 end;
 
 procedure TPanamahStream.Delete(ACliente: IPanamahCliente);
 begin
-  FProcessor.Delete(ACliente);
+  Delete(ACliente, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(ACompra: IPanamahCompra);
+begin
+  Delete(ACompra, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(AEan: IPanamahEan);
+begin
+  Delete(AEan, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao);
+begin
+  Delete(AEstoqueMovimentacao, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(AEventoCaixa: IPanamahEventoCaixa);
+begin
+  Delete(AEventoCaixa, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(AFormaPagamento: IPanamahFormaPagamento);
+begin
+  Delete(AFormaPagamento, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(AFornecedor: IPanamahFornecedor);
+begin
+  Delete(AFornecedor, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(AFuncionario: IPanamahFuncionario);
+begin
+  Delete(AFuncionario, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(AGrupo: IPanamahGrupo);
+begin
+  Delete(AGrupo, varEmpty);
 end;
 
 procedure TPanamahStream.Delete(AHolding: IPanamahHolding);
 begin
-  FProcessor.Delete(AHolding);
-end;
-
-procedure TPanamahStream.Delete(ATituloReceber: IPanamahTituloReceber);
-begin
-  FProcessor.Delete(ATituloReceber);
-end;
-
-procedure TPanamahStream.Delete(ATituloPagar: IPanamahTituloPagar);
-begin
-  FProcessor.Delete(ATituloPagar);
-end;
-
-procedure TPanamahStream.Delete(ASubgrupo: IPanamahSubgrupo);
-begin
-  FProcessor.Delete(ASubgrupo);
-end;
-
-procedure TPanamahStream.Delete(AVenda: IPanamahVenda);
-begin
-  FProcessor.Delete(AVenda);
-end;
-
-procedure TPanamahStream.Delete(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
-begin
-  FProcessor.Delete(ATrocaFormaPagamento);
-end;
-
-procedure TPanamahStream.Delete(ATrocaDevolucao: IPanamahTrocaDevolucao);
-begin
-  FProcessor.Delete(ATrocaDevolucao);
-end;
-
-procedure TPanamahStream.Delete(AMeta: IPanamahMeta);
-begin
-  FProcessor.Delete(AMeta);
-end;
-
-procedure TPanamahStream.Delete(ALoja: IPanamahLoja);
-begin
-  FProcessor.Delete(ALoja);
+  Delete(AHolding, varEmpty);
 end;
 
 procedure TPanamahStream.Delete(ALocalEstoque: IPanamahLocalEstoque);
 begin
-  FProcessor.Delete(ALocalEstoque);
+  Delete(ALocalEstoque, varEmpty);
 end;
 
-procedure TPanamahStream.Delete(ASecao: IPanamahSecao);
+procedure TPanamahStream.Delete(ALoja: IPanamahLoja);
 begin
-  FProcessor.Delete(ASecao);
+  Delete(ALoja, varEmpty);
 end;
 
-procedure TPanamahStream.Delete(ARevenda: IPanamahRevenda);
+procedure TPanamahStream.Delete(AMeta: IPanamahMeta);
 begin
-  FProcessor.Delete(ARevenda);
+  Delete(AMeta, varEmpty);
 end;
 
 procedure TPanamahStream.Delete(AProduto: IPanamahProduto);
 begin
-  FProcessor.Delete(AProduto);
+  Delete(AProduto, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(ARevenda: IPanamahRevenda);
+begin
+  Delete(ARevenda, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(ASecao: IPanamahSecao);
+begin
+  Delete(ASecao, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(ASubgrupo: IPanamahSubgrupo);
+begin
+  Delete(ASubgrupo, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(ATituloPagar: IPanamahTituloPagar);
+begin
+  Delete(ATituloPagar, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(ATituloReceber: IPanamahTituloReceber);
+begin
+  Delete(ATituloReceber, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(ATrocaDevolucao: IPanamahTrocaDevolucao);
+begin
+  Delete(ATrocaDevolucao, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
+begin
+  Delete(ATrocaFormaPagamento, varEmpty);
+end;
+
+procedure TPanamahStream.Delete(AVenda: IPanamahVenda);
+begin
+  Delete(AVenda, varEmpty);
 end;
 
 constructor TPanamahStream.Create;

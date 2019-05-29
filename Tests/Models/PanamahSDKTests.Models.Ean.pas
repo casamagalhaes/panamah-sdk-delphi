@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingEan;
+    procedure TestSendingEanMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(Ean);
+    Flush;
+  end;
+end;
+
+procedure TTestEanTestCase.TestSendingEanMultitenancy;
+var
+  JSON: string;
+  Ean: IPanamahEan;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('ean.json'));
+  Ean := TPanamahEan.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(Ean, '03992843467');
+    Save(Ean, '02541926375');
+    Save(Ean, '00934509022');
     Flush;
   end;
 end;

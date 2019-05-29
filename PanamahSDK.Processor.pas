@@ -56,7 +56,7 @@ type
     procedure RemoveOldSentBatches;
     procedure CreateBatchWithFailedOperations(ASourceBatch: IPanamahBatch; AFailedOperations: IPanamahOperationList);
     procedure Process;
-    procedure AddOperationToCurrentBatch(AOperationType: TPanamahOperationType; AModel: IPanamahModel);
+    procedure AddOperationToCurrentBatch(AOperationType: TPanamahOperationType; AModel: IPanamahModel; AAssinanteId: Variant);
   public
     destructor Destroy; override;
     constructor Create; reintroduce;
@@ -70,8 +70,10 @@ type
     property OnBeforeSave: TPanamahCancelableModelEvent read FOnBeforeSave write FOnBeforeSave;
     property OnBeforeDelete: TPanamahCancelableModelEvent read FOnBeforeDelete write FOnBeforeDelete;
     property OnError: TPanamahErrorEvent read FOnError write FOnError;
-    procedure Save(AModel: IPanamahModel);
-    procedure Delete(AModel: IPanamahModel);
+    procedure Save(AModel: IPanamahModel; AAssinanteId: Variant); overload;
+    procedure Delete(AModel: IPanamahModel; AAssinanteId: Variant); overload;
+    procedure Save(AModel: IPanamahModel); overload;
+    procedure Delete(AModel: IPanamahModel); overload;
     procedure Flush;
     function GetPendingResources: IPanamahPendingResourcesList;
   end;
@@ -147,7 +149,7 @@ begin
   end;
 end;
 
-procedure TPanamahBatchProcessor.Save(AModel: IPanamahModel);
+procedure TPanamahBatchProcessor.Save(AModel: IPanamahModel; AAssinanteId: Variant);
 var
   ValidationResult: IPanamahValidationResult;
   KeepExecuting: Boolean;
@@ -165,13 +167,13 @@ begin
   begin
     ValidationResult := AModel.Validate;
     if ValidationResult.Valid then
-      AddOperationToCurrentBatch(otUPDATE, AModel)
+      AddOperationToCurrentBatch(otUPDATE, AModel, AAssinanteId)
     else
       raise EPanamahSDKValidationException.Create(ValidationResult.Reasons.Text);
   end;
 end;
 
-procedure TPanamahBatchProcessor.Delete(AModel: IPanamahModel);
+procedure TPanamahBatchProcessor.Delete(AModel: IPanamahModel; AAssinanteId: Variant);
 var
   KeepExecuting: Boolean;
 begin
@@ -187,7 +189,7 @@ begin
   if KeepExecuting then
   begin
     if ModelHasId(AModel) then
-      AddOperationToCurrentBatch(otDELETE, AModel)
+      AddOperationToCurrentBatch(otDELETE, AModel, AAssinanteId)
     else
       raise EPanamahSDKValidationException.Create(Format('Id obrigatorio para exclusao de %s', [AModel.ModelName]));
   end;
@@ -221,10 +223,10 @@ begin
 end;
 
 procedure TPanamahBatchProcessor.AddOperationToCurrentBatch(AOperationType: TPanamahOperationType;
-  AModel: IPanamahModel);
+  AModel: IPanamahModel; AAssinanteId: Variant);
 begin
   DoOnBeforeObjectAddedToBatch(AModel);
-  FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone));
+  FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone, AAssinanteId));
   FCriticalSection.Acquire;
   try
     if BatchExpiredByCount(FConfig.BatchMaxCount) then
@@ -290,6 +292,11 @@ procedure TPanamahBatchProcessor.DoOnError(AError: Exception);
 begin
   if Assigned(FOnError) then
     FOnError(AError);
+end;
+
+procedure TPanamahBatchProcessor.Delete(AModel: IPanamahModel);
+begin
+  Delete(AModel, varEmpty);
 end;
 
 destructor TPanamahBatchProcessor.Destroy;
@@ -431,6 +438,11 @@ begin
     if (Now - SentBatches[I].CreatedAt) > 1 then
       SentBatches[I].RemoveFromDirectory(GetBatchSentDirectory);
   end;
+end;
+
+procedure TPanamahBatchProcessor.Save(AModel: IPanamahModel);
+begin
+  Save(AModel, varEmpty);
 end;
 
 procedure TPanamahBatchProcessor.SaveCurrentBatch;

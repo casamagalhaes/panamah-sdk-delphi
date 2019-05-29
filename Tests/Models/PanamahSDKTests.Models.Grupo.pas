@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingGrupo;
+    procedure TestSendingGrupoMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(Grupo);
+    Flush;
+  end;
+end;
+
+procedure TTestGrupoTestCase.TestSendingGrupoMultitenancy;
+var
+  JSON: string;
+  Grupo: IPanamahGrupo;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('grupo.json'));
+  Grupo := TPanamahGrupo.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(Grupo, '03992843467');
+    Save(Grupo, '02541926375');
+    Save(Grupo, '00934509022');
     Flush;
   end;
 end;

@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingLocalEstoque;
+    procedure TestSendingLocalEstoqueMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(LocalEstoque);
+    Flush;
+  end;
+end;
+
+procedure TTestLocalEstoqueTestCase.TestSendingLocalEstoqueMultitenancy;
+var
+  JSON: string;
+  LocalEstoque: IPanamahLocalEstoque;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('local-estoque.json'));
+  LocalEstoque := TPanamahLocalEstoque.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(LocalEstoque, '03992843467');
+    Save(LocalEstoque, '02541926375');
+    Save(LocalEstoque, '00934509022');
     Flush;
   end;
 end;

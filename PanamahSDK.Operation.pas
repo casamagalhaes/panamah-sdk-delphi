@@ -4,7 +4,7 @@ unit PanamahSDK.Operation;
 interface
 
 uses
-  Classes, SysUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums;
+  Classes, SysUtils, uLkJSON, PanamahSDK.Types, PanamahSDK.JsonUtils, PanamahSDK.Enums, Variants;
 
 type
 
@@ -16,16 +16,19 @@ type
     function GetId: Variant;
     function GetDataId: Variant;
     function GetHash: string;
+    function GetAssinanteId: Variant;
     function Clone: IPanamahOperation;
     function Equals(AAnotherOperation: IPanamahOperation): Boolean;
     procedure SetOperationType(AOperationType: TPanamahOperationType);
     procedure SetData(AData: IPanamahModel);
     procedure SetDataType(const ADataType: string);
     procedure SetId(Id: Variant);
+    procedure SetAssinanteId(AAssinanteId: Variant);
     property DataType: string read GetDataType write SetDataType;
     property OperationType: TPanamahOperationType read GetOperationType write SetOperationType;
     property Data: IPanamahModel read GetData write SetData;
     property Id: Variant read GetId write SetId;
+    property AssinanteId: Variant read GetAssinanteId write SetAssinanteId;
   end;
 
   IPanamahOperationList = interface(IJSONSerializable)
@@ -57,14 +60,17 @@ type
     FData: IPanamahModel;
     FDataType: string;
     FId: Variant;
+    FAssinanteId: Variant;
     function GetOperationType: TPanamahOperationType;
     function GetData: IPanamahModel;
     function GetDataType: string;
     function GetId: Variant;
+    function GetAssinanteId: Variant;
     procedure SetOperationType(AOperationType: TPanamahOperationType);
     procedure SetData(AData: IPanamahModel);
     procedure SetDataType(const ADataType: string);
     procedure SetId(AId: Variant);
+    procedure SetAssinanteId(AAssinanteId: Variant);
   public
     function GetHash: string;
     function GetDataId: Variant;
@@ -72,17 +78,19 @@ type
     function Clone: IPanamahOperation;
     function Equals(AAnotherOperation: IPanamahOperation): Boolean; reintroduce;
     procedure DeserializeFromJSON(const AJSON: string);
-    constructor Create(AOperationType: TPanamahOperationType; AModel: IPanamahModel); reintroduce; overload;
+    constructor Create(AOperationType: TPanamahOperationType; AModel: IPanamahModel; AAssinanteId: Variant); reintroduce; overload;
     constructor Create; reintroduce; overload;
     class function FromJSON(const AJSON: string): IPanamahOperation;
     class function SameId(A, B: IPanamahOperation): Boolean;
     class function SameOperationType(A, B: IPanamahOperation): Boolean;
+    class function SameAssinanteId(A, B: IPanamahOperation): Boolean;
     class function SameDataType(A, B: IPanamahOperation): Boolean;
   published
     property OperationType: TPanamahOperationType read GetOperationType write SetOperationType;
     property Data: IPanamahModel read GetData write SetData;
     property DataType: string read GetDataType write SetDataType;
     property Id: Variant read GetId write SetId;
+    property AssinanteId: Variant read GetAssinanteId write SetAssinanteId;
   end;
 
   TPanamahOperationList = class(TInterfacedObject, IPanamahOperationList)
@@ -112,16 +120,17 @@ type
 implementation
 
 uses
-  PanamahSDK.Crypto, PanamahSDK.ModelUtils;
+  PanamahSDK.Crypto, PanamahSDK.ModelUtils, PanamahSDK.ValidationUtils;
 
 { TPanamahOperation }
 
-constructor TPanamahOperation.Create(AOperationType: TPanamahOperationType; AModel: IPanamahModel);
+constructor TPanamahOperation.Create(AOperationType: TPanamahOperationType; AModel: IPanamahModel; AAssinanteId: Variant);
 begin
   inherited Create;
   FOperationType := AOperationType;
   FData := AModel;
   FDataType := GetDataTypeByModel(FData);
+  FAssinanteId := AAssinanteId;
 end;
 
 function TPanamahOperation.Clone: IPanamahOperation;
@@ -140,6 +149,7 @@ var
 begin
   JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
   try
+    FAssinanteId := GetFieldValueAsString(JSONObject, 'assinanteId');
     if SameText(GetFieldValueAsString(JSONObject, 'op'), 'update') then
       FOperationType := otUPDATE
     else
@@ -158,7 +168,8 @@ function TPanamahOperation.Equals(AAnotherOperation: IPanamahOperation): Boolean
 begin
   Result := TPanamahOperation.SameId(Self, AAnotherOperation) and
               TPanamahOperation.SameOperationType(Self, AAnotherOperation) and
-                 TPanamahOperation.SameDataType(Self, AAnotherOperation);
+                 TPanamahOperation.SameDataType(Self, AAnotherOperation) and
+                     TPanamahOperation.SameAssinanteId(Self, AAnotherOperation);
 end;
 
 class function TPanamahOperation.FromJSON(const AJSON: string): IPanamahOperation;
@@ -182,6 +193,11 @@ end;
 class function TPanamahOperation.SameOperationType(A, B: IPanamahOperation): Boolean;
 begin
   Result := A.OperationType = B.OperationType;
+end;
+
+class function TPanamahOperation.SameAssinanteId(A, B: IPanamahOperation): Boolean;
+begin
+  Result := VarToStrDef(A.AssinanteId, EmptyStr) = VarToStrDef(B.AssinanteId, EmptyStr);
 end;
 
 class function TPanamahOperation.SameDataType(A, B: IPanamahOperation): Boolean;
@@ -215,6 +231,8 @@ var
 begin
   JSONObject := TlkJSONobject.Create;
   try
+    if not ModelValueIsEmpty(FAssinanteId) then
+      SetFieldValue(JSONObject, 'assinanteId', FAssinanteId);
     case FOperationType of
       otUPDATE:
       begin
@@ -233,6 +251,11 @@ begin
   finally
     JSONObject.Free;
   end;
+end;
+
+function TPanamahOperation.GetAssinanteId: Variant;
+begin
+  Result := FAssinanteId;
 end;
 
 function TPanamahOperation.GetData: IPanamahModel;
@@ -275,6 +298,11 @@ end;
 function TPanamahOperation.GetOperationType: TPanamahOperationType;
 begin
   Result := FOperationType;
+end;
+
+procedure TPanamahOperation.SetAssinanteId(AAssinanteId: Variant);
+begin
+  FAssinanteId := AAssinanteId;
 end;
 
 procedure TPanamahOperation.SetData(AData: IPanamahModel);

@@ -88,7 +88,8 @@ uses
   PanamahSDKTests.Models.TrocaFormaPagamento in 'Models\PanamahSDKTests.Models.TrocaFormaPagamento.pas',
   PanamahSDKTests.Models.Venda in 'Models\PanamahSDKTests.Models.Venda.pas',
   PanamahSDKTestCase in 'PanamahSDKTestCase.pas',
-  PanamahSDKTests.PendingResources in 'PanamahSDKTests.PendingResources.pas';
+  PanamahSDKTests.PendingResources in 'PanamahSDKTests.PendingResources.pas',
+  PanamahSDK.ModelUtils in '..\PanamahSDK.ModelUtils.pas';
 
 {$R *.RES}
 

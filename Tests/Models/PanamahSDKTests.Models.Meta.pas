@@ -21,6 +21,7 @@ type
     procedure OnError(Error: Exception);
   published
     procedure TestSendingMeta;
+    procedure TestSendingMetaMultitenancy;
   end;
 
 implementation
@@ -53,6 +54,28 @@ begin
       GetTestVariable('ASSINANTE_ID')
     );
     Save(Meta);
+    Flush;
+  end;
+end;
+
+procedure TTestMetaTestCase.TestSendingMetaMultitenancy;
+var
+  JSON: string;
+  Meta: IPanamahMeta;
+begin
+  JSON := TFile.ReadAllText(GetFixturePath('meta.json'));
+  Meta := TPanamahMeta.FromJSON(JSON);
+  with TPanamahStream.GetInstance do
+  begin
+    OnError := Self.OnError;
+    Init(
+      GetTestVariable('AUTHORIZATION_TOKEN'),
+      GetTestVariable('SECRET'),
+      '*'
+    );
+    Save(Meta, '03992843467');
+    Save(Meta, '02541926375');
+    Save(Meta, '00934509022');
     Flush;
   end;
 end;
