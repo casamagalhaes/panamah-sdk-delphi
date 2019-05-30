@@ -9,7 +9,7 @@ uses
 
 type
 
-  TPanamahCancelableModelEvent = procedure(AModel: IPanamahModel;
+  TPanamahCancelableModelEvent = procedure(AModel: IPanamahModel; AAssinanteId: Variant;
     var AContinue: Boolean) of object;
 
   TPanamahErrorEvent = procedure(AError: Exception) of object;
@@ -41,8 +41,8 @@ type
     function CurrentBatchExpiredByTime(ABatchTTL: Integer): Boolean;
     function BatchExpiredBySize(AMaxSize: Integer): Boolean;
     function BatchExpiredByCount(AMaxCount: Integer): Boolean;
-    procedure DoOnBeforeSave(AModel: IPanamahModel; var AContinue: Boolean);
-    procedure DoOnBeforeDelete(AModel: IPanamahModel; var AContinue: Boolean);
+    procedure DoOnBeforeSave(AModel: IPanamahModel; AAssinanteId: Variant; var AContinue: Boolean);
+    procedure DoOnBeforeDelete(AModel: IPanamahModel; AAssinanteId: Variant; var AContinue: Boolean);
     procedure DoOnError(AError: Exception);
     procedure AccumulateCurrentBatch;
     procedure DoOnCurrentBatchExpired;
@@ -156,7 +156,7 @@ var
 begin
   KeepExecuting := True;
   try
-    DoOnBeforeSave(AModel, KeepExecuting);
+    DoOnBeforeSave(AModel, AAssinanteId, KeepExecuting);
   except
     on EAbort do
       KeepExecuting := False;
@@ -179,7 +179,7 @@ var
 begin
   KeepExecuting := True;
   try
-    DoOnBeforeDelete(AModel, KeepExecuting);
+    DoOnBeforeDelete(AModel, AAssinanteId, KeepExecuting);
   except
     on EAbort do
       KeepExecuting := False;
@@ -316,10 +316,10 @@ begin
       DoOnBeforeOperationSent(ABatch.Items[I]);
 end;
 
-procedure TPanamahBatchProcessor.DoOnBeforeDelete(AModel: IPanamahModel; var AContinue: Boolean);
+procedure TPanamahBatchProcessor.DoOnBeforeDelete(AModel: IPanamahModel; AAssinanteId: Variant; var AContinue: Boolean);
 begin
   if Assigned(FOnBeforeDelete) then
-    FOnBeforeDelete(AModel, AContinue);
+    FOnBeforeDelete(AModel, AAssinanteId, AContinue);
 end;
 
 procedure TPanamahBatchProcessor.DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
@@ -334,10 +334,10 @@ begin
     FOnBeforeOperationSent(AOperation);
 end;
 
-procedure TPanamahBatchProcessor.DoOnBeforeSave(AModel: IPanamahModel; var AContinue: Boolean);
+procedure TPanamahBatchProcessor.DoOnBeforeSave(AModel: IPanamahModel; AAssinanteId: Variant; var AContinue: Boolean);
 begin
   if Assigned(FOnBeforeSave) then
-    FOnBeforeSave(AModel, AContinue);
+    FOnBeforeSave(AModel, AAssinanteId, AContinue);
 end;
 
 procedure TPanamahBatchProcessor.Execute;

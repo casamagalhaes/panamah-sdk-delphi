@@ -70,8 +70,7 @@ begin
     OnError := Self.OnError;
     Init(
       GetTestVariable('AUTHORIZATION_TOKEN'),
-      GetTestVariable('SECRET'),
-      '*'
+      GetTestVariable('SECRET')
     );
     Save(FormaPagamento, '03992843467');
     Save(FormaPagamento, '02541926375');

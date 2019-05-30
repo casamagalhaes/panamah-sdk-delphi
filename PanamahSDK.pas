@@ -100,6 +100,7 @@ type
     function GetPendingResources: IPanamahPendingResourcesList;
     procedure Init; overload;
     procedure Init(AConfig: IPanamahStreamConfig); overload;
+    procedure Init(const AAuthorizationToken, ASecret: string); overload;
     procedure Init(const AAuthorizationToken, ASecret, AAssinanteId: string); overload;
     procedure Flush;
 
@@ -237,6 +238,11 @@ begin
   Config.Secret := ASecret;
   Config.AuthorizationToken := AAuthorizationToken;
   Init(Config);
+end;
+
+procedure TPanamahStream.Init(const AAuthorizationToken, ASecret: string);
+begin
+  Init(AAuthorizationToken, ASecret, '*');
 end;
 
 function TPanamahStream.ReadNFe(ADocumentType: TPanamahNFeDocumentType; const AFilename: string): IPanamahNFeDocument;
