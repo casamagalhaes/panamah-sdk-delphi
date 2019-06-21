@@ -43,6 +43,7 @@ uses
     Result.Bairro := 'Rua Poebla';
     Result.Cidade := 'Caucaia';
     Result.Uf := 'CE';
+    Result.Ativo := True;
   end;
 
   //Preenchendo um modelo de produtos
