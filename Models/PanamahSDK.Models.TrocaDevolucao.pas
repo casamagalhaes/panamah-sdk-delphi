@@ -787,7 +787,10 @@ begin
     Validations.AddFailure('TrocaDevolucao.Id obrigatorio(a)');
   
   if ModelListIsEmpty(TrocaDevolucao.Itens) then
-    Validations.AddFailure('TrocaDevolucao.Itens obrigatorio(a)')
+  begin
+    if not Assigned(TrocaDevolucao.Itens) then
+      TrocaDevolucao.Itens := TPanamahTrocaDevolucaoItemList.Create;
+  end
   else
     Validations.Add(TrocaDevolucao.Itens.Validate);
   
