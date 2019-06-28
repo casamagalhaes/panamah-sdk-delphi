@@ -637,6 +637,9 @@ begin
   if ModelValueIsEmpty(EventoCaixa.NumeroCaixa) then
     Validations.AddFailure('EventoCaixa.NumeroCaixa obrigatorio(a)');
   
+  if ModelDateValueIsEmpty(EventoCaixa.DataHora) then
+    Validations.AddFailure('EventoCaixa.DataHora obrigatorio(a)');
+  
   if ModelValueIsEmpty(EventoCaixa.Tipo) then
     Validations.AddFailure('EventoCaixa.Tipo obrigatorio(a)');
   

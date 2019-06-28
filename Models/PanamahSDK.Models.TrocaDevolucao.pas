@@ -780,14 +780,14 @@ begin
   TrocaDevolucao := AModel as IPanamahTrocaDevolucao;
   Validations := TPanamahValidationResultList.Create;
   
+  if ModelDateValueIsEmpty(TrocaDevolucao.Data) then
+    Validations.AddFailure('TrocaDevolucao.Data obrigatorio(a)');
+  
   if ModelValueIsEmpty(TrocaDevolucao.Id) then
     Validations.AddFailure('TrocaDevolucao.Id obrigatorio(a)');
   
   if ModelListIsEmpty(TrocaDevolucao.Itens) then
-  begin
-    if not Assigned(TrocaDevolucao.Itens) then
-      TrocaDevolucao.Itens := TPanamahTrocaDevolucaoItemList.Create;
-  end
+    Validations.AddFailure('TrocaDevolucao.Itens obrigatorio(a)')
   else
     Validations.Add(TrocaDevolucao.Itens.Validate);
   

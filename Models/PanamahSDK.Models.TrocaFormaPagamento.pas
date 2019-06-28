@@ -441,6 +441,9 @@ begin
   TrocaFormaPagamento := AModel as IPanamahTrocaFormaPagamento;
   Validations := TPanamahValidationResultList.Create;
   
+  if ModelDateValueIsEmpty(TrocaFormaPagamento.Data) then
+    Validations.AddFailure('TrocaFormaPagamento.Data obrigatorio(a)');
+  
   if ModelValueIsEmpty(TrocaFormaPagamento.FormaPagamentoDestinoId) then
     Validations.AddFailure('TrocaFormaPagamento.FormaPagamentoDestinoId obrigatorio(a)');
   

@@ -6,6 +6,7 @@ uses
   SysUtils, Classes, Variants, PanamahSDK.Types;
 
   function ModelValueIsEmpty(AValue: Variant): Boolean;
+  function ModelDateValueIsEmpty(AValue: Variant): Boolean;
   function ModelListIsEmpty(AList: IPanamahStringValueList): Boolean; overload;
   function ModelListIsEmpty(AList: IJSONSerializableList): Boolean; overload;
   function ModelStringListEmptyIndex(AList: IPanamahStringValueList): Integer;
@@ -21,6 +22,11 @@ begin
   Result := VarIsNull(AValue) or
               VarIsEmpty(AValue) or
                 SameText(VarToStrDef(AValue, EmptyStr), EmptyStr);
+end;
+
+function ModelDateValueIsEmpty(AValue: Variant): Boolean;
+begin
+  Result := ModelValueIsEmpty(AValue) or (VarToDateTime(AValue) = 0);
 end;
 
 function ModelListIsEmpty(AList: IPanamahStringValueList): Boolean;

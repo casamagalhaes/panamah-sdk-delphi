@@ -1480,6 +1480,12 @@ begin
   if ModelValueIsEmpty(Venda.LojaId) then
     Validations.AddFailure('Venda.LojaId obrigatorio(a)');
   
+  if ModelDateValueIsEmpty(Venda.Data) then
+    Validations.AddFailure('Venda.Data obrigatorio(a)');
+  
+  if ModelDateValueIsEmpty(Venda.DataHoraVenda) then
+    Validations.AddFailure('Venda.DataHoraVenda obrigatorio(a)');
+  
   if ModelValueIsEmpty(Venda.Sequencial) then
     Validations.AddFailure('Venda.Sequencial obrigatorio(a)');
   

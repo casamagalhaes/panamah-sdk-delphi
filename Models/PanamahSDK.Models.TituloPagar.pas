@@ -732,6 +732,12 @@ begin
   if ModelValueIsEmpty(TituloPagar.Documento) then
     Validations.AddFailure('TituloPagar.Documento obrigatorio(a)');
   
+  if ModelDateValueIsEmpty(TituloPagar.DataEmissao) then
+    Validations.AddFailure('TituloPagar.DataEmissao obrigatorio(a)');
+  
+  if ModelDateValueIsEmpty(TituloPagar.DataVencimento) then
+    Validations.AddFailure('TituloPagar.DataVencimento obrigatorio(a)');
+  
   if ModelListIsEmpty(TituloPagar.Pagamentos) then
     Validations.AddFailure('TituloPagar.Pagamentos obrigatorio(a)')
   else

@@ -390,6 +390,9 @@ begin
   if ModelValueIsEmpty(EstoqueMovimentacao.LocalEstoqueId) then
     Validations.AddFailure('EstoqueMovimentacao.LocalEstoqueId obrigatorio(a)');
   
+  if ModelDateValueIsEmpty(EstoqueMovimentacao.DataHora) then
+    Validations.AddFailure('EstoqueMovimentacao.DataHora obrigatorio(a)');
+  
   if ModelValueIsEmpty(EstoqueMovimentacao.ProdutoId) then
     Validations.AddFailure('EstoqueMovimentacao.ProdutoId obrigatorio(a)');
   

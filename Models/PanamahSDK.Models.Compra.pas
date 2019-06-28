@@ -850,6 +850,15 @@ begin
   if ModelValueIsEmpty(Compra.LojaId) then
     Validations.AddFailure('Compra.LojaId obrigatorio(a)');
   
+  if ModelDateValueIsEmpty(Compra.DataEntrada) then
+    Validations.AddFailure('Compra.DataEntrada obrigatorio(a)');
+  
+  if ModelDateValueIsEmpty(Compra.DataEmissao) then
+    Validations.AddFailure('Compra.DataEmissao obrigatorio(a)');
+  
+  if ModelDateValueIsEmpty(Compra.DataHoraCompra) then
+    Validations.AddFailure('Compra.DataHoraCompra obrigatorio(a)');
+  
   if ModelListIsEmpty(Compra.Itens) then
     Validations.AddFailure('Compra.Itens obrigatorio(a)')
   else
