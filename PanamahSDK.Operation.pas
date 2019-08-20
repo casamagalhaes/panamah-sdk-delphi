@@ -184,10 +184,7 @@ var
 begin
   ADataId := A.GetDataId;
   BDataId := B.GetDataId;
-  Result := SameText(A.Id, B.Id) or
-              SameText(ADataId, BDataId) or
-                SameText(A.Id, BDataId) or
-                   SameText(ADataId, B.Id);
+  Result := SameText(ADataId, BDataId);
 end;
 
 class function TPanamahOperation.SameOperationType(A, B: IPanamahOperation): Boolean;
