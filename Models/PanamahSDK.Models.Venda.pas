@@ -1323,7 +1323,7 @@ begin
     SetFieldValue(JSONObject, 'valor', FValor);    
     SetFieldValue(JSONObject, 'valorItensCancelados', FValorItensCancelados);    
     SetFieldValue(JSONObject, 'acrescimo', FAcrescimo);    
-    SetFieldValue(JSONObject, 'numeroCaixa', FNumeroCaixa);    
+    SetFieldValue(JSONObject, 'numeroCaixa', VarToStrDef(FNumeroCaixa, EmptyStr));
     SetFieldValue(JSONObject, 'itens', FItens);    
     SetFieldValue(JSONObject, 'pagamentos', FPagamentos);
     Result := TlkJSON.GenerateText(JSONObject);
