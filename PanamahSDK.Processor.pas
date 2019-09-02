@@ -473,25 +473,37 @@ begin
   end;
   for I := 0 to AccumulatedBatches.Count - 1 do
   begin
-    DoOnBeforeBatchSent(AccumulatedBatches[I].Clone);
-    Response := FClient.Post('/stream/data', AccumulatedBatches[I].SerializeToJSON, nil);
-    if Response.Status = 200 then
+    if AccumulatedBatches[I].Count > 0 then
     begin
-      BatchResponse := TPanamahBatchResponse.FromJSON(Response.Content);
-      if Assigned(BatchResponse.Falhas) and
-          (BatchResponse.Falhas.Total > 0) then
+      DoOnBeforeBatchSent(AccumulatedBatches[I].Clone);
+      Response := FClient.Post('/stream/data', AccumulatedBatches[I].SerializeToJSON, nil);
+      if Response.Status = 200 then
       begin
-        CreateBatchWithFailedOperations(AccumulatedBatches[I], BatchResponse.Falhas.Itens);
-        Break;
-      end
-      else
-      begin
-        FCriticalSection.Acquire;
-        try
-          AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
-        finally
-          FCriticalSection.Release;
+        BatchResponse := TPanamahBatchResponse.FromJSON(Response.Content);
+        if Assigned(BatchResponse.Falhas) and
+            (BatchResponse.Falhas.Total > 0) then
+        begin
+          CreateBatchWithFailedOperations(AccumulatedBatches[I], BatchResponse.Falhas.Itens);
+          Break;
+        end
+        else
+        begin
+          FCriticalSection.Acquire;
+          try
+            AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
+          finally
+            FCriticalSection.Release;
+          end;
         end;
+      end;
+    end
+    else
+    begin
+      FCriticalSection.Acquire;
+      try
+        AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
+      finally
+        FCriticalSection.Release;
       end;
     end;
   end;
