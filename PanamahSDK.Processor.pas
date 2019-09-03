@@ -5,7 +5,7 @@ interface
 uses
   Classes, Windows, SysUtils, Messages, DateUtils, SyncObjs, PanamahSDK.Enums,
   PanamahSDK.Operation, PanamahSDK.Types, PanamahSDK.Batch, PanamahSDK.Client,
-  PanamahSDK.Consts, uLkJSON, ActiveX, PanamahSDK.PendingResources;
+  PanamahSDK.Consts, uLkJSON, ActiveX, PanamahSDK.PendingResources, PanamahSDK.Log;
 
 type
 
@@ -154,6 +154,7 @@ var
   ValidationResult: IPanamahValidationResult;
   KeepExecuting: Boolean;
 begin
+  TPanamahLogger.Log('Save ' + AModel.ModelName);
   KeepExecuting := True;
   try
     DoOnBeforeSave(AModel, AAssinanteId, KeepExecuting);
@@ -163,13 +164,20 @@ begin
     on E: Exception do
       raise E;
   end;
+  TPanamahLogger.Log('BeforeSave hook executed');
   if KeepExecuting then
   begin
     ValidationResult := AModel.Validate;
     if ValidationResult.Valid then
-      AddOperationToCurrentBatch(otUPDATE, AModel, AAssinanteId)
+    begin
+      AddOperationToCurrentBatch(otUPDATE, AModel, AAssinanteId);
+      TPanamahLogger.Log('Update operation added to the current batch');
+    end
     else
+    begin
+      TPanamahLogger.Log('Validation failed, raising exception');
       raise EPanamahSDKValidationException.Create(ValidationResult.Reasons.Text);
+    end;
   end;
 end;
 
@@ -177,6 +185,7 @@ procedure TPanamahBatchProcessor.Delete(AModel: IPanamahModel; AAssinanteId: Var
 var
   KeepExecuting: Boolean;
 begin
+  TPanamahLogger.Log('Delete ' + AModel.ModelName);
   KeepExecuting := True;
   try
     DoOnBeforeDelete(AModel, AAssinanteId, KeepExecuting);
@@ -186,12 +195,19 @@ begin
     on E: Exception do
       raise E;
   end;
+  TPanamahLogger.Log('BeforeDelete hook executed');
   if KeepExecuting then
   begin
     if ModelHasId(AModel) then
-      AddOperationToCurrentBatch(otDELETE, AModel, AAssinanteId)
+    begin
+      AddOperationToCurrentBatch(otDELETE, AModel, AAssinanteId);
+      TPanamahLogger.Log('Delete operation added to the current batch');
+    end
     else
+    begin
+      TPanamahLogger.Log('Id missing, raising exception');
       raise EPanamahSDKValidationException.Create(Format('Id obrigatorio para exclusao de %s', [AModel.ModelName]));
+    end;
   end;
 end;
 
@@ -212,14 +228,20 @@ end;
 
 function TPanamahBatchProcessor.GetPendingResources: IPanamahPendingResourcesList;
 begin
+  TPanamahLogger.Log('Getting pending resources');
   Result := nil;
   if Assigned(FClient) then
     Result := TPanamahPendingResourcesList.Obtain(FClient);
 end;
 
 function TPanamahBatchProcessor.AccumulatedBatchesExists: Boolean;
+var
+  AccumulatedBatchesCount: Integer;
 begin
-  Result := TPanamahBatchList.CountBatchesInDirectory(GetBatchAccumulationDirectory) > 0;
+  TPanamahLogger.Log('Checking for accumulated batches');
+  AccumulatedBatchesCount := TPanamahBatchList.CountBatchesInDirectory(GetBatchAccumulationDirectory);
+  TPanamahLogger.Log(Format('Found %d accumulated batch(es)', [AccumulatedBatchesCount]));
+  Result := AccumulatedBatchesCount > 0;
 end;
 
 procedure TPanamahBatchProcessor.AddOperationToCurrentBatch(AOperationType: TPanamahOperationType;
@@ -290,6 +312,7 @@ end;
 
 procedure TPanamahBatchProcessor.DoOnError(AError: Exception);
 begin
+  TPanamahLogger.Log(Format('Error hook called with %s', [AError.Message]));
   if Assigned(FOnError) then
     FOnError(AError);
 end;
@@ -360,8 +383,10 @@ end;
 
 procedure TPanamahBatchProcessor.Flush;
 begin
+  TPanamahLogger.Log('Flushing stream');
   if FCurrentBatch.Count > 0 then
   begin
+    TPanamahLogger.Log(Format('Current batch has %d entities', [FCurrentBatch.Count]));
     AccumulateCurrentBatch;
     SendAccumulatedBatches;
   end;
@@ -373,12 +398,19 @@ var
 begin
   FCriticalSection.Acquire;
   try
+    TPanamahLogger.Log('Loading current batch');
     if FileExists(GetCurrentBatchFilename) then
     begin
       CurrentBatchFromFile := TPanamahBatch.FromFile(GetCurrentBatchFilename);
+      TPanamahLogger.Log('Current batch loaded');
       if CurrentBatchFromFile.Count > 0 then
+      begin
         FCurrentBatch := CurrentBatchFromFile.Clone;
-    end;
+        TPanamahLogger.Log('Current batch cloned');
+      end;
+    end
+    else
+      TPanamahLogger.Log('No current batch found');
   finally
     FCriticalSection.Release;
   end;
@@ -408,6 +440,7 @@ begin
           end
           else
           begin
+            TPanamahLogger.Log('Current batch expired');
             SaveCurrentBatch;
             CurrentBatchLastHash := FCurrentBatch.Hash;
           end;
@@ -432,12 +465,14 @@ var
   SentBatches: IPanamahBatchList;
   I: Integer;
 begin
+  TPanamahLogger.Log('Removing old sent batches');
   SentBatches :=  TPanamahBatchList.FromDirectory(GetBatchSentDirectory);
   for I := 0 to SentBatches.Count - 1 do
   begin
     if (Now - SentBatches[I].CreatedAt) > 1 then
       SentBatches[I].RemoveFromDirectory(GetBatchSentDirectory);
   end;
+   TPanamahLogger.Log('Done removing old batches');
 end;
 
 procedure TPanamahBatchProcessor.Save(AModel: IPanamahModel);
@@ -446,12 +481,16 @@ begin
 end;
 
 procedure TPanamahBatchProcessor.SaveCurrentBatch;
+var
+  Filename: string;
 begin
   if FCurrentBatch.Count > 0 then
   begin
     FCriticalSection.Acquire;
     try
-      FCurrentBatch.SaveToFile(GetCurrentBatchFilename);
+      Filename := GetCurrentBatchFilename;
+      FCurrentBatch.SaveToFile(Filename);
+      TPanamahLogger.Log(Format('Current batch saved to %s', [Filename]));
     finally
       FCriticalSection.Release;
     end;
@@ -465,40 +504,50 @@ var
   BatchResponse: IPanamahBatchResponse;
   I: Integer;
 begin
+  TPanamahLogger.Log('Sending accumulated batches');
   FCriticalSection.Acquire;
   try
     AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
   finally
     FCriticalSection.Release;
   end;
+  TPanamahLogger.Log(Format('Lodaded %d batches from accumulating directory', [AccumulatedBatches.Count]));
   for I := 0 to AccumulatedBatches.Count - 1 do
   begin
     if AccumulatedBatches[I].Count > 0 then
     begin
+      TPanamahLogger.Log(Format('Found %d entities in batch number %d', [AccumulatedBatches[I].Count, I]));
       DoOnBeforeBatchSent(AccumulatedBatches[I].Clone);
+      TPanamahLogger.Log('Before sent hook executed, requesting /stream/data');
       Response := FClient.Post('/stream/data', AccumulatedBatches[I].SerializeToJSON, nil);
+      TPanamahLogger.Log(Format('Request to /stream/data executed with status %d', [Response.Status]));
       if Response.Status = 200 then
       begin
         BatchResponse := TPanamahBatchResponse.FromJSON(Response.Content);
+        TPanamahLogger.Log('Response deserialized');
         if Assigned(BatchResponse.Falhas) and
             (BatchResponse.Falhas.Total > 0) then
         begin
+          TPanamahLogger.Log('Some operations failed, creating batch with failures');
           CreateBatchWithFailedOperations(AccumulatedBatches[I], BatchResponse.Falhas.Itens);
           Break;
         end
         else
         begin
+          TPanamahLogger.Log('Success, moving batch to sent directory');
           FCriticalSection.Acquire;
           try
             AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
           finally
             FCriticalSection.Release;
           end;
+          TPanamahLogger.Log('Done');
         end;
       end;
     end
     else
     begin
+      TPanamahLogger.Log('Batch was empty, discarding');
       FCriticalSection.Acquire;
       try
         AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
@@ -511,6 +560,7 @@ end;
 
 procedure TPanamahBatchProcessor.Start(AConfig: IPanamahStreamConfig);
 begin
+  TPanamahLogger.Log('Processor started');
   FConfig := AConfig;
   FClient := TPanamahStreamClient.Create(API_BASE_URL, FConfig.AuthorizationToken, FConfig.Secret, FConfig.AssinanteId);
   FCurrentBatch := TPanamahBatch.Create;
@@ -520,10 +570,12 @@ end;
 
 procedure TPanamahBatchProcessor.Stop;
 begin
+  TPanamahLogger.Log('Processor stop requested');
   Terminate;
   if FStarted then
   begin
     WaitFor;
+    TPanamahLogger.Log('Processor successfully stopped');
     FStarted := False;
   end;
 end;

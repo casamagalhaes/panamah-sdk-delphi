@@ -218,7 +218,7 @@ var
 implementation
 
 uses
-  PanamahSDK.ValidationUtils;
+  PanamahSDK.ValidationUtils, PanamahSDK.Log;
 
 { TPanamahStream }
 
@@ -233,6 +233,7 @@ procedure TPanamahStream.Init(const AAuthorizationToken, ASecret, AAssinanteId: 
 var
   Config: IPanamahStreamConfig;
 begin
+  TPanamahLogger.Log('PanamahStream init');
   Config := TPanamahStreamConfig.Create;
   Config.AssinanteId := AAssinanteId;
   Config.Secret := ASecret;
@@ -959,7 +960,9 @@ function TPanamahAdmin.GetAssinante(const AAssinanteId: string): IPanamahAssinan
 var
   Response: IPanamahResponse;
 begin
+  TPanamahLogger.Log(Format('Getting assinante %s', [AAssinanteId]));
   Response := FClient.Get(Format('/admin/assinantes/%s', [AAssinanteId]), nil, nil);
+  TPanamahLogger.Log(Format('Assinante get response returned %d', [Response.Status]));
   case Response.Status of
     200: Result := TPanamahAssinante.FromJSON(Response.Content);
     404: raise EPanamahSDKNotFoundException.Create('Assinante não encontrado');
@@ -972,7 +975,9 @@ function TPanamahAdmin.SaveAssinante(AAssinante: IPanamahAssinante): Boolean;
 var
   Response: IPanamahResponse;
 begin
+  TPanamahLogger.Log('Creating assinante');
   Response := FClient.Post('/admin/assinantes', AAssinante.SerializeToJSON, nil);
+  TPanamahLogger.Log(Format('Assinante create response returned %d', [Response.Status]));
   case Response.Status of
     201: Result := True;
     422: raise EPanamahSDKUnprocessableEntityException.Create(Response.Content);
@@ -994,6 +999,7 @@ procedure TPanamahAdmin.Init(const AAuthorizationToken: string);
 var
   Config: IPanamahAdminConfig;
 begin
+  TPanamahLogger.Log('PanamahAdmin init');
   Config := TPanamahAdminConfig.Create;
   Config.AuthorizationToken := AAuthorizationToken;
   Init(Config);
@@ -1001,6 +1007,7 @@ end;
 
 procedure TPanamahAdmin.Init(AConfig: IPanamahAdminConfig);
 begin
+  TPanamahLogger.Log('PanamahAdmin init');
   FConfig := AConfig;
   FClient := TPanamahAdminClient.Create(API_BASE_URL, FConfig.AuthorizationToken);
 end;
