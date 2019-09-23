@@ -37,7 +37,7 @@ type
     function GetFuncionarioId: variant;
     function GetPreco: Double;
     function GetProdutoId: string;
-    function GetCodigoRegistrado: variant;
+    function GetCodigoRegistrado: string;
     function GetPromocao: Boolean;
     function GetQuantidade: Double;
     function GetServico: Double;
@@ -53,7 +53,7 @@ type
     procedure SetFuncionarioId(const AFuncionarioId: variant);
     procedure SetPreco(const APreco: Double);
     procedure SetProdutoId(const AProdutoId: string);
-    procedure SetCodigoRegistrado(const ACodigoRegistrado: variant);
+    procedure SetCodigoRegistrado(const ACodigoRegistrado: string);
     procedure SetPromocao(const APromocao: Boolean);
     procedure SetQuantidade(const AQuantidade: Double);
     procedure SetServico(const AServico: Double);
@@ -69,7 +69,7 @@ type
     property FuncionarioId: variant read GetFuncionarioId write SetFuncionarioId;
     property Preco: Double read GetPreco write SetPreco;
     property ProdutoId: string read GetProdutoId write SetProdutoId;
-    property CodigoRegistrado: variant read GetCodigoRegistrado write SetCodigoRegistrado;
+    property CodigoRegistrado: string read GetCodigoRegistrado write SetCodigoRegistrado;
     property Promocao: Boolean read GetPromocao write SetPromocao;
     property Quantidade: Double read GetQuantidade write SetQuantidade;
     property Servico: Double read GetServico write SetServico;
@@ -221,7 +221,7 @@ type
     FFuncionarioId: variant;
     FPreco: Double;
     FProdutoId: string;
-    FCodigoRegistrado: variant;
+    FCodigoRegistrado: string;
     FPromocao: Boolean;
     FQuantidade: Double;
     FServico: Double;
@@ -237,7 +237,7 @@ type
     function GetFuncionarioId: variant;
     function GetPreco: Double;
     function GetProdutoId: string;
-    function GetCodigoRegistrado: variant;
+    function GetCodigoRegistrado: string;
     function GetPromocao: Boolean;
     function GetQuantidade: Double;
     function GetServico: Double;
@@ -253,7 +253,7 @@ type
     procedure SetFuncionarioId(const AFuncionarioId: variant);
     procedure SetPreco(const APreco: Double);
     procedure SetProdutoId(const AProdutoId: string);
-    procedure SetCodigoRegistrado(const ACodigoRegistrado: variant);
+    procedure SetCodigoRegistrado(const ACodigoRegistrado: string);
     procedure SetPromocao(const APromocao: Boolean);
     procedure SetQuantidade(const AQuantidade: Double);
     procedure SetServico(const AServico: Double);
@@ -277,7 +277,7 @@ type
     property FuncionarioId: variant read GetFuncionarioId write SetFuncionarioId;
     property Preco: Double read GetPreco write SetPreco;
     property ProdutoId: string read GetProdutoId write SetProdutoId;
-    property CodigoRegistrado: variant read GetCodigoRegistrado write SetCodigoRegistrado;
+    property CodigoRegistrado: string read GetCodigoRegistrado write SetCodigoRegistrado;
     property Promocao: Boolean read GetPromocao write SetPromocao;
     property Quantidade: Double read GetQuantidade write SetQuantidade;
     property Servico: Double read GetServico write SetServico;
@@ -729,12 +729,12 @@ begin
   FProdutoId := AProdutoId;
 end;
 
-function TPanamahVendaItem.GetCodigoRegistrado: variant;
+function TPanamahVendaItem.GetCodigoRegistrado: string;
 begin
   Result := FCodigoRegistrado;
 end;
 
-procedure TPanamahVendaItem.SetCodigoRegistrado(const ACodigoRegistrado: variant);
+procedure TPanamahVendaItem.SetCodigoRegistrado(const ACodigoRegistrado: string);
 begin
   FCodigoRegistrado := ACodigoRegistrado;
 end;
