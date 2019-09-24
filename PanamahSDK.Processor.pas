@@ -16,7 +16,7 @@ type
 
   TPanamahBatchEvent = procedure(ABatch: IPanamahBatch) of object;
 
-  TPanamahModelEvent = procedure(AModel: IPanamahModel) of object;
+  TPanamahModelEvent = procedure(AModel: IPanamahModel; AAssinanteId: Variant) of object;
 
   TPanamahOperationEvent = procedure(AModel: IPanamahOperation) of object;
 
@@ -28,6 +28,8 @@ type
     FOnError: TPanamahErrorEvent;
     FOnCurrentBatchExpired: TPanamahBatchEvent;
     FOnBeforeObjectAddedToBatch: TPanamahModelEvent;
+    FOnAfterSave: TPanamahModelEvent;
+    FOnAfterDelete: TPanamahModelEvent;
     FOnBeforeBatchSent: TPanamahBatchEvent;
     FOnBeforeOperationSent: TPanamahOperationEvent;
     FClient: IPanamahClient;
@@ -42,11 +44,13 @@ type
     function BatchExpiredBySize(AMaxSize: Integer): Boolean;
     function BatchExpiredByCount(AMaxCount: Integer): Boolean;
     procedure DoOnBeforeSave(AModel: IPanamahModel; AAssinanteId: Variant; var AContinue: Boolean);
+    procedure DoOnAfterSave(AModel: IPanamahModel; AAssinanteId: Variant);
     procedure DoOnBeforeDelete(AModel: IPanamahModel; AAssinanteId: Variant; var AContinue: Boolean);
+    procedure DoOnAfterDelete(AModel: IPanamahModel; AAssinanteId: Variant);
     procedure DoOnError(AError: Exception);
     procedure AccumulateCurrentBatch;
     procedure DoOnCurrentBatchExpired;
-    procedure DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
+    procedure DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel; AAssinanteId: Variant);
     procedure DoOnBeforeBatchSent(ABatch: IPanamahBatch);
     procedure DoOnBeforeOperationSent(AOperation: IPanamahOperation);
     procedure SendAccumulatedBatches;
@@ -70,6 +74,8 @@ type
     property OnBeforeSave: TPanamahCancelableModelEvent read FOnBeforeSave write FOnBeforeSave;
     property OnBeforeDelete: TPanamahCancelableModelEvent read FOnBeforeDelete write FOnBeforeDelete;
     property OnError: TPanamahErrorEvent read FOnError write FOnError;
+    property OnAfterDelete: TPanamahModelEvent read FOnAfterDelete write FOnAfterDelete;
+    property OnAfterSave: TPanamahModelEvent read FOnAfterSave write FOnAfterSave;
     procedure Save(AModel: IPanamahModel; AAssinanteId: Variant); overload;
     procedure Delete(AModel: IPanamahModel; AAssinanteId: Variant); overload;
     procedure Save(AModel: IPanamahModel); overload;
@@ -171,6 +177,7 @@ begin
     if ValidationResult.Valid then
     begin
       AddOperationToCurrentBatch(otUPDATE, AModel, AAssinanteId);
+      DoOnAfterSave(AModel, AAssinanteId);
       TPanamahLogger.Log('Update operation added to the current batch');
     end
     else
@@ -201,6 +208,7 @@ begin
     if ModelHasId(AModel) then
     begin
       AddOperationToCurrentBatch(otDELETE, AModel, AAssinanteId);
+      DoOnAfterDelete(AModel, AAssinanteId);
       TPanamahLogger.Log('Delete operation added to the current batch');
     end
     else
@@ -247,7 +255,7 @@ end;
 procedure TPanamahBatchProcessor.AddOperationToCurrentBatch(AOperationType: TPanamahOperationType;
   AModel: IPanamahModel; AAssinanteId: Variant);
 begin
-  DoOnBeforeObjectAddedToBatch(AModel);
+  DoOnBeforeObjectAddedToBatch(AModel, AAssinanteId);
   FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone, AAssinanteId));
   FCriticalSection.Acquire;
   try
@@ -328,6 +336,18 @@ begin
   inherited;
 end;
 
+procedure TPanamahBatchProcessor.DoOnAfterDelete(AModel: IPanamahModel; AAssinanteId: Variant);
+begin
+  if Assigned(FOnAfterDelete) then
+    FOnAfterDelete(AModel, AAssinanteId);
+end;
+
+procedure TPanamahBatchProcessor.DoOnAfterSave(AModel: IPanamahModel; AAssinanteId: Variant);
+begin
+  if Assigned(FOnAfterSave) then
+    FOnAfterSave(AModel, AAssinanteId);
+end;
+
 procedure TPanamahBatchProcessor.DoOnBeforeBatchSent(ABatch: IPanamahBatch);
 var
   I: Integer;
@@ -345,10 +365,10 @@ begin
     FOnBeforeDelete(AModel, AAssinanteId, AContinue);
 end;
 
-procedure TPanamahBatchProcessor.DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel);
+procedure TPanamahBatchProcessor.DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel; AAssinanteId: Variant);
 begin
   if Assigned(FOnBeforeObjectAddedToBatch) then
-    FOnBeforeObjectAddedToBatch(AModel);
+    FOnBeforeObjectAddedToBatch(AModel, AAssinanteId);
 end;
 
 procedure TPanamahBatchProcessor.DoOnBeforeOperationSent(AOperation: IPanamahOperation);

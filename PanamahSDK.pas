@@ -82,6 +82,9 @@ type
     function GetOnBeforeSave: TPanamahCancelableModelEvent;
     function GetOnBeforeDelete: TPanamahCancelableModelEvent;
     function GetOnError: TPanamahErrorEvent;
+    function GetOnAfterSave: TPanamahModelEvent;
+    function GetOnAfterDelete: TPanamahModelEvent;
+
     procedure SetOnBeforeSave(AEvent: TPanamahCancelableModelEvent);
     procedure SetOnBeforeDelete(AEvent: TPanamahCancelableModelEvent);
     procedure SetOnError(AEvent: TPanamahErrorEvent);
@@ -89,6 +92,8 @@ type
     procedure SetOnBeforeObjectAddedToBatch(AEvent: TPanamahModelEvent);
     procedure SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
     procedure SetOnBeforeOperationSent(AEvent: TPanamahOperationEvent);
+    procedure SetOnAfterSave(AEvent: TPanamahModelEvent);
+    procedure SetOnAfterDelete(AEvent: TPanamahModelEvent);
   public
     constructor Create; reintroduce;
     destructor Destroy; override;
@@ -209,6 +214,8 @@ type
     property OnBeforeSave: TPanamahCancelableModelEvent read GetOnBeforeSave write SetOnBeforeSave;
     property OnBeforeDelete: TPanamahCancelableModelEvent read GetOnBeforeDelete write SetOnBeforeDelete;
     property OnError: TPanamahErrorEvent read GetOnError write SetOnError;
+    property OnAfterSave: TPanamahModelEvent read GetOnAfterSave write SetOnAfterSave;
+    property OnAfterDelete: TPanamahModelEvent read GetOnAfterDelete write SetOnAfterDelete;
   end;
 
 var
@@ -265,6 +272,16 @@ end;
 procedure TPanamahStream.Init;
 begin
   Init(GetEnvironmentVariable('PANAMAH_AUTHORIZATION_TOKEN'), GetEnvironmentVariable('PANAMAH_ASSINANTE_ID'), GetEnvironmentVariable('PANAMAH_SECRET'));
+end;
+
+procedure TPanamahStream.SetOnAfterDelete(AEvent: TPanamahModelEvent);
+begin
+  FProcessor.OnAfterDelete := AEvent;
+end;
+
+procedure TPanamahStream.SetOnAfterSave(AEvent: TPanamahModelEvent);
+begin
+  FProcessor.OnAfterSave := AEvent;
 end;
 
 procedure TPanamahStream.SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
@@ -818,6 +835,16 @@ begin
   if not Assigned(_PanamahStreamInstance) then
     _PanamahStreamInstance := TPanamahStream.Create;
   Result := _PanamahStreamInstance;
+end;
+
+function TPanamahStream.GetOnAfterDelete: TPanamahModelEvent;
+begin
+  Result := FProcessor.OnAfterDelete;
+end;
+
+function TPanamahStream.GetOnAfterSave: TPanamahModelEvent;
+begin
+  Result := FProcessor.OnAfterSave;
 end;
 
 function TPanamahStream.GetOnBeforeBatchSent: TPanamahBatchEvent;
