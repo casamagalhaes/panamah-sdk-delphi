@@ -30,6 +30,8 @@ type
     FOnBeforeObjectAddedToBatch: TPanamahModelEvent;
     FOnAfterSave: TPanamahModelEvent;
     FOnAfterDelete: TPanamahModelEvent;
+    FOnAfterSaveSync: TPanamahModelEvent;
+    FOnAfterDeleteSync: TPanamahModelEvent;
     FOnBeforeBatchSent: TPanamahBatchEvent;
     FOnBeforeOperationSent: TPanamahOperationEvent;
     FClient: IPanamahClient;
@@ -51,6 +53,8 @@ type
     procedure AccumulateCurrentBatch;
     procedure DoOnCurrentBatchExpired;
     procedure DoOnBeforeObjectAddedToBatch(AModel: IPanamahModel; AAssinanteId: Variant);
+    procedure DoAfterSaveSync(AModel: IPanamahModel; AAssinanteId: Variant);
+    procedure DoAfterDeleteSync(AModel: IPanamahModel; AAssinanteId: Variant);
     procedure DoOnBeforeBatchSent(ABatch: IPanamahBatch);
     procedure DoOnBeforeOperationSent(AOperation: IPanamahOperation);
     procedure SendAccumulatedBatches;
@@ -58,6 +62,7 @@ type
     procedure SaveCurrentBatch;
     procedure ExpireCurrentBatch;
     procedure RemoveOldSentBatches;
+    procedure TriggerAfterSync(ASourceBatch: IPanamahBatch);
     procedure CreateBatchWithFailedOperations(ASourceBatch: IPanamahBatch; AFailedOperations: IPanamahOperationList);
     procedure Process;
     procedure AddOperationToCurrentBatch(AOperationType: TPanamahOperationType; AModel: IPanamahModel; AAssinanteId: Variant);
@@ -76,6 +81,8 @@ type
     property OnError: TPanamahErrorEvent read FOnError write FOnError;
     property OnAfterDelete: TPanamahModelEvent read FOnAfterDelete write FOnAfterDelete;
     property OnAfterSave: TPanamahModelEvent read FOnAfterSave write FOnAfterSave;
+    property OnAfterDeleteSync: TPanamahModelEvent read FOnAfterDeleteSync write FOnAfterDeleteSync;
+    property OnAfterSaveSync: TPanamahModelEvent read FOnAfterSaveSync write FOnAfterSaveSync;
     procedure Save(AModel: IPanamahModel; AAssinanteId: Variant); overload;
     procedure Delete(AModel: IPanamahModel; AAssinanteId: Variant); overload;
     procedure Save(AModel: IPanamahModel); overload;
@@ -336,6 +343,18 @@ begin
   inherited;
 end;
 
+procedure TPanamahBatchProcessor.DoAfterSaveSync(AModel: IPanamahModel; AAssinanteId: Variant);
+begin
+  if Assigned(FOnAfterSaveSync) then
+    FOnAfterSaveSync(AModel, AAssinanteId);
+end;
+
+procedure TPanamahBatchProcessor.DoAfterDeleteSync(AModel: IPanamahModel; AAssinanteId: Variant);
+begin
+  if Assigned(FOnAfterDeleteSync) then
+    FOnAfterDeleteSync(AModel, AAssinanteId);
+end;
+
 procedure TPanamahBatchProcessor.DoOnAfterDelete(AModel: IPanamahModel; AAssinanteId: Variant);
 begin
   if Assigned(FOnAfterDelete) then
@@ -554,6 +573,8 @@ begin
         end
         else
         begin
+          TPanamahLogger.Log('Triggering AfterSync hook');
+          TriggerAfterSync(AccumulatedBatches[I]);
           TPanamahLogger.Log('Success, moving batch to sent directory');
           FCriticalSection.Acquire;
           try
@@ -597,6 +618,21 @@ begin
     WaitFor;
     TPanamahLogger.Log('Processor successfully stopped');
     FStarted := False;
+  end;
+end;
+
+procedure TPanamahBatchProcessor.TriggerAfterSync(ASourceBatch: IPanamahBatch);
+var
+  I: Integer;
+  BatchOperation: IPanamahOperation;
+begin
+  for I := 0 to ASourceBatch.Count - 1 do
+  begin
+    BatchOperation := ASourceBatch.Items[I];
+    case BatchOperation.OperationType of
+      otUPDATE: DoAfterSaveSync(BatchOperation.Data, BatchOperation.AssinanteId);
+      otDELETE: DoAfterDeleteSync(BatchOperation.Data, BatchOperation.AssinanteId);
+    end;
   end;
 end;
 

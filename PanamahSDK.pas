@@ -84,6 +84,8 @@ type
     function GetOnError: TPanamahErrorEvent;
     function GetOnAfterSave: TPanamahModelEvent;
     function GetOnAfterDelete: TPanamahModelEvent;
+    function GetOnAfterSaveSync: TPanamahModelEvent;
+    function GetOnAfterDeleteSync: TPanamahModelEvent;
 
     procedure SetOnBeforeSave(AEvent: TPanamahCancelableModelEvent);
     procedure SetOnBeforeDelete(AEvent: TPanamahCancelableModelEvent);
@@ -94,6 +96,8 @@ type
     procedure SetOnBeforeOperationSent(AEvent: TPanamahOperationEvent);
     procedure SetOnAfterSave(AEvent: TPanamahModelEvent);
     procedure SetOnAfterDelete(AEvent: TPanamahModelEvent);
+    procedure SetOnAfterSaveSync(AEvent: TPanamahModelEvent);
+    procedure SetOnAfterDeleteSync(AEvent: TPanamahModelEvent);
   public
     constructor Create; reintroduce;
     destructor Destroy; override;
@@ -216,6 +220,8 @@ type
     property OnError: TPanamahErrorEvent read GetOnError write SetOnError;
     property OnAfterSave: TPanamahModelEvent read GetOnAfterSave write SetOnAfterSave;
     property OnAfterDelete: TPanamahModelEvent read GetOnAfterDelete write SetOnAfterDelete;
+    property OnAfterSaveSync: TPanamahModelEvent read GetOnAfterSaveSync write SetOnAfterSaveSync;
+    property OnAfterDeleteSync: TPanamahModelEvent read GetOnAfterDeleteSync write SetOnAfterDeleteSync;
   end;
 
 var
@@ -279,9 +285,19 @@ begin
   FProcessor.OnAfterDelete := AEvent;
 end;
 
+procedure TPanamahStream.SetOnAfterDeleteSync(AEvent: TPanamahModelEvent);
+begin
+  FProcessor.OnAfterDeleteSync := AEvent;
+end;
+
 procedure TPanamahStream.SetOnAfterSave(AEvent: TPanamahModelEvent);
 begin
   FProcessor.OnAfterSave := AEvent;
+end;
+
+procedure TPanamahStream.SetOnAfterSaveSync(AEvent: TPanamahModelEvent);
+begin
+  FProcessor.OnAfterSaveSync := AEvent;
 end;
 
 procedure TPanamahStream.SetOnBeforeBatchSent(AEvent: TPanamahBatchEvent);
@@ -842,9 +858,19 @@ begin
   Result := FProcessor.OnAfterDelete;
 end;
 
+function TPanamahStream.GetOnAfterDeleteSync: TPanamahModelEvent;
+begin
+  Result := FProcessor.OnAfterDeleteSync;
+end;
+
 function TPanamahStream.GetOnAfterSave: TPanamahModelEvent;
 begin
   Result := FProcessor.OnAfterSave;
+end;
+
+function TPanamahStream.GetOnAfterSaveSync: TPanamahModelEvent;
+begin
+  Result := FProcessor.OnAfterSaveSync;
 end;
 
 function TPanamahStream.GetOnBeforeBatchSent: TPanamahBatchEvent;
