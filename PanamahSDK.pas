@@ -919,8 +919,8 @@ constructor TPanamahStreamConfig.Create;
 begin
   inherited Create;
   FBatchTTL := 5 * 60 * 1000;
-  FBatchMaxSize := 5 * 1024;
-  FBatchMaxCount := 500;
+  FBatchMaxSize := 3 * 1024;
+  FBatchMaxCount := 300;
   FBaseDirectory := GetCurrentDir + '\.panamah';
 end;
 
