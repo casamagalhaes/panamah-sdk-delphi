@@ -401,9 +401,9 @@ begin
         Item := TPanamahVendaItem.Create;
         Item.ProdutoId := Produtos[I].Id;
         Item.Quantidade := DecimalDotStringToDouble(GetItemValue(I, Document.DocumentElement, 'qCom'));
-        Item.Preco := DecimalDotStringToDouble(GetItemValue(I, Document.DocumentElement, 'vProd'));
         Item.ValorUnitario := DecimalDotStringToDouble(GetItemValue(I, Document.DocumentElement, 'vUnCom'));
-        Item.ValorTotal := Item.Quantidade * Item.Preco;
+        Item.ValorTotal := DecimalDotStringToDouble(GetItemValue(I, Document.DocumentElement, 'vProd'));
+        Item.Preco := DecimalDotStringToDouble(GetItemValue(I, Document.DocumentElement, 'vUnCom'));
         Item.Desconto := DecimalDotStringToDouble(GetItemValue(I, Document.DocumentElement, 'vDesc'));
         Item.Efetivo := True;
         Result.Itens.Add(Item);
