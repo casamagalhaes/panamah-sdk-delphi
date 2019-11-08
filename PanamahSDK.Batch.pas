@@ -260,7 +260,10 @@ begin
     ForceDirectories(ADestiny);
     SourceFile := Format('%s\%s.pbt', [ASource, BatchFilename.ToString]);
     DestinyFile := Format('%s\%s.pbt', [ADestiny, BatchFilename.ToString]);
-    MoveFile(PChar(SourceFile), PChar(DestinyFile));
+    if FileExists(PChar(DestinyFile)) then
+      DeleteFile(PWideChar(SourceFile))
+    else
+      MoveFile(PChar(SourceFile), PChar(DestinyFile));
     Result := DestinyFile;
   finally
     BatchFilename.Free;

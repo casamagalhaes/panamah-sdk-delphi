@@ -1,0 +1,1 @@
+[{"op":"update","data":{"id":"1","descricao":"DINHEIRO"},"tipo":"FORMA_PAGAMENTO"}]
