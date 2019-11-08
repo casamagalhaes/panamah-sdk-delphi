@@ -2634,7 +2634,5 @@ initialization
 {$ENDIF THREADSAFE}
 
 DecimalSeparator := FormatSettings.DecimalSeparator;
-{$Warnings On}
-{$Hints On}
 end.
 
