@@ -1,3 +1,5 @@
+{$Warnings Off}
+{$Hints Off}
 {
   LkJSON v1.07
 
