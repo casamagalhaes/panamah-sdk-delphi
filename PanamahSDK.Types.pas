@@ -438,7 +438,7 @@ begin
   Hours := Format('%.*d',[4, -1 * Trunc(TimeZoneInformation.Bias / 60) * 100]);
   if not StartsText('-', Hours) then
     Hours := Concat('+', Hours);
-  Result := FormatDateTime('yyyy-mm-dd', AInput) + 'T' + FormatDateTime('hh:nn:ss', AInput) + Hours;
+  Result := FormatDateTime('yyyy-mm-dd', AInput) + 'T' + FormatDateTime('hh:nn:ss', AInput);
 end;
 
 function ISO8601ToDateTime(const AInput: string): TDateTime;
