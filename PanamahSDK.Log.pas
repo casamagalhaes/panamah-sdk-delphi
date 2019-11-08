@@ -3,7 +3,7 @@ unit PanamahSDK.Log;
 interface
 
 uses
-  SysUtils, Classes, SyncObjs, Windows;
+  SysUtils, Classes, SyncObjs, PanamahSDK.Consts, Windows;
 
 type
 
@@ -20,9 +20,11 @@ implementation
 { TPanamahLog }
 
 class procedure TPanamahLogger.Log(const AMessage: string);
+{$IFDEF PANAMAHSDK_LOG}
 var
   LogFilename: string;
   LogFile: TextFile;
+{$ENDIF}
 begin
   {$IFDEF PANAMAHSDK_LOG}
   PanamahLogCriticalSection.Acquire;
@@ -34,7 +36,7 @@ begin
         Append(LogFile)
       else
         Rewrite(LogFile);
-      WriteLn(LogFile, Format('[%s thread %d] %s', [FormatDateTime('dd/mm/yyyy hh:nn:ss', Now), GetCurrentThreadId, AMessage]));
+      WriteLn(LogFile, Format('[%s thread %d Version ' + SDK_VERSION + '] %s', [FormatDateTime('dd/mm/yyyy hh:nn:ss', Now), GetCurrentThreadId, AMessage]));
     finally
       CloseFile(LogFile);
     end;

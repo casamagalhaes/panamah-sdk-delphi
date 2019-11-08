@@ -427,11 +427,15 @@ begin
 end;
 
 procedure TPanamahOperationList.DeserializeFromJSON(const AJSON: string);
+var
+  List: TlkJSONlist;
 begin
-  with TlkJSON.ParseText(AJSON) as TlkJSONlist do
-  begin
-    ForEach(AddJSONObjectToList, nil);
-    Free;
+  List := TlkJSON.ParseText(AJSON) as TlkJSONlist;
+  try
+    if Assigned(List) then
+      List.ForEach(AddJSONObjectToList, nil);
+  finally
+    FreeAndNil(List);
   end;
 end;
 
