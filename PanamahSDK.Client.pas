@@ -230,7 +230,7 @@ begin
             end;
             mtPOST:
             begin
-              RequestContent := TStringStream.Create(ARequest.Content);
+              RequestContent := TStringStream.Create(ARequest.Content, TEncoding.UTF8);
               try
                 ResponseContent := HTTP.Post(ARequest.URL, RequestContent);
               finally
@@ -239,7 +239,7 @@ begin
             end;
             mtPUT:
             begin
-              RequestContent := TStringStream.Create(ARequest.Content);
+              RequestContent := TStringStream.Create(ARequest.Content, TEncoding.UTF8);
               try
                 ResponseContent := HTTP.Put(ARequest.URL, RequestContent);
               finally
