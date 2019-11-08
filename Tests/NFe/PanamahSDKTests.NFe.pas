@@ -159,8 +159,9 @@ begin
 
   Assert(Venda.Itens[4].ProdutoId = '00000075', 'Id do produto 4 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[4].Quantidade, 75), 'Quantidade do produto 4 lido incorretamente do xml');
-  Assert(SameValue(Venda.Itens[4].Preco, 900), 'Preco do produto 4 lido incorretamente do xml');
-  Assert(SameValue(Venda.Itens[4].ValorTotal, 67500), 'Valor Total do produto 4 lido incorretamente do xml');
+  Assert(SameValue(Venda.Itens[4].Preco, 12), 'Preco do produto 4 lido incorretamente do xml');
+  Assert(SameValue(Venda.Itens[4].ValorUnitario, 12), 'Preco do produto 4 lido incorretamente do xml');
+  Assert(SameValue(Venda.Itens[4].ValorTotal, 900), 'Valor Total do produto 4 lido incorretamente do xml');
   Assert(SameValue(Venda.Itens[4].Desconto, 33.75), 'Desconto do produto 4 lido incorretamente do xml');
 
   Assert(Venda.Itens[5].ProdutoId = '00000005', 'Id do produto 5 lido incorretamente do xml');
