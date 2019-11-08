@@ -1,5 +1,3 @@
-{$Warnings Off}
-{$Hints Off}
 {
   LkJSON v1.07
 
@@ -144,13 +142,16 @@
 
 unit uLkJSON;
 
+{$Warnings Off}
+{$Hints Off}
+
 {$IFDEF fpc}
   {$MODE objfpc}
   {$H+}
   {.$DEFINE HAVE_FORMATSETTING}
 {$ELSE}
   {$IF RTLVersion > 14.00}
-    {$DEFINE HAVE_FORMATSETTING}
+    {.$DEFINE HAVE_FORMATSETTING}
     {$IF RTLVersion > 19.00}
       {$DEFINE USE_D2009}
     {$IFEND}
@@ -167,7 +168,7 @@ interface
 {.$DEFINE USE_HASH}
 {.$DEFINE TCB_EXT}
 
-uses windows,
+uses //windows,
   SysUtils,
 {$IFNDEF KOL}
   classes,
@@ -486,6 +487,10 @@ function GenerateReadableText(vObj: TlkJSONbase; var vLevel:
 implementation
 
 uses math,strutils;
+
+//const DecimalSeparator = ',';
+var
+  DecimalSeparator: Char;
 
 type
   ElkIntException = class(Exception)
@@ -1381,7 +1386,8 @@ var
 {$IFDEF HAVE_FORMATSETTING}
   fs: TFormatSettings;
 {$ENDIF}
-  pt1, pt0, pt2: PChar;
+  lCharArray: array of char;
+  lCurrentChar, lLastChar: integer;
   ptsz: cardinal;
 
 {$IFNDEF NEW_STYLE_GENERATE}
@@ -1482,26 +1488,26 @@ var
     delta: cardinal;
   begin
     delta := 50000;
-    if pt0 = nil then
+    if lLastChar = 0 then
       begin
-        pt0 := AllocMem(delta);
+        SetLength(lCharArray, delta);
         ptsz := 0;
-        pt1 := pt0;
+        lCurrentChar := 0;
       end
     else
       begin
-        ReallocMem(pt0, ptsz + delta);
-        pt1 := pointer(cardinal(pt0) + ptsz);
+        SetLength(lCharArray, ptsz + delta);
+        lCurrentChar := ptsz;
       end;
     ptsz := ptsz + delta;
-    pt2 := pointer(cardinal(pt1) + delta);
+    lLastChar := lCurrentChar + delta;
   end;
 
   procedure mem_ch(ch: char);
   begin
-    if pt1 >= pt2 then get_more_memory;
-    pt1^ := ch;
-    inc(pt1);
+    if lCurrentChar >= lLastChar then get_more_memory;
+    lCharArray[lCurrentChar] := ch;
+    inc(lCurrentChar);
   end;
 
   procedure mem_write(rs: string);
@@ -1510,9 +1516,8 @@ var
   begin
     for i := 1 to length(rs) do
       begin
-        if pt1 >= pt2 then get_more_memory;
-        pt1^ := rs[i];
-        inc(pt1);
+        if lCurrentChar >= lLastChar then get_more_memory;
+        mem_ch(rs[i]);
       end;
   end;
 
@@ -1616,15 +1621,15 @@ begin
   fs.DecimalSeparator := '.';
 {$ENDIF}
 {$IFDEF NEW_STYLE_GENERATE}
-  pt0 := nil;
+  lLastChar := 0;
   get_more_memory;
   gn_base(obj);
-  mem_ch(#0);
-  result := string(pt0);
-  freemem(pt0);
+  SetString(Result, PChar(@lCharArray[0]), Length(lCharArray));
+//  SetLength(lCharArray, 0);
 {$ELSE}
   result := gn_base(obj);
 {$ENDIF}
+  Result := UTF8Encode(Trim(Result));
 end;
 
 class function TlkJSON.ParseText(const txt: string): TlkJSONbase;
@@ -1882,7 +1887,8 @@ var
 
     js := TlkJSONstring.Create;
 {$ifdef USE_D2009}
-    js.FValue := UTF8ToString(ws);
+    //js.FValue := UTF8ToString(ws);                       // Taken out on 20170530 - conversion couldn't handle accents, due to a problem with the function or due to the content - that had to pass via UTF8Encode.
+    js.FValue := ws;
 {$else}
     js.FValue := UTF8Decode(ws);
 {$endif}
@@ -2001,7 +2007,7 @@ var
     TlkJSONbase): Boolean;
   begin
     skip_spc(idx);
-    result := js_boolean(idx, idx, o);
+    result := (idx > 1) and js_boolean(idx, idx, o);
     if not result then result := js_null(idx, idx, o);
     if not result then result := js_number(idx, idx, o);
     if not result then result := js_string(idx, idx, o);
@@ -2624,8 +2630,9 @@ initialization
   init_rnd;
 {$ENDIF USE_HASH}
 {$ENDIF THREADSAFE}
+
+DecimalSeparator := FormatSettings.DecimalSeparator;
+{$Warnings On}
+{$Hints On}
 end.
-
-
-
 
