@@ -335,6 +335,8 @@ var
   Document: IXMLDocument;
   Nodes: TCustomXMLNodeArray;
   Produto: IPanamahProduto;
+  Ean, EanTributado: string;
+  ProdutoEan: IPanamahProdutoEan;
   I: Integer;
   Id: string;
 begin
@@ -350,6 +352,26 @@ begin
       Produto.Id := Id;
       Produto.Descricao := GetProdValue(I, Nodes[I], 'xProd');
       Produto.Ativo := True;
+      Ean := GetProdValue(I, Nodes[I], 'cEAN');
+      EanTributado := GetProdValue(I, Nodes[I], 'cEANTrib');
+      if ((Ean <> EmptyStr) and (Ean <> 'SEM GTIN')) or ((EanTributado <> EmptyStr) and (EanTributado <> 'SEM GTIN')) then
+      begin
+        Produto.Eans := TPanamahProdutoEanList.Create;
+        if EanTributado <> EmptyStr then
+        begin
+          ProdutoEan := TPanamahProdutoEan.Create;
+          ProdutoEan.Id := EanTributado;
+          ProdutoEan.Tributado := True;
+          Produto.Eans.Add(ProdutoEan);
+        end;
+        if (Ean <> EmptyStr) and (Ean <> EanTributado) then
+        begin
+          ProdutoEan := TPanamahProdutoEan.Create;
+          ProdutoEan.Id := Ean;
+          ProdutoEan.Tributado := False;
+          Produto.Eans.Add(ProdutoEan);
+        end;
+      end;
       Result.Add(Produto);
     end;
   end;

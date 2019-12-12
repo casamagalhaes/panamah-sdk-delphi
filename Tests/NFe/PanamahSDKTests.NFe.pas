@@ -103,9 +103,12 @@ begin
 
   Assert(Produtos[0].Id = '00000075', 'Id do produto 0 lido incorretamente do xml');
   Assert(Produtos[0].Descricao = 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL', 'Descrição do produto 0 lido incorretamente do xml');
+  Assert(Produtos[0].Eans[0].Id = '00854011370054', 'Ean do produto 0 lido incorretamente do xml');
+  Assert(Produtos[0].Eans[0].Tributado, 'Ean do produto 0 lido incorretamente do xml');
 
   Assert(Produtos[1].Id = '00000005', 'Id do produto 1 lido incorretamente do xml');
   Assert(Produtos[1].Descricao = 'Celular Moto G 6', 'Descrição do produto 1 lido incorretamente do xml');
+  Assert(not Assigned(Produtos[1].Eans), 'Ean do produto 1 lido incorretamente do xml');
 
   Assert(Produtos[2].Id = '00000005', 'Id do produto 2 lido incorretamente do xml');
   Assert(Produtos[2].Descricao = 'Celular Moto G 6', 'Descrição do produto 2 lido incorretamente do xml');
