@@ -171,3 +171,29 @@ begin
   end;
 end.
 ```
+
+## Criando produtos com eans
+
+```delphi
+Produto := TPanamahProduto.Create;
+
+Produto.Id := '587';
+Produto.Descricao := 'CAFE SANTA CLARA 500G';
+Produto.PesoVariavel := False;
+Produto.SecaoId := '100';
+Produto.Ativo := True;
+
+Produto.Eans := TPanamahProdutoEanList.Create;
+
+Ean := TPanamahProdutoEan.Create;
+Ean.Id := '7896224835893';
+Ean.Tributado := True;
+Produto.Eans.Add(Ean);
+
+Ean := TPanamahProdutoEan.Create;
+Ean.Id := '7896224800522';
+Ean.Tributado := False;
+Produto.Eans.Add(Ean);
+
+Stream.Save(Produto);
+```
