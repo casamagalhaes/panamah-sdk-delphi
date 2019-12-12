@@ -7,6 +7,24 @@ uses
   Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
 
 type
+
+  IPanamahProdutoEan = interface(IPanamahModel)
+    ['{BB3F7FB5-550C-4FD4-898C-D1E71F384C91}']
+    function GetId: string;
+    function GetTributado: Boolean;
+    procedure SetId(const AId: string);
+    procedure SetTributado(const ATributado: Boolean);
+    property Id: string read GetId write SetId;
+    property Tributado: Boolean read GetTributado write SetTributado;
+  end;
+
+  IPanamahProdutoEanList = interface(IPanamahModelList)
+    ['{3BBB128D-EDB9-431D-A31A-F6397ABF471C}']
+    function GetItem(AIndex: Integer): IPanamahProdutoEan;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoEan);
+    procedure Add(const AItem: IPanamahProdutoEan);
+    property Items[AIndex: Integer]: IPanamahProdutoEan read GetItem write SetItem; default;
+  end;
   
   IPanamahProdutoFornecedor = interface(IPanamahModel)
     ['{081C4308-7736-11E9-A131-EBAF8D88186A}']
@@ -77,6 +95,7 @@ type
     function GetSecaoId: string;
     function GetSubgrupoId: variant;
     function GetFornecedores: IpanamahProdutoFornecedorList;
+    function GetEans: IPanamahProdutoEanList;
     procedure SetComposicao(const AComposicao: IpanamahProdutoComposicao);
     procedure SetTipoComposicao(const ATipoComposicao: variant);
     procedure SetDescricao(const ADescricao: string);
@@ -90,6 +109,7 @@ type
     procedure SetSecaoId(const ASecaoId: string);
     procedure SetSubgrupoId(const ASubgrupoId: variant);
     procedure SetFornecedores(const AFornecedores: IpanamahProdutoFornecedorList);
+    procedure SetEans(const AEans: IPanamahProdutoEanList);
     property Composicao: IpanamahProdutoComposicao read GetComposicao write SetComposicao;
     property TipoComposicao: variant read GetTipoComposicao write SetTipoComposicao;
     property Descricao: string read GetDescricao write SetDescricao;
@@ -103,6 +123,7 @@ type
     property SecaoId: string read GetSecaoId write SetSecaoId;
     property SubgrupoId: variant read GetSubgrupoId write SetSubgrupoId;
     property Fornecedores: IpanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
+    property Eans: IPanamahProdutoEanList read GetEans write SetEans;
   end;
   
   IPanamahProdutoList = interface(IPanamahModelList)
@@ -111,6 +132,26 @@ type
     procedure SetItem(AIndex: Integer; const Value: IPanamahProduto);
     procedure Add(const AItem: IPanamahProduto);
     property Items[AIndex: Integer]: IPanamahProduto read GetItem write SetItem; default;
+  end;
+
+  TPanamahProdutoEan = class(TInterfacedObject, IPanamahProdutoEan)
+  private
+    FId: string;
+    FTributado: Boolean;
+    function GetId: string;
+    function GetTributado: Boolean;
+    procedure SetId(const AId: string);
+    procedure SetTributado(const ATributado: Boolean);
+    function GetModelName: string;
+  public
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
+    function Clone: IPanamahModel;
+    class function FromJSON(const AJSON: string): IPanamahProdutoEan;
+    function Validate: IPanamahValidationResult;
+  published
+    property Id: string read GetId write SetId;
+    property Tributado: Boolean read GetTributado write SetTributado;
   end;
   
   TPanamahProdutoFornecedor = class(TInterfacedObject, IPanamahProdutoFornecedor)
@@ -131,6 +172,28 @@ type
   published
     property Id: string read GetId write SetId;
     property Principal: Boolean read GetPrincipal write SetPrincipal;
+  end;
+
+  TPanamahProdutoEanList = class(TInterfacedObject, IPanamahProdutoEanList)
+  private
+    FList: TInterfaceList;
+    function GetItem(AIndex: Integer): IPanamahProdutoEan;
+    procedure SetItem(AIndex: Integer; const Value: IPanamahProdutoEan);
+    function GetModel(AIndex: Integer): IPanamahModel;
+    procedure SetModel(AIndex: Integer; const Value: IPanamahModel);
+    procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
+  public
+    function Validate: IPanamahValidationResult;
+    function SerializeToJSON: string;
+    procedure DeserializeFromJSON(const AJSON: string);
+    class function FromJSON(const AJSON: string): IPanamahProdutoEanList;
+    constructor Create;
+    procedure Add(const AItem: IPanamahProdutoEan);
+    procedure Clear;
+    function Count: Integer;
+    destructor Destroy; override;
+    property Items[AIndex: Integer]: IPanamahProdutoEan read GetItem write SetItem; default;
+    property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
 
   TPanamahProdutoFornecedorList = class(TInterfacedObject, IPanamahProdutoFornecedorList)
@@ -254,6 +317,7 @@ type
     FSecaoId: string;
     FSubgrupoId: variant;
     FFornecedores: IpanamahProdutoFornecedorList;
+    FEans: IPanamahProdutoEanList;
     function GetComposicao: IpanamahProdutoComposicao;
     function GetTipoComposicao: variant;
     function GetDescricao: string;
@@ -267,6 +331,7 @@ type
     function GetSecaoId: string;
     function GetSubgrupoId: variant;
     function GetFornecedores: IpanamahProdutoFornecedorList;
+    function GetEans: IPanamahProdutoEanList;
     procedure SetComposicao(const AComposicao: IpanamahProdutoComposicao);
     procedure SetTipoComposicao(const ATipoComposicao: variant);
     procedure SetDescricao(const ADescricao: string);
@@ -280,6 +345,7 @@ type
     procedure SetSecaoId(const ASecaoId: string);
     procedure SetSubgrupoId(const ASubgrupoId: variant);
     procedure SetFornecedores(const AFornecedores: IpanamahProdutoFornecedorList);
+    procedure SetEans(const AEans: IPanamahProdutoEanList);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -301,6 +367,7 @@ type
     property SecaoId: string read GetSecaoId write SetSecaoId;
     property SubgrupoId: variant read GetSubgrupoId write SetSubgrupoId;
     property Fornecedores: IpanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
+    property Eans: IPanamahProdutoEanList read GetEans write SetEans;
   end;
 
   TPanamahProdutoList = class(TInterfacedObject, IPanamahProdutoList)
@@ -324,7 +391,11 @@ type
     property Items[AIndex: Integer]: IPanamahProduto read GetItem write SetItem; default;
     property Models[AIndex: Integer]: IPanamahModel read GetModel write SetModel;
   end;
-  
+
+  TPanamahProdutoEanValidator = class(TInterfacedObject, IPanamahModelValidator)
+  public
+    function Validate(AModel: IPanamahModel): IPanamahValidationResult;
+  end;
   
   TPanamahProdutoFornecedorValidator = class(TInterfacedObject, IPanamahModelValidator)
   public
@@ -970,9 +1041,19 @@ begin
   Result := FDescricao;
 end;
 
+function TPanamahProduto.GetEans: IPanamahProdutoEanList;
+begin
+  Result := FEans;
+end;
+
 procedure TPanamahProduto.SetDescricao(const ADescricao: string);
 begin
   FDescricao := ADescricao;
+end;
+
+procedure TPanamahProduto.SetEans(const AEans: IPanamahProdutoEanList);
+begin
+  FEans := AEans;
 end;
 
 function TPanamahProduto.GetDataInclusao: TDateTime;
@@ -1096,6 +1177,8 @@ begin
     FSubgrupoId := GetFieldValue(JSONObject, 'subgrupoId');
     if JSONObject.Field['fornecedores'] is TlkJSONlist then
       FFornecedores := TpanamahProdutoFornecedorList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['fornecedores']));
+    if JSONObject.Field['eans'] is TlkJSONlist then
+      FEans := TPanamahProdutoEanList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['eans']));
   finally
     JSONObject.Free;
   end;
@@ -1120,6 +1203,7 @@ begin
     SetFieldValue(JSONObject, 'secaoId', FSecaoId);    
     SetFieldValue(JSONObject, 'subgrupoId', FSubgrupoId);    
     SetFieldValue(JSONObject, 'fornecedores', FFornecedores);
+    SetFieldValue(JSONObject, 'eans', FEans);
     Result := TlkJSON.GenerateText(JSONObject);
   finally
     JSONObject.Free;
@@ -1279,7 +1363,208 @@ begin
   
   if not ModelListIsEmpty(Produto.Fornecedores) then
     Validations.Add(Produto.Fornecedores.Validate);
+
+  if not ModelListIsEmpty(Produto.Eans) then
+    Validations.Add(Produto.Eans.Validate);
   
+  Result := Validations.GetAggregate;
+end;
+
+
+{ TPanamahProdutoEan }
+
+function TPanamahProdutoEan.GetId: string;
+begin
+  Result := FId;
+end;
+
+procedure TPanamahProdutoEan.SetId(const AId: string);
+begin
+  FId := AId;
+end;
+
+function TPanamahProdutoEan.GetTributado: Boolean;
+begin
+  Result := FTributado;
+end;
+
+procedure TPanamahProdutoEan.SetTributado(const ATributado: Boolean);
+begin
+  FTributado := ATributado;
+end;
+
+procedure TPanamahProdutoEan.DeserializeFromJSON(const AJSON: string);
+var
+  JSONObject: TlkJSONobject;
+begin
+  JSONObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
+  try
+    FId := GetFieldValueAsString(JSONObject, 'id');
+    FTributado := GetFieldValueAsBoolean(JSONObject, 'tributado');
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+function TPanamahProdutoEan.SerializeToJSON: string;
+var
+  JSONObject: TlkJSONobject;
+begin
+  JSONObject := TlkJSONobject.Create;
+  try
+    SetFieldValue(JSONObject, 'id', FId);
+    SetFieldValue(JSONObject, 'tributado', FTributado);
+    Result := TlkJSON.GenerateText(JSONObject);
+  finally
+    JSONObject.Free;
+  end;
+end;
+
+class function TPanamahProdutoEan.FromJSON(const AJSON: string): IPanamahProdutoEan;
+begin
+  Result := TPanamahProdutoEan.Create;
+  Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProdutoEan.GetModelName: string;
+begin
+  Result := 'EAN';
+end;
+
+function TPanamahProdutoEan.Clone: IPanamahModel;
+begin
+  Result := TPanamahProdutoEan.FromJSON(SerializeToJSON);
+end;
+
+function TPanamahProdutoEan.Validate: IPanamahValidationResult;
+var
+  Validator: IPanamahModelValidator;
+begin
+  Validator := TPanamahProdutoEanValidator.Create;
+  Result := Validator.Validate(Self as IPanamahProdutoEan);
+end;
+
+{ TPanamahProdutoEanList }
+
+constructor TPanamahProdutoEanList.Create;
+begin
+  FList := TInterfaceList.Create;
+end;
+
+destructor TPanamahProdutoEanList.Destroy;
+begin
+  FreeAndNil(FList);
+  inherited;
+end;
+
+function TPanamahProdutoEanList.Validate: IPanamahValidationResult;
+var
+  I: Integer;
+begin
+  Result := TPanamahValidationResult.CreateSuccess;
+  FList.Lock;
+  try
+    for I := 0 to FList.Count - 1 do
+      Result.Concat(Format('[%d]', [I]), (FList[I] as IPanamahProdutoEan).Validate);
+  finally
+    FList.Unlock;
+  end;
+end;
+
+class function TPanamahProdutoEanList.FromJSON(const AJSON: string): IPanamahProdutoEanList;
+begin
+  Result := TPanamahProdutoEanList.Create;
+  Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahProdutoEanList.GetModel(AIndex: Integer): IPanamahModel;
+begin
+  Result := FList[AIndex] as IPanamahProdutoEan;
+end;
+
+procedure TPanamahProdutoEanList.SetModel(AIndex: Integer; const Value: IPanamahModel);
+begin
+  FList[AIndex] := Value;
+end;
+
+procedure TPanamahProdutoEanList.Add(const AItem: IPanamahProdutoEan);
+begin
+  FList.Add(AItem);
+end;
+
+procedure TPanamahProdutoEanList.AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer;
+  var Continue: Boolean);
+var
+  Item: IPanamahProdutoEan;
+begin
+  Item := TPanamahProdutoEan.Create;
+  Item.DeserializeFromJSON(TlkJSON.GenerateText(Elem));
+  FList.Add(Item);
+end;
+
+procedure TPanamahProdutoEanList.Clear;
+begin
+  FList.Clear;
+end;
+
+function TPanamahProdutoEanList.Count: Integer;
+begin
+  Result := FList.Count;
+end;
+
+function TPanamahProdutoEanList.GetItem(AIndex: Integer): IPanamahProdutoEan;
+begin
+  Result := FList.Items[AIndex] as IPanamahProdutoEan;
+end;
+
+procedure TPanamahProdutoEanList.SetItem(AIndex: Integer;
+  const Value: IPanamahProdutoEan);
+begin
+  FList[AIndex] := Value;
+end;
+
+procedure TPanamahProdutoEanList.DeserializeFromJSON(const AJSON: string);
+begin
+  with TlkJSON.ParseText(AJSON) as TlkJSONlist do
+  begin
+    ForEach(AddJSONObjectToList, nil);
+    Free;
+  end;
+end;
+
+function TPanamahProdutoEanList.SerializeToJSON: string;
+var
+  JSONObject: TlkJSONlist;
+  I: Integer;
+begin
+  FList.Lock;
+  try
+    JSONObject := TlkJSONlist.Create;
+    try
+      for I := 0 to FList.Count - 1 do
+        JSONObject.Add(TlkJSON.ParseText((FList[I] as IPanamahProdutoEan).SerializeToJSON));
+      Result := TlkJSON.GenerateText(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
+  finally
+    FList.Unlock;
+  end;
+end;
+
+{ TPanamahProdutoEanValidator }
+
+function TPanamahProdutoEanValidator.Validate(AModel: IPanamahModel): IPanamahValidationResult;
+var
+  Ean: IPanamahProdutoEan;
+  Validations: IPanamahValidationResultList;
+begin
+  Ean := AModel as IPanamahProdutoEan;
+  Validations := TPanamahValidationResultList.Create;
+
+  if ModelValueIsEmpty(Ean.Id) then
+    Validations.AddFailure('Ean.Id obrigatorio(a)');
+
   Result := Validations.GetAggregate;
 end;
 
