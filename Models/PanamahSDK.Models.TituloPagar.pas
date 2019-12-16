@@ -404,6 +404,9 @@ var
 begin
   Pagamentos := AModel as IPanamahTituloPagarPagamento;
   Validations := TPanamahValidationResultList.Create;
+
+  if not IsValueBetween(Pagamentos.Valor, -999999999.99, 999999999.99) then
+    Validations.AddFailure('Pagamentos.Valor ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
   
   Result := Validations.GetAggregate;
 end;
@@ -742,7 +745,22 @@ begin
     Validations.AddFailure('TituloPagar.Pagamentos obrigatorio(a)')
   else
     Validations.Add(TituloPagar.Pagamentos.Validate);
-  
+
+  if not IsValueBetween(TituloPagar.ValorNominal, -999999999.99, 999999999.99) then
+    Validations.AddFailure('Itens.ValorNominal ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
+  if not IsValueBetween(TituloPagar.ValorJuros, -999999999.99, 999999999.99) then
+    Validations.AddFailure('TituloPagar.ValorJuros ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
+  if not IsValueBetween(TituloPagar.ValorMulta, -999999999.99, 999999999.99) then
+    Validations.AddFailure('TituloPagar.ValorMulta ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
+  if not IsValueBetween(TituloPagar.ValorDevido, -999999999.99, 999999999.99) then
+    Validations.AddFailure('TituloPagar.ValorDevido ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
+  if not IsValueBetween(TituloPagar.ValorPago, -999999999.99, 999999999.99) then
+    Validations.AddFailure('TituloPagar.ValorPago ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
   Result := Validations.GetAggregate;
 end;
 

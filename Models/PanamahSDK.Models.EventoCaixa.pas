@@ -372,6 +372,9 @@ begin
   
   if ModelValueIsEmpty(ValoresDeclarados.FormaPagamentoId) then
     Validations.AddFailure('ValoresDeclarados.FormaPagamentoId obrigatorio(a)');
+
+  if not IsValueBetween(ValoresDeclarados.Valor, -999999999.99, 999999999.99) then
+    Validations.AddFailure('ValoresDeclarados.Valor ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
   
   Result := Validations.GetAggregate;
 end;

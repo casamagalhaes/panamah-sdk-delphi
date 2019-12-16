@@ -458,6 +458,12 @@ begin
   
   if ModelValueIsEmpty(TrocaFormaPagamento.SequencialPagamento) then
     Validations.AddFailure('TrocaFormaPagamento.SequencialPagamento obrigatorio(a)');
+
+  if not IsValueBetween(TrocaFormaPagamento.Valor, -999999999.99, 999999999.99) then
+    Validations.AddFailure('TrocaFormaPagamento.Valor ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
+  if not IsValueBetween(TrocaFormaPagamento.ValorContraValeOuTroco, -999999999.99, 999999999.99) then
+    Validations.AddFailure('TrocaFormaPagamento.ValorContraValeOuTroco ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
   
   Result := Validations.GetAggregate;
 end;

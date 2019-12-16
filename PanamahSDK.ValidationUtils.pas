@@ -11,6 +11,7 @@ uses
   function ModelListIsEmpty(AList: IJSONSerializableList): Boolean; overload;
   function ModelStringListEmptyIndex(AList: IPanamahStringValueList): Integer;
   function ModelHasId(AModel: IPanamahModel): Boolean;
+  function IsValueBetween(AValue, AMin, AMax: Double): Boolean;
 
 implementation
 
@@ -63,6 +64,11 @@ begin
   finally
     DataJSONObject.Free;
   end;
+end;
+
+function IsValueBetween(AValue, AMin, AMax: Double): Boolean;
+begin
+  Result := (AValue >= AMin) and (AValue <= AMax);
 end;
 
 end.

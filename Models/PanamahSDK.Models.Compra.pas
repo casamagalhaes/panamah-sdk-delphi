@@ -498,6 +498,15 @@ begin
   
   if ModelValueIsEmpty(Itens.ProdutoId) then
     Validations.AddFailure('Itens.ProdutoId obrigatorio(a)');
+
+  if not IsValueBetween(Itens.ValorTotal, -999999999.99, 999999999.99) then
+    Validations.AddFailure('Itens.ValorTotal ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
+  if not IsValueBetween(Itens.ValorUnitario, -999999999.99, 999999999.99) then
+    Validations.AddFailure('Itens.ValorUnitario ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
+  if not IsValueBetween(Itens.Quantidade, -999999999.9999, 999999999.9999) then
+    Validations.AddFailure('Itens.Quantidade ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.9999, Max: 999999999.9999)');
   
   Result := Validations.GetAggregate;
 end;
@@ -863,7 +872,10 @@ begin
     Validations.AddFailure('Compra.Itens obrigatorio(a)')
   else
     Validations.Add(Compra.Itens.Validate);
-  
+
+  if not IsValueBetween(Compra.Valor, -999999999.99, 999999999.99) then
+    Validations.AddFailure('Compra.Valor ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
+
   Result := Validations.GetAggregate;
 end;
 

@@ -812,7 +812,10 @@ begin
   
   if ModelValueIsEmpty(Itens.ProdutoId) then
     Validations.AddFailure('Itens.ProdutoId obrigatorio(a)');
-  
+
+  if not IsValueBetween(Itens.Quantidade, -999999999.9999, 999999999.9999) then
+    Validations.AddFailure('Itens.Quantidade ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.9999, Max: 999999999.9999)');
+
   Result := Validations.GetAggregate;
 end;
 
@@ -1010,6 +1013,9 @@ begin
   
   if not ModelListIsEmpty(Composicao.Itens) then
     Validations.Add(Composicao.Itens.Validate);
+
+  if not IsValueBetween(Composicao.Quantidade, -999999999.9999, 999999999.9999) then
+    Validations.AddFailure('Composicao.Quantidade ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.9999, Max: 999999999.9999)');
   
   Result := Validations.GetAggregate;
 end;

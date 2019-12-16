@@ -354,6 +354,9 @@ begin
   
   if ModelValueIsEmpty(Meta.SecaoId) then
     Validations.AddFailure('Meta.SecaoId obrigatorio(a)');
+
+  if not IsValueBetween(Meta.Valor, -999999999.99, 999999999.99) then
+    Validations.AddFailure('Meta.Valor ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
   
   Result := Validations.GetAggregate;
 end;

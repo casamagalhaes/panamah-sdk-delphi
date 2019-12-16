@@ -395,6 +395,9 @@ begin
   
   if ModelValueIsEmpty(EstoqueMovimentacao.ProdutoId) then
     Validations.AddFailure('EstoqueMovimentacao.ProdutoId obrigatorio(a)');
+
+  if not IsValueBetween(EstoqueMovimentacao.Quantidade, -999999999.9999, 999999999.9999) then
+    Validations.AddFailure('EstoqueMovimentacao.Quantidade ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.9999, Max: 999999999.9999)');
   
   Result := Validations.GetAggregate;
 end;
