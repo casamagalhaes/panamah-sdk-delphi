@@ -12,7 +12,7 @@ uses
   PanamahSDK.Models.Meta, PanamahSDK.Models.Produto, PanamahSDK.Models.Revenda, PanamahSDK.Models.Secao,
   PanamahSDK.Models.Subgrupo, PanamahSDK.Models.TituloPagar, PanamahSDK.Models.TituloReceber,
   PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento, PanamahSDK.Models.Venda, PanamahSDK.Processor,
-  PanamahSDK.NFe, PanamahSDK.Consts, PanamahSDK.PendingResources;
+  PanamahSDK.NFe, PanamahSDK.Consts, PanamahSDK.PendingResources, PanamahSDK.MiscTypes;
 
 type
 
@@ -65,6 +65,8 @@ type
     procedure Init(AConfig: IPanamahAdminConfig); overload;
     procedure Init(const AAuthorizationToken: string); overload;
     function GetAssinante(const AAssinanteId: string): IPanamahAssinante;
+    function GenerateKey(const AAssinanteId: string): string;
+    function ResetKey(const AAssinanteId, AOldKey: string): string;
     function SaveAssinante(AAssinante: IPanamahAssinante): Boolean;
     constructor Create; reintroduce;
     class function GetInstance: TPanamahAdmin;
@@ -1009,6 +1011,46 @@ begin
     FreeAndNil(_PanamahAdminInstance);
 end;
 
+function TPanamahAdmin.GenerateKey(const AAssinanteId: string): string;
+var
+  RawResponse: IPanamahResponse;
+  Response: IPanamahKeyResponse;
+begin
+  TPanamahLogger.Log(Format('Generating assinante %s key', [AAssinanteId]));
+  RawResponse := FClient.Post(Format('/admin/assinantes/%s/key/generate', [AAssinanteId]), '', nil);
+  TPanamahLogger.Log(Format('Assinante generate key response returned %d', [RawResponse.Status]));
+  case RawResponse.Status of
+    200:
+    begin
+      Response := TPanamahKeyResponse.FromJSON(RawResponse.Content);
+      Result := Response.Chave;
+    end;
+    404: raise EPanamahSDKNotFoundException.Create('Assinante não encontrado');
+    else
+      raise EPanamahSDKUnknownException.Create(RawResponse.Content);
+  end;
+end;
+
+function TPanamahAdmin.ResetKey(const AAssinanteId, AOldKey: string): string;
+var
+  RawResponse: IPanamahResponse;
+  Response: IPanamahKeyResponse;
+begin
+  TPanamahLogger.Log(Format('Resetting assinante %s key', [AAssinanteId]));
+  RawResponse := FClient.Post(Format('/admin/assinantes/%s/key/reset', [AAssinanteId]), Format('{"chave": "%s"}', [AOldKey]), nil);
+  TPanamahLogger.Log(Format('Assinante reset key response returned %d', [RawResponse.Status]));
+  case RawResponse.Status of
+    200:
+    begin
+      Response := TPanamahKeyResponse.FromJSON(RawResponse.Content);
+      Result := Response.Chave;
+    end;
+    404: raise EPanamahSDKNotFoundException.Create('Assinante não encontrado');
+    else
+      raise EPanamahSDKUnknownException.Create(RawResponse.Content);
+  end;
+end;
+
 function TPanamahAdmin.GetAssinante(const AAssinanteId: string): IPanamahAssinante;
 var
   Response: IPanamahResponse;
@@ -1068,9 +1110,10 @@ end;
 initialization
   TPanamahStream.GetInstance;
   TPanamahAdmin.GetInstance;
-  
+
 finalization
   TPanamahStream.Free;
   TPanamahAdmin.Free;
 
 end.
+
