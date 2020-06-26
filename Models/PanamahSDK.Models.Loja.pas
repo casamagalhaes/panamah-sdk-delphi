@@ -22,7 +22,7 @@ type
     function GetUf: string;
     function GetCidade: string;
     function GetBairro: string;
-    function GetCep: variant;
+    function GetCep: string;
     function GetDistrito: variant;
     function GetComplemento: variant;
     function GetTelefone: variant;
@@ -41,7 +41,7 @@ type
     procedure SetUf(const AUf: string);
     procedure SetCidade(const ACidade: string);
     procedure SetBairro(const ABairro: string);
-    procedure SetCep(const ACep: variant);
+    procedure SetCep(const ACep: string);
     procedure SetDistrito(const ADistrito: variant);
     procedure SetComplemento(const AComplemento: variant);
     procedure SetTelefone(const ATelefone: variant);
@@ -60,7 +60,7 @@ type
     property Uf: string read GetUf write SetUf;
     property Cidade: string read GetCidade write SetCidade;
     property Bairro: string read GetBairro write SetBairro;
-    property Cep: variant read GetCep write SetCep;
+    property Cep: string read GetCep write SetCep;
     property Distrito: variant read GetDistrito write SetDistrito;
     property Complemento: variant read GetComplemento write SetComplemento;
     property Telefone: variant read GetTelefone write SetTelefone;
@@ -91,7 +91,7 @@ type
     FUf: string;
     FCidade: string;
     FBairro: string;
-    FCep: variant;
+    FCep: string;
     FDistrito: variant;
     FComplemento: variant;
     FTelefone: variant;
@@ -110,7 +110,7 @@ type
     function GetUf: string;
     function GetCidade: string;
     function GetBairro: string;
-    function GetCep: variant;
+    function GetCep: string;
     function GetDistrito: variant;
     function GetComplemento: variant;
     function GetTelefone: variant;
@@ -129,7 +129,7 @@ type
     procedure SetUf(const AUf: string);
     procedure SetCidade(const ACidade: string);
     procedure SetBairro(const ABairro: string);
-    procedure SetCep(const ACep: variant);
+    procedure SetCep(const ACep: string);
     procedure SetDistrito(const ADistrito: variant);
     procedure SetComplemento(const AComplemento: variant);
     procedure SetTelefone(const ATelefone: variant);
@@ -156,7 +156,7 @@ type
     property Uf: string read GetUf write SetUf;
     property Cidade: string read GetCidade write SetCidade;
     property Bairro: string read GetBairro write SetBairro;
-    property Cep: variant read GetCep write SetCep;
+    property Cep: string read GetCep write SetCep;
     property Distrito: variant read GetDistrito write SetDistrito;
     property Complemento: variant read GetComplemento write SetComplemento;
     property Telefone: variant read GetTelefone write SetTelefone;
@@ -320,12 +320,12 @@ begin
   FBairro := ABairro;
 end;
 
-function TPanamahLoja.GetCep: variant;
+function TPanamahLoja.GetCep: string;
 begin
   Result := FCep;
 end;
 
-procedure TPanamahLoja.SetCep(const ACep: variant);
+procedure TPanamahLoja.SetCep(const ACep: string);
 begin
   FCep := ACep;
 end;
