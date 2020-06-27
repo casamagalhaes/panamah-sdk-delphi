@@ -88,12 +88,12 @@ type
     function GetDataInclusao: TDateTime;
     function GetFinalidade: variant;
     function GetAtivo: Boolean;
-    function GetGrupoId: variant;
+    function GetGrupoId: string;
     function GetId: string;
     function GetPesoVariavel: Boolean;
     function GetQuantidadeItensEmbalagem: Double;
     function GetSecaoId: string;
-    function GetSubgrupoId: variant;
+    function GetSubGrupoId: string;
     function GetFornecedores: IpanamahProdutoFornecedorList;
     function GetEans: IPanamahProdutoEanList;
     procedure SetComposicao(const AComposicao: IpanamahProdutoComposicao);
@@ -102,12 +102,12 @@ type
     procedure SetDataInclusao(const ADataInclusao: TDateTime);
     procedure SetFinalidade(const AFinalidade: variant);
     procedure SetAtivo(const AAtivo: Boolean);
-    procedure SetGrupoId(const AGrupoId: variant);
+    procedure SetGrupoId(const AGrupoId: string);
     procedure SetId(const AId: string);
     procedure SetPesoVariavel(const APesoVariavel: Boolean);
     procedure SetQuantidadeItensEmbalagem(const AQuantidadeItensEmbalagem: Double);
     procedure SetSecaoId(const ASecaoId: string);
-    procedure SetSubgrupoId(const ASubgrupoId: variant);
+    procedure SetSubgrupoId(const ASubGrupoId: string);
     procedure SetFornecedores(const AFornecedores: IpanamahProdutoFornecedorList);
     procedure SetEans(const AEans: IPanamahProdutoEanList);
     property Composicao: IpanamahProdutoComposicao read GetComposicao write SetComposicao;
@@ -116,12 +116,12 @@ type
     property DataInclusao: TDateTime read GetDataInclusao write SetDataInclusao;
     property Finalidade: variant read GetFinalidade write SetFinalidade;
     property Ativo: Boolean read GetAtivo write SetAtivo;
-    property GrupoId: variant read GetGrupoId write SetGrupoId;
+    property GrupoId: string read GetGrupoId write SetGrupoId;
     property Id: string read GetId write SetId;
     property PesoVariavel: Boolean read GetPesoVariavel write SetPesoVariavel;
     property QuantidadeItensEmbalagem: Double read GetQuantidadeItensEmbalagem write SetQuantidadeItensEmbalagem;
     property SecaoId: string read GetSecaoId write SetSecaoId;
-    property SubgrupoId: variant read GetSubgrupoId write SetSubgrupoId;
+    property SubGrupoId: string read GetSubgrupoId write SetSubgrupoId;
     property Fornecedores: IpanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
     property Eans: IPanamahProdutoEanList read GetEans write SetEans;
   end;
@@ -310,12 +310,12 @@ type
     FDataInclusao: TDateTime;
     FFinalidade: variant;
     FAtivo: Boolean;
-    FGrupoId: variant;
+    FGrupoId: string;
     FId: string;
     FPesoVariavel: Boolean;
     FQuantidadeItensEmbalagem: Double;
     FSecaoId: string;
-    FSubgrupoId: variant;
+    FSubGrupoId: string;
     FFornecedores: IpanamahProdutoFornecedorList;
     FEans: IPanamahProdutoEanList;
     function GetComposicao: IpanamahProdutoComposicao;
@@ -324,12 +324,12 @@ type
     function GetDataInclusao: TDateTime;
     function GetFinalidade: variant;
     function GetAtivo: Boolean;
-    function GetGrupoId: variant;
+    function GetGrupoId: string;
     function GetId: string;
     function GetPesoVariavel: Boolean;
     function GetQuantidadeItensEmbalagem: Double;
     function GetSecaoId: string;
-    function GetSubgrupoId: variant;
+    function GetSubGrupoId: string;
     function GetFornecedores: IpanamahProdutoFornecedorList;
     function GetEans: IPanamahProdutoEanList;
     procedure SetComposicao(const AComposicao: IpanamahProdutoComposicao);
@@ -338,12 +338,12 @@ type
     procedure SetDataInclusao(const ADataInclusao: TDateTime);
     procedure SetFinalidade(const AFinalidade: variant);
     procedure SetAtivo(const AAtivo: Boolean);
-    procedure SetGrupoId(const AGrupoId: variant);
+    procedure SetGrupoId(const AGrupoId: string);
     procedure SetId(const AId: string);
     procedure SetPesoVariavel(const APesoVariavel: Boolean);
     procedure SetQuantidadeItensEmbalagem(const AQuantidadeItensEmbalagem: Double);
     procedure SetSecaoId(const ASecaoId: string);
-    procedure SetSubgrupoId(const ASubgrupoId: variant);
+    procedure SetSubgrupoId(const ASubGrupoId: string);
     procedure SetFornecedores(const AFornecedores: IpanamahProdutoFornecedorList);
     procedure SetEans(const AEans: IPanamahProdutoEanList);
     function GetModelName: string;    
@@ -360,12 +360,12 @@ type
     property DataInclusao: TDateTime read GetDataInclusao write SetDataInclusao;
     property Finalidade: variant read GetFinalidade write SetFinalidade;
     property Ativo: Boolean read GetAtivo write SetAtivo;
-    property GrupoId: variant read GetGrupoId write SetGrupoId;
+    property GrupoId: string read GetGrupoId write SetGrupoId;
     property Id: string read GetId write SetId;
     property PesoVariavel: Boolean read GetPesoVariavel write SetPesoVariavel;
     property QuantidadeItensEmbalagem: Double read GetQuantidadeItensEmbalagem write SetQuantidadeItensEmbalagem;
     property SecaoId: string read GetSecaoId write SetSecaoId;
-    property SubgrupoId: variant read GetSubgrupoId write SetSubgrupoId;
+    property SubGrupoId: string read GetSubgrupoId write SetSubgrupoId;
     property Fornecedores: IpanamahProdutoFornecedorList read GetFornecedores write SetFornecedores;
     property Eans: IPanamahProdutoEanList read GetEans write SetEans;
   end;
@@ -1092,12 +1092,12 @@ begin
   FAtivo := AAtivo;
 end;
 
-function TPanamahProduto.GetGrupoId: variant;
+function TPanamahProduto.GetGrupoId: string;
 begin
   Result := FGrupoId;
 end;
 
-procedure TPanamahProduto.SetGrupoId(const AGrupoId: variant);
+procedure TPanamahProduto.SetGrupoId(const AGrupoId: string);
 begin
   FGrupoId := AGrupoId;
 end;
@@ -1142,12 +1142,12 @@ begin
   FSecaoId := ASecaoId;
 end;
 
-function TPanamahProduto.GetSubgrupoId: variant;
+function TPanamahProduto.GetSubGrupoId: string;
 begin
   Result := FSubgrupoId;
 end;
 
-procedure TPanamahProduto.SetSubgrupoId(const ASubgrupoId: variant);
+procedure TPanamahProduto.SetSubgrupoId(const ASubGrupoId: string);
 begin
   FSubgrupoId := ASubgrupoId;
 end;

@@ -11,7 +11,7 @@ uses
   PanamahSDK.Models.LocalEstoque, PanamahSDK.Models.Loja, PanamahSDK.Models.Meta, PanamahSDK.Models.Produto,
   PanamahSDK.Models.Revenda, PanamahSDK.Models.Secao, PanamahSDK.Models.Subgrupo, PanamahSDK.Models.TituloPagar,
   PanamahSDK.Models.TituloReceber, PanamahSDK.Models.TrocaDevolucao, PanamahSDK.Models.TrocaFormaPagamento,
-  PanamahSDK.Models.Venda, PanamahSDK.Operation;
+  PanamahSDK.Models.Venda, PanamahSDK.Operation, Variants;
 
 type
 
@@ -32,6 +32,7 @@ type
     function MoveToDirectory(const ASource, ADestiny: string): string;
     function GetCount: Integer;
     function GetHash: string;
+    function GetAssinantes: TStrings;
     function GetItem(AIndex: Integer): IPanamahOperation;
     property CreatedAt: TDateTime read GetCreatedAt write SetCreatedAt;
     property Size: Integer read GetSize;
@@ -39,6 +40,7 @@ type
     property Count: Integer read GetCount;
     property Hash: string read GetHash;
     property Items[AIndex: Integer]: IPanamahOperation read GetItem;
+    property Assinantes: TStrings read GetAssinantes;
   end;
 
   IPanamahBatchList = interface(IJSONSerializable)
@@ -56,6 +58,7 @@ type
     FOperationList: IPanamahOperationList;
     FCreatedAt: TDateTime;
     FPriority: Boolean;
+    FAssinantes: TStrings;
     procedure SetCreatedAt(ACreatedAt: TDateTime);
     procedure SetPriority(APriority: Boolean);
     procedure SaveToFile(const AFilename: string);
@@ -66,6 +69,7 @@ type
     function GetPriority: Boolean;
     function Clone: IPanamahBatch;
     function GetItem(AIndex: Integer): IPanamahOperation;
+    function GetAssinantes: TStrings;
   public
     procedure DeserializeFromJSON(const AJSON: string);
     function SerializeToJSON: string;
@@ -77,11 +81,13 @@ type
     class function FromFile(const AFilename: string): IPanamahBatch;
     procedure Add(AOperation: IPanamahOperation); overload;
     procedure RemoveFromDirectory(const ADirectory: string);
+    destructor Destroy; override;
     property Items[AIndex: Integer]: IPanamahOperation read GetItem;
   published
     property CreatedAt: TDateTime read GetCreatedAt write SetCreatedAt;
     property Size: Integer read GetSize;
     property Priority: Boolean read GetPriority write SetPriority;
+    property Assinantes: TStrings read GetAssinantes;
     constructor Create; reintroduce;
   end;
 
@@ -91,13 +97,14 @@ type
     function GetItem(AIndex: Integer): IPanamahBatch;
     procedure SetItem(AIndex: Integer; const Value: IPanamahBatch);
     procedure AddJSONObjectToList(ElName: string; Elem: TlkJSONbase; Data: pointer; var Continue: Boolean);
-    class function GetBatchesInDirectory(const ADirectory: string): TStrings;
+    class function GetBatchesInDirectory(const ADirectory, AAssinanteId: string): TStrings; overload;
+    class function GetBatchesInDirectory(const ADirectory: string): TStrings; overload;
   public
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     class function FromJSON(const AJSON: string): IPanamahBatchList;
     class function FromDirectory(const ADirectory: string): IPanamahBatchList;
-    class function CountBatchesInDirectory(const ADirectory: string): Integer;
+    class function CountBatchesInDirectory(const ADirectory: string; const AssinanteId: Variant): Integer;
     constructor Create;
     procedure Add(const AItem: IPanamahBatch);
     procedure Clear;
@@ -140,11 +147,27 @@ begin
   inherited;
   FCreatedAt := Now;
   FOperationList := TPanamahOperationList.Create;
+  FAssinantes := TStringList.Create;
 end;
 
 procedure TPanamahBatch.DeserializeFromJSON(const AJSON: string);
+var
+  I: Integer;
+  AssinanteId: Variant;
 begin
   FOperationList.DeserializeFromJSON(AJSON);
+  for I := 0 to FOperationList.Count - 1 do
+  begin
+    AssinanteId := FOperationList[I].AssinanteId;
+    if (VarToStrDef(AssinanteId, EmptyStr) <> EmptyStr) and (FAssinantes.IndexOf(AssinanteId) = -1) then
+      FAssinantes.Add(FOperationList[I].AssinanteId);
+  end;
+end;
+
+destructor TPanamahBatch.Destroy;
+begin
+  FAssinantes.Free;
+  inherited;
 end;
 
 function TPanamahBatch.SaveToDirectory(const ADirectory: string): string;
@@ -216,6 +239,11 @@ class function TPanamahBatch.FromJSON(const AJSON: string): IPanamahBatch;
 begin
   Result := TPanamahBatch.Create;
   Result.DeserializeFromJSON(AJSON);
+end;
+
+function TPanamahBatch.GetAssinantes: TStrings;
+begin
+  Result := FAssinantes;
 end;
 
 function TPanamahBatch.GetCount: Integer;
@@ -362,11 +390,11 @@ begin
   Result := FList.Count;
 end;
 
-class function TPanamahBatchList.CountBatchesInDirectory(const ADirectory: string): Integer;
+class function TPanamahBatchList.CountBatchesInDirectory(const ADirectory: string; const AssinanteId: Variant): Integer;
 var
   Batches: TStrings;
 begin
-  Batches := GetBatchesInDirectory(ADirectory);
+  Batches := GetBatchesInDirectory(ADirectory, AssinanteId);
   try
     Result := Batches.Count;
   finally
@@ -374,14 +402,21 @@ begin
   end;
 end;
 
+class function TPanamahBatchList.GetBatchesInDirectory(const ADirectory: string): TStrings;
+begin
+  Result := GetBatchesInDirectory(ADirectory, EmptyStr);
+end;
+
 function TPanamahBatchList.GetItem(AIndex: Integer): IPanamahBatch;
 begin
   Result := FList.Items[AIndex] as IPanamahBatch;
 end;
 
-class function TPanamahBatchList.GetBatchesInDirectory(const ADirectory: string): TStrings;
+class function TPanamahBatchList.GetBatchesInDirectory(const ADirectory, AAssinanteId: string): TStrings;
 var
   SearchRec: TSearchRec;
+  BatchFilename: string;
+  Batch: IPanamahBatch;
 begin
   ForceDirectories(ADirectory);
   Result := TStringList.Create;
@@ -391,7 +426,19 @@ begin
     if FindFirst(Format('%s\*.pbt', [ADirectory]), faAnyFile, SearchRec) = 0 then
     begin
       repeat
-        Result.Add(Format('%s\%s', [ADirectory, SearchRec.Name]));
+      begin
+        BatchFilename := Format('%s\%s', [ADirectory, SearchRec.Name]);
+        if not SameText(AAssinanteId, EmptyStr) then
+        begin
+          Batch := TPanamahBatch.FromFile(BatchFilename);
+          if (Batch.Assinantes.Count = 1) and SameText(Batch.Assinantes[0], AAssinanteId) then
+          begin
+            Result.Add(BatchFilename);
+          end;
+        end
+        else
+          Result.Add(BatchFilename);
+      end
       until FindNext(SearchRec) <> 0;
     end;
   end
