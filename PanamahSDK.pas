@@ -103,9 +103,6 @@ type
     destructor Destroy; override;
     class procedure Free;
     class function GetInstance: TPanamahStream;
-    function ReadNFeDirectory(const ADirectory: string): IPanamahNFeDocumentList; overload;
-    function ReadNFe(const AFilename: string): IPanamahNFeDocument; overload;
-    function ReadNFe(ADocumentType: TPanamahNFeDocumentType; const AFilename: string): IPanamahNFeDocument; overload;
     function GetPendingResources: IPanamahPendingResourcesList;
     procedure Init; overload;
     procedure Init(AConfig: IPanamahStreamConfig); overload;
@@ -113,10 +110,13 @@ type
     procedure Init(const AAuthorizationToken, ASecret, AAssinanteId: string); overload;
     procedure Flush;
 
-    procedure Save(ANFeDocumentList: IPanamahNFeDocumentList; AAssinanteId: Variant); overload;
-    procedure Save(ANFeDocument: IPanamahNFeDocument; AAssinanteId: Variant); overload;
-    procedure Save(ANFeDocumentList: IPanamahNFeDocumentList); overload;
-    procedure Save(ANFeDocument: IPanamahNFeDocument); overload;
+    function ReadNFeDirectory(const ADirectory: string): IPanamahNFeDocumentList; overload;
+    function ReadNFe(const AFilename: string): IPanamahNFeDocument; overload;
+    function ReadNFe(ADocumentType: TPanamahNFeDocumentType; const AFilename: string): IPanamahNFeDocument; overload;
+    procedure SaveNFe(ANFeDocumentList: IPanamahNFeDocumentList; AAssinanteId: Variant); overload;
+    procedure SaveNFe(ANFeDocument: IPanamahNFeDocument; AAssinanteId: Variant); overload;
+    procedure SaveNFe(ANFeDocumentList: IPanamahNFeDocumentList); overload;
+    procedure SaveNFe(ANFeDocument: IPanamahNFeDocument); overload;
 
     procedure Save(APanamahModel: IPanamahModel; AAssinanteId: Variant); overload;
     procedure Save(APanamahModel: IPanamahModel); overload;
@@ -187,6 +187,32 @@ begin
   Result := ReadNFe(ndtDESCONHECIDO, AFilename);
 end;
 
+procedure TPanamahStream.SaveNFe(ANFeDocumentList: IPanamahNFeDocumentList; AAssinanteId: Variant);
+var
+  I: Integer;
+begin
+  for I := 0 to ANFeDocumentList.Count - 1 do
+    SaveNFe(ANFeDocumentList[I], AAssinanteId);
+end;
+
+procedure TPanamahStream.SaveNFe(ANFeDocument: IPanamahNFeDocument; AAssinanteId: Variant);
+var
+  I: Integer;
+begin
+  for I := 0 to ANFeDocument.Count - 1 do
+    FProcessor.Save(ANFeDocument[I], AAssinanteId);
+end;
+
+procedure TPanamahStream.SaveNFe(ANFeDocument: IPanamahNFeDocument);
+begin
+  SaveNFe(ANFeDocument, FConfig.AssinanteId);
+end;
+
+procedure TPanamahStream.SaveNFe(ANFeDocumentList: IPanamahNFeDocumentList);
+begin
+  SaveNFe(ANFeDocumentList, FConfig.AssinanteId);
+end;
+
 procedure TPanamahStream.Init;
 begin
   Init(GetEnvironmentVariable('PANAMAH_AUTHORIZATION_TOKEN'), GetEnvironmentVariable('PANAMAH_ASSINANTE_ID'), GetEnvironmentVariable('PANAMAH_SECRET'));
@@ -248,32 +274,6 @@ begin
   FProcessor.OnError := AEvent;
 end;
 
-
-procedure TPanamahStream.Save(ANFeDocumentList: IPanamahNFeDocumentList; AAssinanteId: Variant);
-var
-  I: Integer;
-begin
-  for I := 0 to ANFeDocumentList.Count - 1 do
-    Save(ANFeDocumentList[I], AAssinanteId);
-end;
-
-procedure TPanamahStream.Save(ANFeDocument: IPanamahNFeDocument; AAssinanteId: Variant);
-var
-  I: Integer;
-begin
-  for I := 0 to ANFeDocument.Count - 1 do
-    FProcessor.Save(ANFeDocument[I], AAssinanteId);
-end;
-
-procedure TPanamahStream.Save(ANFeDocumentList: IPanamahNFeDocumentList);
-begin
-  Save(ANFeDocumentList, FConfig.AssinanteId);
-end;
-
-procedure TPanamahStream.Save(ANFeDocument: IPanamahNFeDocument);
-begin
-  Save(ANFeDocument, FConfig.AssinanteId);
-end;
 procedure TPanamahStream.Save(APanamahModel: IPanamahModel; AAssinanteId: Variant);
 begin
   FProcessor.Save(APanamahModel, AAssinanteId);
