@@ -258,7 +258,7 @@ begin
               raise EPanamahSDKServerInternalException.Create(E.Message)
             else
             if HTTP.ResponseCode = 400 then
-              raise EPanamahSDKBadRequestException.Create(E.Message)
+              raise EPanamahSDKBadRequestException.Create(Format('%s: %s', [E.ErrorMessage, E.Message]))
             else
             if (HTTP.ResponseCode = 403) or (HTTP.ResponseCode = 404) or (HTTP.ResponseCode = 409) then
             else
