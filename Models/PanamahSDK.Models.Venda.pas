@@ -93,7 +93,7 @@ type
     ['{081D5470-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetLojaId: string;
-    function GetClienteId: variant;
+    function GetClienteId: string;
     function GetFuncionarioId: string;
     function GetData: TDateTime;
     function GetDataHoraInicio: TDateTime;
@@ -115,7 +115,7 @@ type
     function GetPagamentos: IpanamahVendaPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
-    procedure SetClienteId(const AClienteId: variant);
+    procedure SetClienteId(const AClienteId: string);
     procedure SetFuncionarioId(const AFuncionarioId: string);
     procedure SetData(const AData: TDateTime);
     procedure SetDataHoraInicio(const ADataHoraInicio: TDateTime);
@@ -137,7 +137,7 @@ type
     procedure SetPagamentos(const APagamentos: IpanamahVendaPagamentoList);
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
-    property ClienteId: variant read GetClienteId write SetClienteId;
+    property ClienteId: string read GetClienteId write SetClienteId;
     property FuncionarioId: string read GetFuncionarioId write SetFuncionarioId;
     property Data: TDateTime read GetData write SetData;
     property DataHoraInicio: TDateTime read GetDataHoraInicio write SetDataHoraInicio;
@@ -315,7 +315,7 @@ type
   private
     FId: string;
     FLojaId: string;
-    FClienteId: variant;
+    FClienteId: string;
     FFuncionarioId: string;
     FData: TDateTime;
     FDataHoraInicio: TDateTime;
@@ -337,7 +337,7 @@ type
     FPagamentos: IpanamahVendaPagamentoList;
     function GetId: string;
     function GetLojaId: string;
-    function GetClienteId: variant;
+    function GetClienteId: string;
     function GetFuncionarioId: string;
     function GetData: TDateTime;
     function GetDataHoraInicio: TDateTime;
@@ -359,7 +359,7 @@ type
     function GetPagamentos: IpanamahVendaPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
-    procedure SetClienteId(const AClienteId: variant);
+    procedure SetClienteId(const AClienteId: string);
     procedure SetFuncionarioId(const AFuncionarioId: string);
     procedure SetData(const AData: TDateTime);
     procedure SetDataHoraInicio(const ADataHoraInicio: TDateTime);
@@ -390,7 +390,7 @@ type
   published
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
-    property ClienteId: variant read GetClienteId write SetClienteId;
+    property ClienteId: string read GetClienteId write SetClienteId;
     property FuncionarioId: string read GetFuncionarioId write SetFuncionarioId;
     property Data: TDateTime read GetData write SetData;
     property DataHoraInicio: TDateTime read GetDataHoraInicio write SetDataHoraInicio;
@@ -1069,12 +1069,12 @@ begin
   FLojaId := ALojaId;
 end;
 
-function TPanamahVenda.GetClienteId: variant;
+function TPanamahVenda.GetClienteId: string;
 begin
   Result := FClienteId;
 end;
 
-procedure TPanamahVenda.SetClienteId(const AClienteId: variant);
+procedure TPanamahVenda.SetClienteId(const AClienteId: string);
 begin
   FClienteId := AClienteId;
 end;
