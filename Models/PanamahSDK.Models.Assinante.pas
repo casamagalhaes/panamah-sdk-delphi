@@ -114,6 +114,7 @@ type
     property SoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList read GetSoftwaresEmContratosDeManutencao write SetSoftwaresEmContratosDeManutencao;
     property Series: IpanamahStringValueList read GetSeries write SetSeries;
     property Ativo: Boolean read GetAtivo write SetAtivo;
+    constructor Create;
   end;
 
   TPanamahAssinanteList = class(TInterfacedObject, IPanamahAssinanteList)
@@ -269,6 +270,12 @@ end;
 procedure TPanamahAssinante.SetAtivo(const AAtivo: Boolean);
 begin
   FAtivo := AAtivo;
+end;
+
+constructor TPanamahAssinante.Create;
+begin
+  inherited;
+  FAtivo := True;
 end;
 
 procedure TPanamahAssinante.DeserializeFromJSON(const AJSON: string);

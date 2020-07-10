@@ -1025,19 +1025,32 @@ begin
 end;
 
 function TPanamahAdmin.SaveAssinante(AAssinante: IPanamahAssinante): Boolean;
+
+  function IsSuccessful(AResponse: IPanamahResponse): Boolean;
+  begin
+    case AResponse.Status of
+      200, 201: Result := True;
+      422: raise EPanamahSDKUnprocessableEntityException.Create(AResponse.Content);
+      400: raise EPanamahSDKBadRequestException.Create(AResponse.Content);
+      409: raise EPanamahSDKConflictException.Create(AResponse.Content);
+      else
+        Result := False;
+    end;
+  end;
+
 var
-  Response: IPanamahResponse;
+  PostResponse, PutResponse: IPanamahResponse;
 begin
-  TPanamahLogger.Log('Creating assinante');
-  Response := FClient.Post('/admin/assinantes', AAssinante.SerializeToJSON, nil);
-  TPanamahLogger.Log(Format('Assinante create response returned %d', [Response.Status]));
-  case Response.Status of
-    201: Result := True;
-    422: raise EPanamahSDKUnprocessableEntityException.Create(Response.Content);
-    400: raise EPanamahSDKBadRequestException.Create(Response.Content);
-    409: raise EPanamahSDKConflictException.Create(Response.Content);
-    else
-      Result := False;
+  Result := True;
+  TPanamahLogger.Log(Format('Updating assinante %s', [AAssinante.Id]));
+  PutResponse := FClient.Put(Format('/admin/assinantes/%s', [AAssinante.Id]), AAssinante.SerializeToJSON, nil);
+  TPanamahLogger.Log(Format('Assinante update response returned %d', [PutResponse.Status]));
+  if not IsSuccessful(PutResponse) then
+  begin
+    TPanamahLogger.Log('Assinante not found, creating...');
+    PostResponse := FClient.Post('/admin/assinantes', AAssinante.SerializeToJSON, nil);
+    TPanamahLogger.Log(Format('Assinante create response returned %d', [PostResponse.Status]));
+    Result := IsSuccessful(PostResponse);
   end;
 end;
 
