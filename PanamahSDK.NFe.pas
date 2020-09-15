@@ -404,6 +404,7 @@ begin
     Produtos := DeserializeProdutosFromProd(ANFeXML);
     Document := CreateDocument(ANFeXML);
     Result.Id := TPanamahNFeDeserializer.GetIdFromXML(ANFeXML);
+    Result.XML := ANFeXML;
     Result.LojaId := XPathValue(Document, '//*[local-name()=''emit'']/*[local-name()=''CNPJ'']');
     Result.ClienteId :=
       CoalesceText(

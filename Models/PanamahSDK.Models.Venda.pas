@@ -4,10 +4,11 @@ unit PanamahSDK.Models.Venda;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, DateUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON,
+  PanamahSDK.XMLUtils;
 
 type
-  
+
   IPanamahVendaPagamento = interface(IPanamahModel)
     ['{081DA299-7736-11E9-A131-EBAF8D88186A}']
     function GetFormaPagamentoId: string;
@@ -107,6 +108,8 @@ type
     function GetServico: Double;
     function GetTipoDesconto: variant;
     function GetTipoPreco: string;
+    function GetXML: string;
+    function GetChave: string;
     function GetValor: Double;
     function GetValorItensCancelados: Double;
     function GetAcrescimo: Double;
@@ -129,6 +132,8 @@ type
     procedure SetServico(const AServico: Double);
     procedure SetTipoDesconto(const ATipoDesconto: variant);
     procedure SetTipoPreco(const ATipoPreco: string);
+    procedure SetXML(const AXML: string);
+    procedure SetChave(const AChave: string);
     procedure SetValor(const AValor: Double);
     procedure SetValorItensCancelados(const AValorItensCancelados: Double);
     procedure SetAcrescimo(const AAcrescimo: Double);
@@ -151,6 +156,8 @@ type
     property Servico: Double read GetServico write SetServico;
     property TipoDesconto: variant read GetTipoDesconto write SetTipoDesconto;
     property TipoPreco: string read GetTipoPreco write SetTipoPreco;
+    property XML: string read GetXML write SetXML;
+    property Chave: string read GetChave write SetChave;
     property Valor: Double read GetValor write SetValor;
     property ValorItensCancelados: Double read GetValorItensCancelados write SetValorItensCancelados;
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
@@ -335,6 +342,8 @@ type
     FNumeroCaixa: variant;
     FItens: IpanamahVendaItemList;
     FPagamentos: IpanamahVendaPagamentoList;
+    FChave: string;
+    FXML: string;
     function GetId: string;
     function GetLojaId: string;
     function GetClienteId: string;
@@ -357,6 +366,8 @@ type
     function GetNumeroCaixa: variant;
     function GetItens: IpanamahVendaItemList;
     function GetPagamentos: IpanamahVendaPagamentoList;
+    function GetXML: string;
+    function GetChave: string;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
     procedure SetClienteId(const AClienteId: string);
@@ -379,6 +390,9 @@ type
     procedure SetNumeroCaixa(const ANumeroCaixa: variant);
     procedure SetItens(const AItens: IpanamahVendaItemList);
     procedure SetPagamentos(const APagamentos: IpanamahVendaPagamentoList);
+    procedure SetXML(const AXML: string);
+    procedure SetChaveByXML(const AXML: string);
+    procedure SetChave(const AChave: string);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -453,7 +467,7 @@ type
 implementation
 
 uses
-  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils, PanamahSDK.NFe, XMLIntf;
 
 { TPanamahVendaPagamento }
 
@@ -1069,9 +1083,25 @@ begin
   FLojaId := ALojaId;
 end;
 
+function TPanamahVenda.GetChave: string;
+begin
+  Result := FChave;
+end;
+
 function TPanamahVenda.GetClienteId: string;
 begin
   Result := FClienteId;
+end;
+
+procedure TPanamahVenda.SetChave(const AChave: string);
+begin
+  FChave := AChave;
+end;
+
+procedure TPanamahVenda.SetChaveByXML(const AXML: string);
+begin
+  if FChave = EmptyStr then
+    FChave := OnlyNumbers(TPanamahNFeDeserializer.GetIdFromXML(AXML));
 end;
 
 procedure TPanamahVenda.SetClienteId(const AClienteId: string);
@@ -1224,9 +1254,20 @@ begin
   Result := FValorItensCancelados;
 end;
 
+function TPanamahVenda.GetXML: string;
+begin
+  Result := FXML;
+end;
+
 procedure TPanamahVenda.SetValorItensCancelados(const AValorItensCancelados: Double);
 begin
   FValorItensCancelados := AValorItensCancelados;
+end;
+
+procedure TPanamahVenda.SetXML(const AXML: string);
+begin
+  FXML := AXML;
+  SetChaveByXML(AXML);
 end;
 
 function TPanamahVenda.GetAcrescimo: Double;
@@ -1301,6 +1342,8 @@ begin
     FValorItensCancelados := GetFieldValueAsDouble(JSONObject, 'valorItensCancelados');
     FAcrescimo := GetFieldValueAsDouble(JSONObject, 'acrescimo');
     FNumeroCaixa := GetFieldValue(JSONObject, 'numeroCaixa');
+    FXML := DecodeB64(GetFieldValue(JSONObject, 'xml'));
+    FChave := GetFieldValue(JSONObject, 'chave');
     if JSONObject.Field['itens'] is TlkJSONlist then
       FItens := TpanamahVendaItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
     if JSONObject.Field['pagamentos'] is TlkJSONlist then
@@ -1332,7 +1375,11 @@ begin
     SetFieldValue(JSONObject, 'servico', FServico);    
     SetFieldValue(JSONObject, 'tipoDesconto', FTipoDesconto);    
     SetFieldValue(JSONObject, 'tipoPreco', FTipoPreco);    
-    SetFieldValue(JSONObject, 'valor', FValor);    
+    SetFieldValue(JSONObject, 'valor', FValor);
+    if FXML <> EmptyStr then
+      SetFieldValue(JSONObject, 'xml', EncodeB64(FXML), [sfoKEEPCASE]);
+    if FChave <> EmptyStr then
+      SetFieldValue(JSONObject, 'chave', FChave);
     SetFieldValue(JSONObject, 'valorItensCancelados', FValorItensCancelados);    
     SetFieldValue(JSONObject, 'acrescimo', FAcrescimo);    
     SetFieldValue(JSONObject, 'numeroCaixa', VarToStrDef(FNumeroCaixa, EmptyStr));
@@ -1482,6 +1529,50 @@ function TPanamahVendaValidator.Validate(AModel: IPanamahModel): IPanamahValidat
 var
   Venda: IPanamahVenda;
   Validations: IPanamahValidationResultList;
+
+  procedure ValidateXML(const AXML: string);
+  var
+    Document: IXMLDocument;
+    NfeValor: Double;
+    NfeChave: string;
+    NfeData: TDateTime;
+  begin
+    with TPanamahXMLHelper do
+    begin
+      Document := CreateDocument(AXML);
+      NfeValor := DecimalDotStringToDouble(XPathValue(Document, '//*[local-name()=''total'']/*[local-name()=''ICMSTot'']/*[local-name()=''vNF'']'));
+      NfeChave := OnlyNumbers(XPathValue(Document, '//*[local-name()=''infNFe'']/@Id'));
+      NfeData := ISO8601ToDateTime(XPathValue(Document, '//*[local-name()=''dhEmi'']'));
+
+      if (Venda.Chave <> EmptyStr) and (Venda.Chave <> NfeChave) then
+      begin
+        Validations.AddFailure(Format(
+          'Venda.Chave difere da chave da NF-e (Venda.XML). [Venda.Chave: %s | NFe.Id: %s]', [
+          Venda.Chave,
+          NFeChave
+        ]));
+      end;
+
+      if (Venda.Valor <> NfeValor) then
+      begin
+        Validations.AddFailure(Format(
+          'Venda.Valor difere da chave da NF-e (Venda.XML). [Venda.Valor: %s | NFe.vNF: %s]', [
+          FloatToStr(Venda.Valor),
+          FloatToStr(NFeValor)
+        ]));
+      end;
+
+      if DaysBetween(Venda.Data, NfeData) > 0 then
+      begin
+        Validations.AddFailure(Format(
+          'Venda.Data difere da data de emissão da NF-e (Venda.XML). [Venda.Data: %s | NFe.dhEmi: %s]', [
+          DateTimeToISO8601(Venda.Data),
+          DateTimeToISO8601(NfeData)
+        ]));
+      end;
+    end;
+  end;
+
 begin
   Venda := AModel as IPanamahVenda;
   Validations := TPanamahValidationResultList.Create;
@@ -1500,7 +1591,7 @@ begin
 
   if not IsValueBetween(Venda.ValorItensCancelados, -999999999.99, 999999999.99) then
     Validations.AddFailure('Venda.ValorItensCancelados ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
-  
+
   if ModelDateValueIsEmpty(Venda.DataHoraVenda) then
     Validations.AddFailure('Venda.DataHoraVenda obrigatorio(a)');
   
@@ -1519,7 +1610,12 @@ begin
     Validations.AddFailure('Venda.Pagamentos obrigatorio(a)')
   else
     Validations.Add(Venda.Pagamentos.Validate);
-  
+
+  if not ModelValueIsEmpty(Venda.XML) then
+  begin
+    ValidateXML(Venda.XML);
+  end;
+
   Result := Validations.GetAggregate;
 end;
 

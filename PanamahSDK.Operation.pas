@@ -229,7 +229,7 @@ begin
   JSONObject := TlkJSONobject.Create;
   try
     if not ModelValueIsEmpty(FAssinanteId) then
-      SetFieldValue(JSONObject, 'assinanteId', FAssinanteId);
+      SetFieldValue(JSONObject, 'assinanteId', FAssinanteId, [sfoKEEPCASE]);
     case FOperationType of
       otUPDATE:
       begin
