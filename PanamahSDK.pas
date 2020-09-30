@@ -213,8 +213,11 @@ type
     procedure Delete(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
     procedure Delete(AVenda: IPanamahVenda); overload;
 
+    procedure SaveModel(APanamahModel: IPanamahModel); overload;
+    procedure SaveModel(APanamahModel: IPanamahModel; AAssinanteId: Variant); overload;
     procedure DeleteModel(APanamahModel: IPanamahModel); overload;
     procedure DeleteModel(APanamahModel: IPanamahModel; AAssinanteId: Variant); overload;
+
     property OnCurrentBatchExpired: TPanamahBatchEvent read GetOnCurrentBatchExpired write SetOnCurrentBatchExpired;
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
@@ -709,6 +712,16 @@ end;
 procedure TPanamahStream.Save(AVenda: IPanamahVenda);
 begin
   Save(AVenda, FConfig.AssinanteId);
+end;
+
+procedure TPanamahStream.SaveModel(APanamahModel: IPanamahModel; AAssinanteId: Variant);
+begin
+  FProcessor.Save(APanamahModel, AAssinanteId);
+end;
+
+procedure TPanamahStream.SaveModel(APanamahModel: IPanamahModel);
+begin
+  SaveModel(APanamahModel, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AAcesso: IPanamahAcesso);
