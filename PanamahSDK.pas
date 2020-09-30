@@ -284,7 +284,7 @@ end;
 
 procedure TPanamahStream.Init;
 begin
-  Init(GetEnvironmentVariable('PANAMAH_AUTHORIZATION_TOKEN'), GetEnvironmentVariable('PANAMAH_ASSINANTE_ID'), GetEnvironmentVariable('PANAMAH_SECRET'));
+  Init(GetEnvironmentVariable('PANAMAH_AUTHORIZATION_TOKEN'), GetEnvironmentVariable('PANAMAH_SECRET'), GetEnvironmentVariable('PANAMAH_ASSINANTE_ID'));
 end;
 
 procedure TPanamahStream.SetOnAfterDelete(AEvent: TPanamahModelEvent);
