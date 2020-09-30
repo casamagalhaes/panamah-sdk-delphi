@@ -1531,6 +1531,21 @@ var
   Validations: IPanamahValidationResultList;
 
   procedure ValidateXML(const AXML: string);
+
+    function Coalesce(const AValue, ASubstitute: string): string; overload;
+    begin
+      Result := AValue;
+      if AValue = EmptyStr then
+        Result := ASubstitute;
+    end;
+
+    function Coalesce(const AValue, ASubstitute: TDateTime): TDateTime; overload;
+    begin
+      Result := AValue;
+      if AValue = 0 then
+        Result := ASubstitute;
+    end;
+
   var
     Document: IXMLDocument;
     NfeValor: Double;
@@ -1540,14 +1555,25 @@ var
     with TPanamahXMLHelper do
     begin
       Document := CreateDocument(AXML);
-      NfeValor := DecimalDotStringToDouble(XPathValue(Document, '//*[local-name()=''total'']/*[local-name()=''ICMSTot'']/*[local-name()=''vNF'']'));
-      NfeChave := OnlyNumbers(XPathValue(Document, '//*[local-name()=''infNFe'']/@Id'));
-      NfeData := ISO8601ToDateTime(XPathValue(Document, '//*[local-name()=''dhEmi'']'));
+      NfeValor := DecimalDotStringToDouble(
+        Coalesce(
+          XPathValue(Document, '//*[local-name()=''total'']/*[local-name()=''ICMSTot'']/*[local-name()=''vNF'']'),
+          XPathValue(Document, '//*[local-name()=''total'']/*[local-name()=''vCFe'']')
+      ));
+      NfeChave := OnlyNumbers(
+        Coalesce(
+          XPathValue(Document, '//*[local-name()=''infNFe'']/@Id'),
+          XPathValue(Document, '//*[local-name()=''infCFe'']/@Id')
+      ));
+      NfeData := Coalesce(
+        ISO8601ToDateTime(XPathValue(Document, '//*[local-name()=''dhEmi'']')),
+        ConcatenatedYearMonthDayToDateTime(XPathValue(Document, '//*[local-name()=''dEmi'']') + XPathValue(Document, '//*[local-name()=''hEmi'']'))
+      );
 
       if (Venda.Chave <> EmptyStr) and (Venda.Chave <> NfeChave) then
       begin
         Validations.AddFailure(Format(
-          'Venda.Chave difere da chave da NF-e (Venda.XML). [Venda.Chave: %s | NFe.Id: %s]', [
+          'Venda.Chave difere da chave da NF-e (Venda.XML). [Venda.Chave: %s | infCFe[Id] ou infCFe[Id]: %s]', [
           Venda.Chave,
           NFeChave
         ]));
@@ -1556,7 +1582,7 @@ var
       if (Venda.Valor <> NfeValor) then
       begin
         Validations.AddFailure(Format(
-          'Venda.Valor difere da chave da NF-e (Venda.XML). [Venda.Valor: %s | NFe.vNF: %s]', [
+          'Venda.Valor difere da chave da NF-e (Venda.XML). [Venda.Valor: %s | NFe[vNF] ou CFe[vCFe]: %s]', [
           FloatToStr(Venda.Valor),
           FloatToStr(NFeValor)
         ]));
@@ -1565,7 +1591,7 @@ var
       if DaysBetween(Venda.Data, NfeData) > 0 then
       begin
         Validations.AddFailure(Format(
-          'Venda.Data difere da data de emissão da NF-e (Venda.XML). [Venda.Data: %s | NFe.dhEmi: %s]', [
+          'Venda.Data difere da data de emissão da NF-e (Venda.XML). [Venda.Data: %s | NFe[dhEmi] ou CFe[dEmi]: %s]', [
           DateTimeToISO8601(Venda.Data),
           DateTimeToISO8601(NfeData)
         ]));
