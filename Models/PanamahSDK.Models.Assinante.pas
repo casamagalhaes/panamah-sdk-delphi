@@ -22,6 +22,8 @@ type
     function GetSoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList;
     function GetSeries: IpanamahStringValueList;
     function GetAtivo: Boolean;
+    function GetOficial: Boolean;
+    function GetChave: string;
     procedure SetId(const AId: string);
     procedure SetNome(const ANome: string);
     procedure SetFantasia(const AFantasia: string);
@@ -34,6 +36,8 @@ type
     procedure SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList);
     procedure SetSeries(const ASeries: IpanamahStringValueList);
     procedure SetAtivo(const AAtivo: Boolean);
+    procedure SetOficial(const AOficial: Boolean);
+    procedure SetChave(const AChave: string);
     property Id: string read GetId write SetId;
     property Nome: string read GetNome write SetNome;
     property Fantasia: string read GetFantasia write SetFantasia;
@@ -46,6 +50,8 @@ type
     property SoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList read GetSoftwaresEmContratosDeManutencao write SetSoftwaresEmContratosDeManutencao;
     property Series: IpanamahStringValueList read GetSeries write SetSeries;
     property Ativo: Boolean read GetAtivo write SetAtivo;
+    property Oficial: Boolean read GetOficial write SetOficial;
+    property Chave: string read GetChave write SetChave;
   end;
 
   IPanamahAssinanteList = interface(IPanamahModelList)
@@ -70,6 +76,8 @@ type
     FSoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList;
     FSeries: IpanamahStringValueList;
     FAtivo: Boolean;
+    FOficial: Boolean;
+    FChave: string;
     function GetId: string;
     function GetNome: string;
     function GetFantasia: string;
@@ -82,6 +90,8 @@ type
     function GetSoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList;
     function GetSeries: IpanamahStringValueList;
     function GetAtivo: Boolean;
+    function GetOficial: Boolean;
+    function GetChave: string;
     procedure SetId(const AId: string);
     procedure SetNome(const ANome: string);
     procedure SetFantasia(const AFantasia: string);
@@ -94,8 +104,11 @@ type
     procedure SetSoftwaresEmContratosDeManutencao(const ASoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList);
     procedure SetSeries(const ASeries: IpanamahStringValueList);
     procedure SetAtivo(const AAtivo: Boolean);
+    procedure SetOficial(const AOficial: Boolean);
+    procedure SetChave(const AChave: string);
     function GetModelName: string;
   public
+    constructor Create;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
@@ -114,7 +127,8 @@ type
     property SoftwaresEmContratosDeManutencao: IpanamahSoftwareContratoManutencaoList read GetSoftwaresEmContratosDeManutencao write SetSoftwaresEmContratosDeManutencao;
     property Series: IpanamahStringValueList read GetSeries write SetSeries;
     property Ativo: Boolean read GetAtivo write SetAtivo;
-    constructor Create;
+    property Oficial: Boolean read GetOficial write SetOficial;
+    property Chave: string read GetChave write SetChave;
   end;
 
   TPanamahAssinanteList = class(TInterfacedObject, IPanamahAssinanteList)
@@ -187,9 +201,19 @@ begin
   Result := FRamo;
 end;
 
+function TPanamahAssinante.GetChave: string;
+begin
+  Result := FChave;
+end;
+
 procedure TPanamahAssinante.SetRamo(const ARamo: string);
 begin
   FRamo := ARamo;
+end;
+
+procedure TPanamahAssinante.SetChave(const AChave: string);
+begin
+  FChave := AChave;
 end;
 
 function TPanamahAssinante.GetUf: string;
@@ -267,15 +291,26 @@ begin
   Result := FAtivo;
 end;
 
+function TPanamahAssinante.GetOficial: Boolean;
+begin
+  Result := FOficial;
+end;
+
 procedure TPanamahAssinante.SetAtivo(const AAtivo: Boolean);
 begin
   FAtivo := AAtivo;
+end;
+
+procedure TPanamahAssinante.SetOficial(const AOficial: Boolean);
+begin
+  FOficial := AOficial;
 end;
 
 constructor TPanamahAssinante.Create;
 begin
   inherited;
   FAtivo := True;
+  FOficial := True;
 end;
 
 procedure TPanamahAssinante.DeserializeFromJSON(const AJSON: string);
@@ -299,6 +334,8 @@ begin
     if JSONObject.Field['series'] is TlkJSONlist then
       FSeries := TpanamahStringValueList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['series']));
     FAtivo := GetFieldValueAsBoolean(JSONObject, 'ativo');
+    FOficial := GetFieldValueAsBoolean(JSONObject, 'oficial');
+    FChave := GetFieldValueAsString(JSONObject, 'chave');
   finally
     JSONObject.Free;
   end;
@@ -322,6 +359,8 @@ begin
     SetFieldValue(JSONObject, 'softwaresEmContratosDeManutencao', FSoftwaresEmContratosDeManutencao);
     SetFieldValue(JSONObject, 'series', FSeries);
     SetFieldValue(JSONObject, 'ativo', FAtivo);
+    SetFieldValue(JSONObject, 'oficial', FOficial);
+    SetFieldValue(JSONObject, 'chave', FChave);
     Result := TlkJSON.GenerateText(JSONObject);
   finally
     JSONObject.Free;

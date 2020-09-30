@@ -138,6 +138,7 @@ type
     procedure SetQtdFuncionarios(const AQtdFuncionarios: Double);
     function GetModelName: string;    
   public
+    constructor Create;
     function SerializeToJSON: string;
     procedure DeserializeFromJSON(const AJSON: string);
     function Clone: IPanamahModel;
@@ -388,6 +389,12 @@ end;
 procedure TPanamahLoja.SetQtdFuncionarios(const AQtdFuncionarios: Double);
 begin
   FQtdFuncionarios := AQtdFuncionarios;
+end;
+
+constructor TPanamahLoja.Create;
+begin
+  inherited;
+  FAtiva := True;
 end;
 
 procedure TPanamahLoja.DeserializeFromJSON(const AJSON: string);
