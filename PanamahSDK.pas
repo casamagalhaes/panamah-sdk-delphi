@@ -586,242 +586,242 @@ end;
 
 procedure TPanamahStream.Save(ANFeDocumentList: IPanamahNFeDocumentList);
 begin
-  Save(ANFeDocumentList, varEmpty);
+  Save(ANFeDocumentList, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ANFeDocument: IPanamahNFeDocument);
 begin
-  Save(ANFeDocument, varEmpty);
+  Save(ANFeDocument, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AAcesso: IPanamahAcesso);
 begin
-  Save(AAcesso, varEmpty);
+  Save(AAcesso, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ACliente: IPanamahCliente);
 begin
-  Save(ACliente, varEmpty);
+  Save(ACliente, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ACompra: IPanamahCompra);
 begin
-  Save(ACompra, varEmpty);
+  Save(ACompra, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AEan: IPanamahEan);
 begin
-  Save(AEan, varEmpty);
+  Save(AEan, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao);
 begin
-  Save(AEstoqueMovimentacao, varEmpty);
+  Save(AEstoqueMovimentacao, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AEventoCaixa: IPanamahEventoCaixa);
 begin
-  Save(AEventoCaixa, varEmpty);
+  Save(AEventoCaixa, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AFormaPagamento: IPanamahFormaPagamento);
 begin
-  Save(AFormaPagamento, varEmpty);
+  Save(AFormaPagamento, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AFornecedor: IPanamahFornecedor);
 begin
-  Save(AFornecedor, varEmpty);
+  Save(AFornecedor, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AFuncionario: IPanamahFuncionario);
 begin
-  Save(AFuncionario, varEmpty);
+  Save(AFuncionario, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AGrupo: IPanamahGrupo);
 begin
-  Save(AGrupo, varEmpty);
+  Save(AGrupo, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AHolding: IPanamahHolding);
 begin
-  Save(AHolding, varEmpty);
+  Save(AHolding, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ALocalEstoque: IPanamahLocalEstoque);
 begin
-  Save(ALocalEstoque, varEmpty);
+  Save(ALocalEstoque, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ALoja: IPanamahLoja);
 begin
-  Save(ALoja, varEmpty);
+  Save(ALoja, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AMeta: IPanamahMeta);
 begin
-  Save(AMeta, varEmpty);
+  Save(AMeta, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AProduto: IPanamahProduto);
 begin
-  Save(AProduto, varEmpty);
+  Save(AProduto, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ARevenda: IPanamahRevenda);
 begin
-  Save(ARevenda, varEmpty);
+  Save(ARevenda, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ASecao: IPanamahSecao);
 begin
-  Save(ASecao, varEmpty);
+  Save(ASecao, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ASubgrupo: IPanamahSubgrupo);
 begin
-  Save(ASubgrupo, varEmpty);
+  Save(ASubgrupo, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ATituloPagar: IPanamahTituloPagar);
 begin
-  Save(ATituloPagar, varEmpty);
+  Save(ATituloPagar, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ATituloReceber: IPanamahTituloReceber);
 begin
-  Save(ATituloReceber, varEmpty);
+  Save(ATituloReceber, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ATrocaDevolucao: IPanamahTrocaDevolucao);
 begin
-  Save(ATrocaDevolucao, varEmpty);
+  Save(ATrocaDevolucao, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
 begin
-  Save(ATrocaFormaPagamento, varEmpty);
+  Save(ATrocaFormaPagamento, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Save(AVenda: IPanamahVenda);
 begin
-  Save(AVenda, varEmpty);
+  Save(AVenda, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AAcesso: IPanamahAcesso);
 begin
-  Delete(AAcesso, varEmpty);
+  Delete(AAcesso, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ACliente: IPanamahCliente);
 begin
-  Delete(ACliente, varEmpty);
+  Delete(ACliente, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ACompra: IPanamahCompra);
 begin
-  Delete(ACompra, varEmpty);
+  Delete(ACompra, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AEan: IPanamahEan);
 begin
-  Delete(AEan, varEmpty);
+  Delete(AEan, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AEstoqueMovimentacao: IPanamahEstoqueMovimentacao);
 begin
-  Delete(AEstoqueMovimentacao, varEmpty);
+  Delete(AEstoqueMovimentacao, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AEventoCaixa: IPanamahEventoCaixa);
 begin
-  Delete(AEventoCaixa, varEmpty);
+  Delete(AEventoCaixa, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AFormaPagamento: IPanamahFormaPagamento);
 begin
-  Delete(AFormaPagamento, varEmpty);
+  Delete(AFormaPagamento, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AFornecedor: IPanamahFornecedor);
 begin
-  Delete(AFornecedor, varEmpty);
+  Delete(AFornecedor, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AFuncionario: IPanamahFuncionario);
 begin
-  Delete(AFuncionario, varEmpty);
+  Delete(AFuncionario, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AGrupo: IPanamahGrupo);
 begin
-  Delete(AGrupo, varEmpty);
+  Delete(AGrupo, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AHolding: IPanamahHolding);
 begin
-  Delete(AHolding, varEmpty);
+  Delete(AHolding, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ALocalEstoque: IPanamahLocalEstoque);
 begin
-  Delete(ALocalEstoque, varEmpty);
+  Delete(ALocalEstoque, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ALoja: IPanamahLoja);
 begin
-  Delete(ALoja, varEmpty);
+  Delete(ALoja, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AMeta: IPanamahMeta);
 begin
-  Delete(AMeta, varEmpty);
+  Delete(AMeta, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AProduto: IPanamahProduto);
 begin
-  Delete(AProduto, varEmpty);
+  Delete(AProduto, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ARevenda: IPanamahRevenda);
 begin
-  Delete(ARevenda, varEmpty);
+  Delete(ARevenda, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ASecao: IPanamahSecao);
 begin
-  Delete(ASecao, varEmpty);
+  Delete(ASecao, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ASubgrupo: IPanamahSubgrupo);
 begin
-  Delete(ASubgrupo, varEmpty);
+  Delete(ASubgrupo, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ATituloPagar: IPanamahTituloPagar);
 begin
-  Delete(ATituloPagar, varEmpty);
+  Delete(ATituloPagar, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ATituloReceber: IPanamahTituloReceber);
 begin
-  Delete(ATituloReceber, varEmpty);
+  Delete(ATituloReceber, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ATrocaDevolucao: IPanamahTrocaDevolucao);
 begin
-  Delete(ATrocaDevolucao, varEmpty);
+  Delete(ATrocaDevolucao, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento);
 begin
-  Delete(ATrocaFormaPagamento, varEmpty);
+  Delete(ATrocaFormaPagamento, FConfig.AssinanteId);
 end;
 
 procedure TPanamahStream.Delete(AVenda: IPanamahVenda);
 begin
-  Delete(AVenda, varEmpty);
+  Delete(AVenda, FConfig.AssinanteId);
 end;
 
 constructor TPanamahStream.Create;
@@ -1067,19 +1067,32 @@ begin
 end;
 
 function TPanamahAdmin.SaveAssinante(AAssinante: IPanamahAssinante): Boolean;
+
+  function IsSuccessful(AResponse: IPanamahResponse): Boolean;
+  begin
+    case AResponse.Status of
+      200, 201: Result := True;
+      422: raise EPanamahSDKUnprocessableEntityException.Create(AResponse.Content);
+      400: raise EPanamahSDKBadRequestException.Create(AResponse.Content);
+      409: raise EPanamahSDKConflictException.Create(AResponse.Content);
+      else
+        Result := False;
+    end;
+  end;
+
 var
-  Response: IPanamahResponse;
+  PostResponse, PutResponse: IPanamahResponse;
 begin
-  TPanamahLogger.Log('Creating assinante');
-  Response := FClient.Post('/admin/assinantes', AAssinante.SerializeToJSON, nil);
-  TPanamahLogger.Log(Format('Assinante create response returned %d', [Response.Status]));
-  case Response.Status of
-    201: Result := True;
-    422: raise EPanamahSDKUnprocessableEntityException.Create(Response.Content);
-    400: raise EPanamahSDKBadRequestException.Create(Response.Content);
-    409: raise EPanamahSDKConflictException.Create(Response.Content);
-    else
-      Result := False;
+  Result := True;
+  TPanamahLogger.Log(Format('Updating assinante %s', [AAssinante.Id]));
+  PutResponse := FClient.Put(Format('/admin/assinantes/%s', [AAssinante.Id]), AAssinante.SerializeToJSON, nil);
+  TPanamahLogger.Log(Format('Assinante update response returned %d', [PutResponse.Status]));
+  if not IsSuccessful(PutResponse) then
+  begin
+    TPanamahLogger.Log('Assinante not found, creating...');
+    PostResponse := FClient.Post('/admin/assinantes', AAssinante.SerializeToJSON, nil);
+    TPanamahLogger.Log(Format('Assinante create response returned %d', [PostResponse.Status]));
+    Result := IsSuccessful(PostResponse);
   end;
 end;
 

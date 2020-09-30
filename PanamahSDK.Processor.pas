@@ -254,7 +254,7 @@ var
   AccumulatedBatchesCount: Integer;
 begin
   TPanamahLogger.Log('Checking for accumulated batches');
-  AccumulatedBatchesCount := TPanamahBatchList.CountBatchesInDirectory(GetBatchAccumulationDirectory);
+  AccumulatedBatchesCount := TPanamahBatchList.CountBatchesInDirectory(GetBatchAccumulationDirectory, FConfig.AssinanteId);
   TPanamahLogger.Log(Format('Found %d accumulated batch(es)', [AccumulatedBatchesCount]));
   Result := AccumulatedBatchesCount > 0;
 end;
@@ -425,10 +425,10 @@ begin
   TPanamahLogger.Log('Flushing stream');
   if FCurrentBatch.Count > 0 then
   begin
-    TPanamahLogger.Log(Format('Current batch has %d entities', [FCurrentBatch.Count]));
+    TPanamahLogger.Log(Format('Current open batch has %d entities, accumulating...', [FCurrentBatch.Count]));
     AccumulateCurrentBatch;
-    SendAccumulatedBatches;
   end;
+  SendAccumulatedBatches;
 end;
 
 procedure TPanamahBatchProcessor.LoadCurrentBatch;
@@ -547,55 +547,67 @@ begin
   FCriticalSection.Acquire;
   try
     AccumulatedBatches := TPanamahBatchList.FromDirectory(GetBatchAccumulationDirectory);
-  finally
-    FCriticalSection.Release;
-  end;
-  TPanamahLogger.Log(Format('Lodaded %d batches from accumulating directory', [AccumulatedBatches.Count]));
-  for I := 0 to AccumulatedBatches.Count - 1 do
-  begin
-    if AccumulatedBatches[I].Count > 0 then
+    TPanamahLogger.Log(Format('Loaded %d batches from accumulating directory', [AccumulatedBatches.Count]));
+    for I := 0 to AccumulatedBatches.Count - 1 do
     begin
-      TPanamahLogger.Log(Format('Found %d entities in batch number %d', [AccumulatedBatches[I].Count, I]));
-      DoOnBeforeBatchSent(AccumulatedBatches[I].Clone);
-      TPanamahLogger.Log('Before sent hook executed, requesting /stream/data');
-      Response := FClient.Post('/stream/data', AccumulatedBatches[I].SerializeToJSON, nil);
-      TPanamahLogger.Log(Format('Request to /stream/data executed with status %d', [Response.Status]));
-      if Response.Status = 200 then
+      if AccumulatedBatches[I].Count > 0 then
       begin
-        BatchResponse := TPanamahBatchResponse.FromJSON(Response.Content);
-        TPanamahLogger.Log('Response deserialized');
-        if Assigned(BatchResponse.Falhas) and
-            (BatchResponse.Falhas.Total > 0) then
+        if FConfig.AssinanteId <> '*' then
         begin
-          TPanamahLogger.Log('Some operations failed, creating batch with failures');
-          CreateBatchWithFailedOperations(AccumulatedBatches[I], BatchResponse.Falhas.Itens);
-          Break;
-        end
-        else
-        begin
-          TPanamahLogger.Log('Triggering AfterSync hook');
-          TriggerAfterSync(AccumulatedBatches[I]);
-          TPanamahLogger.Log('Success, moving batch to sent directory');
-          FCriticalSection.Acquire;
-          try
-            AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
-          finally
-            FCriticalSection.Release;
+          TPanamahLogger.Log(Format('Found %d entities in batch number %d', [AccumulatedBatches[I].Count, I]));
+          if AccumulatedBatches[I].Assinantes.Count > 1 then
+          begin
+            TPanamahLogger.Log(Format('Multiple assinantes found inside batch number %d, ignoring...', [AccumulatedBatches[I].Count, I]));
+            Continue;
+          end
+          else
+          if AccumulatedBatches[I].Assinantes.Count = 1 then
+          begin
+            TPanamahLogger.Log(Format('Single assinante %s found inside batch number %d', [AccumulatedBatches[I].Assinantes[0], I]));
+            if AccumulatedBatches[I].Assinantes[0] <> FConfig.AssinanteId then
+            begin
+              TPanamahLogger.Log('Assinante not logged in, ignoring...');
+              Continue;
+            end;
+          end
+          else
+          begin
+            TPanamahLogger.Log(Format('No assinantes found inside batch number %d, using %s', [I, FConfig.AssinanteId]));
           end;
-          TPanamahLogger.Log('Done');
         end;
-      end;
-    end
-    else
-    begin
-      TPanamahLogger.Log('Batch was empty, discarding');
-      FCriticalSection.Acquire;
-      try
+        DoOnBeforeBatchSent(AccumulatedBatches[I].Clone);
+        TPanamahLogger.Log('Before sent hook executed, requesting /stream/data');
+        Response := FClient.Post('/stream/data', AccumulatedBatches[I].SerializeToJSON, nil);
+        TPanamahLogger.Log(Format('Request to /stream/data executed with status %d', [Response.Status]));
+        if Response.Status = 200 then
+        begin
+          BatchResponse := TPanamahBatchResponse.FromJSON(Response.Content);
+          TPanamahLogger.Log('Response deserialized');
+          if Assigned(BatchResponse.Falhas) and
+              (BatchResponse.Falhas.Total > 0) then
+          begin
+            TPanamahLogger.Log('Some operations failed, creating batch with failures');
+            CreateBatchWithFailedOperations(AccumulatedBatches[I], BatchResponse.Falhas.Itens);
+            Break;
+          end
+          else
+          begin
+            TPanamahLogger.Log('Triggering AfterSync hook');
+            TriggerAfterSync(AccumulatedBatches[I]);
+            TPanamahLogger.Log('Success, moving batch to sent directory');
+            AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
+            TPanamahLogger.Log('Done');
+          end;
+        end;
+      end
+      else
+      begin
+        TPanamahLogger.Log('Batch was empty, discarding');
         AccumulatedBatches[I].MoveToDirectory(GetBatchAccumulationDirectory, GetBatchSentDirectory);
-      finally
-        FCriticalSection.Release;
       end;
     end;
+  finally
+    FCriticalSection.Release;
   end;
 end;
 

@@ -4,10 +4,11 @@ unit PanamahSDK.Models.Venda;
 interface
 
 uses
-  Classes, SysUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON;
+  Classes, SysUtils, DateUtils, PanamahSDK.Types, PanamahSDK.Enums, Variants, uLkJSON,
+  PanamahSDK.XMLUtils;
 
 type
-  
+
   IPanamahVendaPagamento = interface(IPanamahModel)
     ['{081DA299-7736-11E9-A131-EBAF8D88186A}']
     function GetFormaPagamentoId: string;
@@ -34,7 +35,7 @@ type
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetEfetivo: Boolean;
-    function GetFuncionarioId: variant;
+    function GetFuncionarioId: string;
     function GetPreco: Double;
     function GetProdutoId: string;
     function GetCodigoRegistrado: string;
@@ -50,7 +51,7 @@ type
     procedure SetAcrescimo(const AAcrescimo: Double);
     procedure SetDesconto(const ADesconto: Double);
     procedure SetEfetivo(const AEfetivo: Boolean);
-    procedure SetFuncionarioId(const AFuncionarioId: variant);
+    procedure SetFuncionarioId(const AFuncionarioId: string);
     procedure SetPreco(const APreco: Double);
     procedure SetProdutoId(const AProdutoId: string);
     procedure SetCodigoRegistrado(const ACodigoRegistrado: string);
@@ -66,7 +67,7 @@ type
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
     property Desconto: Double read GetDesconto write SetDesconto;
     property Efetivo: Boolean read GetEfetivo write SetEfetivo;
-    property FuncionarioId: variant read GetFuncionarioId write SetFuncionarioId;
+    property FuncionarioId: string read GetFuncionarioId write SetFuncionarioId;
     property Preco: Double read GetPreco write SetPreco;
     property ProdutoId: string read GetProdutoId write SetProdutoId;
     property CodigoRegistrado: string read GetCodigoRegistrado write SetCodigoRegistrado;
@@ -93,8 +94,8 @@ type
     ['{081D5470-7736-11E9-A131-EBAF8D88186A}']
     function GetId: string;
     function GetLojaId: string;
-    function GetClienteId: variant;
-    function GetFuncionarioId: variant;
+    function GetClienteId: string;
+    function GetFuncionarioId: string;
     function GetData: TDateTime;
     function GetDataHoraInicio: TDateTime;
     function GetDataHoraFim: TDateTime;
@@ -107,6 +108,8 @@ type
     function GetServico: Double;
     function GetTipoDesconto: variant;
     function GetTipoPreco: string;
+    function GetXML: string;
+    function GetChave: string;
     function GetValor: Double;
     function GetValorItensCancelados: Double;
     function GetAcrescimo: Double;
@@ -115,8 +118,8 @@ type
     function GetPagamentos: IpanamahVendaPagamentoList;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
-    procedure SetClienteId(const AClienteId: variant);
-    procedure SetFuncionarioId(const AFuncionarioId: variant);
+    procedure SetClienteId(const AClienteId: string);
+    procedure SetFuncionarioId(const AFuncionarioId: string);
     procedure SetData(const AData: TDateTime);
     procedure SetDataHoraInicio(const ADataHoraInicio: TDateTime);
     procedure SetDataHoraFim(const ADataHoraFim: TDateTime);
@@ -129,6 +132,8 @@ type
     procedure SetServico(const AServico: Double);
     procedure SetTipoDesconto(const ATipoDesconto: variant);
     procedure SetTipoPreco(const ATipoPreco: string);
+    procedure SetXML(const AXML: string);
+    procedure SetChave(const AChave: string);
     procedure SetValor(const AValor: Double);
     procedure SetValorItensCancelados(const AValorItensCancelados: Double);
     procedure SetAcrescimo(const AAcrescimo: Double);
@@ -137,8 +142,8 @@ type
     procedure SetPagamentos(const APagamentos: IpanamahVendaPagamentoList);
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
-    property ClienteId: variant read GetClienteId write SetClienteId;
-    property FuncionarioId: variant read GetFuncionarioId write SetFuncionarioId;
+    property ClienteId: string read GetClienteId write SetClienteId;
+    property FuncionarioId: string read GetFuncionarioId write SetFuncionarioId;
     property Data: TDateTime read GetData write SetData;
     property DataHoraInicio: TDateTime read GetDataHoraInicio write SetDataHoraInicio;
     property DataHoraFim: TDateTime read GetDataHoraFim write SetDataHoraFim;
@@ -151,6 +156,8 @@ type
     property Servico: Double read GetServico write SetServico;
     property TipoDesconto: variant read GetTipoDesconto write SetTipoDesconto;
     property TipoPreco: string read GetTipoPreco write SetTipoPreco;
+    property XML: string read GetXML write SetXML;
+    property Chave: string read GetChave write SetChave;
     property Valor: Double read GetValor write SetValor;
     property ValorItensCancelados: Double read GetValorItensCancelados write SetValorItensCancelados;
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
@@ -218,7 +225,7 @@ type
     FAcrescimo: Double;
     FDesconto: Double;
     FEfetivo: Boolean;
-    FFuncionarioId: variant;
+    FFuncionarioId: string;
     FPreco: Double;
     FProdutoId: string;
     FCodigoRegistrado: string;
@@ -234,7 +241,7 @@ type
     function GetAcrescimo: Double;
     function GetDesconto: Double;
     function GetEfetivo: Boolean;
-    function GetFuncionarioId: variant;
+    function GetFuncionarioId: string;
     function GetPreco: Double;
     function GetProdutoId: string;
     function GetCodigoRegistrado: string;
@@ -250,7 +257,7 @@ type
     procedure SetAcrescimo(const AAcrescimo: Double);
     procedure SetDesconto(const ADesconto: Double);
     procedure SetEfetivo(const AEfetivo: Boolean);
-    procedure SetFuncionarioId(const AFuncionarioId: variant);
+    procedure SetFuncionarioId(const AFuncionarioId: string);
     procedure SetPreco(const APreco: Double);
     procedure SetProdutoId(const AProdutoId: string);
     procedure SetCodigoRegistrado(const ACodigoRegistrado: string);
@@ -274,7 +281,7 @@ type
     property Acrescimo: Double read GetAcrescimo write SetAcrescimo;
     property Desconto: Double read GetDesconto write SetDesconto;
     property Efetivo: Boolean read GetEfetivo write SetEfetivo;
-    property FuncionarioId: variant read GetFuncionarioId write SetFuncionarioId;
+    property FuncionarioId: string read GetFuncionarioId write SetFuncionarioId;
     property Preco: Double read GetPreco write SetPreco;
     property ProdutoId: string read GetProdutoId write SetProdutoId;
     property CodigoRegistrado: string read GetCodigoRegistrado write SetCodigoRegistrado;
@@ -315,8 +322,8 @@ type
   private
     FId: string;
     FLojaId: string;
-    FClienteId: variant;
-    FFuncionarioId: variant;
+    FClienteId: string;
+    FFuncionarioId: string;
     FData: TDateTime;
     FDataHoraInicio: TDateTime;
     FDataHoraFim: TDateTime;
@@ -335,10 +342,12 @@ type
     FNumeroCaixa: variant;
     FItens: IpanamahVendaItemList;
     FPagamentos: IpanamahVendaPagamentoList;
+    FChave: string;
+    FXML: string;
     function GetId: string;
     function GetLojaId: string;
-    function GetClienteId: variant;
-    function GetFuncionarioId: variant;
+    function GetClienteId: string;
+    function GetFuncionarioId: string;
     function GetData: TDateTime;
     function GetDataHoraInicio: TDateTime;
     function GetDataHoraFim: TDateTime;
@@ -357,10 +366,12 @@ type
     function GetNumeroCaixa: variant;
     function GetItens: IpanamahVendaItemList;
     function GetPagamentos: IpanamahVendaPagamentoList;
+    function GetXML: string;
+    function GetChave: string;
     procedure SetId(const AId: string);
     procedure SetLojaId(const ALojaId: string);
-    procedure SetClienteId(const AClienteId: variant);
-    procedure SetFuncionarioId(const AFuncionarioId: variant);
+    procedure SetClienteId(const AClienteId: string);
+    procedure SetFuncionarioId(const AFuncionarioId: string);
     procedure SetData(const AData: TDateTime);
     procedure SetDataHoraInicio(const ADataHoraInicio: TDateTime);
     procedure SetDataHoraFim(const ADataHoraFim: TDateTime);
@@ -379,6 +390,9 @@ type
     procedure SetNumeroCaixa(const ANumeroCaixa: variant);
     procedure SetItens(const AItens: IpanamahVendaItemList);
     procedure SetPagamentos(const APagamentos: IpanamahVendaPagamentoList);
+    procedure SetXML(const AXML: string);
+    procedure SetChaveByXML(const AXML: string);
+    procedure SetChave(const AChave: string);
     function GetModelName: string;    
   public
     function SerializeToJSON: string;
@@ -390,8 +404,8 @@ type
   published
     property Id: string read GetId write SetId;
     property LojaId: string read GetLojaId write SetLojaId;
-    property ClienteId: variant read GetClienteId write SetClienteId;
-    property FuncionarioId: variant read GetFuncionarioId write SetFuncionarioId;
+    property ClienteId: string read GetClienteId write SetClienteId;
+    property FuncionarioId: string read GetFuncionarioId write SetFuncionarioId;
     property Data: TDateTime read GetData write SetData;
     property DataHoraInicio: TDateTime read GetDataHoraInicio write SetDataHoraInicio;
     property DataHoraFim: TDateTime read GetDataHoraFim write SetDataHoraFim;
@@ -453,7 +467,7 @@ type
 implementation
 
 uses
-  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils;
+  PanamahSDK.JsonUtils, PanamahSDK.ValidationUtils, PanamahSDK.NFe, XMLIntf;
 
 { TPanamahVendaPagamento }
 
@@ -702,12 +716,12 @@ begin
   FEfetivo := AEfetivo;
 end;
 
-function TPanamahVendaItem.GetFuncionarioId: variant;
+function TPanamahVendaItem.GetFuncionarioId: string;
 begin
   Result := FFuncionarioId;
 end;
 
-procedure TPanamahVendaItem.SetFuncionarioId(const AFuncionarioId: variant);
+procedure TPanamahVendaItem.SetFuncionarioId(const AFuncionarioId: string);
 begin
   FFuncionarioId := AFuncionarioId;
 end;
@@ -1069,22 +1083,38 @@ begin
   FLojaId := ALojaId;
 end;
 
-function TPanamahVenda.GetClienteId: variant;
+function TPanamahVenda.GetChave: string;
+begin
+  Result := FChave;
+end;
+
+function TPanamahVenda.GetClienteId: string;
 begin
   Result := FClienteId;
 end;
 
-procedure TPanamahVenda.SetClienteId(const AClienteId: variant);
+procedure TPanamahVenda.SetChave(const AChave: string);
+begin
+  FChave := AChave;
+end;
+
+procedure TPanamahVenda.SetChaveByXML(const AXML: string);
+begin
+  if FChave = EmptyStr then
+    FChave := OnlyNumbers(TPanamahNFeDeserializer.GetIdFromXML(AXML));
+end;
+
+procedure TPanamahVenda.SetClienteId(const AClienteId: string);
 begin
   FClienteId := AClienteId;
 end;
 
-function TPanamahVenda.GetFuncionarioId: variant;
+function TPanamahVenda.GetFuncionarioId: string;
 begin
   Result := FFuncionarioId;
 end;
 
-procedure TPanamahVenda.SetFuncionarioId(const AFuncionarioId: variant);
+procedure TPanamahVenda.SetFuncionarioId(const AFuncionarioId: string);
 begin
   FFuncionarioId := AFuncionarioId;
 end;
@@ -1224,9 +1254,20 @@ begin
   Result := FValorItensCancelados;
 end;
 
+function TPanamahVenda.GetXML: string;
+begin
+  Result := FXML;
+end;
+
 procedure TPanamahVenda.SetValorItensCancelados(const AValorItensCancelados: Double);
 begin
   FValorItensCancelados := AValorItensCancelados;
+end;
+
+procedure TPanamahVenda.SetXML(const AXML: string);
+begin
+  FXML := AXML;
+  SetChaveByXML(AXML);
 end;
 
 function TPanamahVenda.GetAcrescimo: Double;
@@ -1301,6 +1342,8 @@ begin
     FValorItensCancelados := GetFieldValueAsDouble(JSONObject, 'valorItensCancelados');
     FAcrescimo := GetFieldValueAsDouble(JSONObject, 'acrescimo');
     FNumeroCaixa := GetFieldValue(JSONObject, 'numeroCaixa');
+    FXML := DecodeB64(GetFieldValue(JSONObject, 'xml'));
+    FChave := GetFieldValue(JSONObject, 'chave');
     if JSONObject.Field['itens'] is TlkJSONlist then
       FItens := TpanamahVendaItemList.FromJSON(TlkJSON.GenerateText(JSONObject.Field['itens']));
     if JSONObject.Field['pagamentos'] is TlkJSONlist then
@@ -1332,7 +1375,11 @@ begin
     SetFieldValue(JSONObject, 'servico', FServico);    
     SetFieldValue(JSONObject, 'tipoDesconto', FTipoDesconto);    
     SetFieldValue(JSONObject, 'tipoPreco', FTipoPreco);    
-    SetFieldValue(JSONObject, 'valor', FValor);    
+    SetFieldValue(JSONObject, 'valor', FValor);
+    if FXML <> EmptyStr then
+      SetFieldValue(JSONObject, 'xml', EncodeB64(FXML), [sfoKEEPCASE]);
+    if FChave <> EmptyStr then
+      SetFieldValue(JSONObject, 'chave', FChave);
     SetFieldValue(JSONObject, 'valorItensCancelados', FValorItensCancelados);    
     SetFieldValue(JSONObject, 'acrescimo', FAcrescimo);    
     SetFieldValue(JSONObject, 'numeroCaixa', VarToStrDef(FNumeroCaixa, EmptyStr));
@@ -1482,6 +1529,76 @@ function TPanamahVendaValidator.Validate(AModel: IPanamahModel): IPanamahValidat
 var
   Venda: IPanamahVenda;
   Validations: IPanamahValidationResultList;
+
+  procedure ValidateXML(const AXML: string);
+
+    function Coalesce(const AValue, ASubstitute: string): string; overload;
+    begin
+      Result := AValue;
+      if AValue = EmptyStr then
+        Result := ASubstitute;
+    end;
+
+    function Coalesce(const AValue, ASubstitute: TDateTime): TDateTime; overload;
+    begin
+      Result := AValue;
+      if AValue = 0 then
+        Result := ASubstitute;
+    end;
+
+  var
+    Document: IXMLDocument;
+    NfeValor: Double;
+    NfeChave: string;
+    NfeData: TDateTime;
+  begin
+    with TPanamahXMLHelper do
+    begin
+      Document := CreateDocument(AXML);
+      NfeValor := DecimalDotStringToDouble(
+        Coalesce(
+          XPathValue(Document, '//*[local-name()=''total'']/*[local-name()=''ICMSTot'']/*[local-name()=''vNF'']'),
+          XPathValue(Document, '//*[local-name()=''total'']/*[local-name()=''vCFe'']')
+      ));
+      NfeChave := OnlyNumbers(
+        Coalesce(
+          XPathValue(Document, '//*[local-name()=''infNFe'']/@Id'),
+          XPathValue(Document, '//*[local-name()=''infCFe'']/@Id')
+      ));
+      NfeData := Coalesce(
+        ISO8601ToDateTime(XPathValue(Document, '//*[local-name()=''dhEmi'']')),
+        ConcatenatedYearMonthDayToDateTime(XPathValue(Document, '//*[local-name()=''dEmi'']') + XPathValue(Document, '//*[local-name()=''hEmi'']'))
+      );
+
+      if (Venda.Chave <> EmptyStr) and (Venda.Chave <> NfeChave) then
+      begin
+        Validations.AddFailure(Format(
+          'Venda.Chave difere da chave da NF-e (Venda.XML). [Venda.Chave: %s | infCFe[Id] ou infCFe[Id]: %s]', [
+          Venda.Chave,
+          NFeChave
+        ]));
+      end;
+
+      if (Venda.Valor <> NfeValor) then
+      begin
+        Validations.AddFailure(Format(
+          'Venda.Valor difere da chave da NF-e (Venda.XML). [Venda.Valor: %s | NFe[vNF] ou CFe[vCFe]: %s]', [
+          FloatToStr(Venda.Valor),
+          FloatToStr(NFeValor)
+        ]));
+      end;
+
+      if DaysBetween(Venda.Data, NfeData) > 0 then
+      begin
+        Validations.AddFailure(Format(
+          'Venda.Data difere da data de emissão da NF-e (Venda.XML). [Venda.Data: %s | NFe[dhEmi] ou CFe[dEmi]: %s]', [
+          DateTimeToISO8601(Venda.Data),
+          DateTimeToISO8601(NfeData)
+        ]));
+      end;
+    end;
+  end;
+
 begin
   Venda := AModel as IPanamahVenda;
   Validations := TPanamahValidationResultList.Create;
@@ -1500,7 +1617,7 @@ begin
 
   if not IsValueBetween(Venda.ValorItensCancelados, -999999999.99, 999999999.99) then
     Validations.AddFailure('Venda.ValorItensCancelados ultrapassou limite mínimo ou máximo permitido. (Min: -999999999.99, Max: 999999999.99)');
-  
+
   if ModelDateValueIsEmpty(Venda.DataHoraVenda) then
     Validations.AddFailure('Venda.DataHoraVenda obrigatorio(a)');
   
@@ -1519,7 +1636,12 @@ begin
     Validations.AddFailure('Venda.Pagamentos obrigatorio(a)')
   else
     Validations.Add(Venda.Pagamentos.Validate);
-  
+
+  if not ModelValueIsEmpty(Venda.XML) then
+  begin
+    ValidateXML(Venda.XML);
+  end;
+
   Result := Validations.GetAggregate;
 end;
 

@@ -3,7 +3,7 @@ unit PanamahSDK.Types;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, uLkJSON, Windows, PanamahSDK.Consts;
+  Classes, SysUtils, StrUtils, uLkJSON, Windows, PanamahSDK.Consts, IdCoderMIME;
 
 type
 
@@ -185,9 +185,12 @@ type
   function CoalesceText(const AText, ATextIfNull: string): string;
   function DateTimeToISO8601(const AInput: TDateTime): string;
   function ISO8601ToDateTime(const AInput: string): TDateTime;
+  function ConcatenatedYearMonthDayToDateTime(const AInput: string): TDateTime;
   function DecimalDotStringToDouble(const AString: string): Double;
   function TzSpecificLocalTimeToSystemTime(lpTimeZoneInformation: PTimeZoneInformation; var lpLocalTime, lpUniversalTime: TSystemTime): BOOL; stdcall;
   function NowUTC: TDateTime;
+  function EncodeB64(const Text: AnsiString): AnsiString;
+  function DecodeB64(const Text: AnsiString): AnsiString;
 
 implementation
 
@@ -465,6 +468,29 @@ begin
     end;
 end;
 
+function ConcatenatedYearMonthDayToDateTime(const AInput: string): TDateTime;
+var
+  Day, Month, Year, Hour, Minute, Second: Word;
+begin
+  if Trim(AInput) = EmptyStr then
+    Result := 0
+  else
+    try
+      Year := StrToInt(Copy(AInput, 1, 4));
+      Month := StrToInt(Copy(AInput, 5, 2));
+      Day := StrToInt(Copy(AInput, 7, 2));
+      Hour := StrToIntDef(Copy(AInput, 9, 2), 0);
+      Minute := StrToIntDef(Copy(AInput, 11, 2), 0);
+      Second := StrToIntDef(Copy(AInput, 13, 2), 0);
+      Result := EncodeDate(Year, Month, Day) + EncodeTime(Hour, Minute, Second, 0);
+    except
+      on E: Exception do
+      begin
+        raise e.Create('Falha na conversao de data');
+      end;
+    end;
+end;
+
 function DecimalDotStringToDouble(const AString: string): Double;
 var
   Value: string;
@@ -503,6 +529,25 @@ begin
     if {$IFDEF UNICODE}CharInSet(AText[I], ['0'..'9']){$ELSE}AText[I] in ['0'..'9']{$ENDIF} then
       Result := Result + AText[I];
   end;
+end;
+
+
+function EncodeB64(const Text: AnsiString): AnsiString;
+var
+  Encoder : TIdEncoderMime;
+begin
+  Encoder := TIdEncoderMime.Create(nil);
+  Result := Encoder.EncodeString(Text);
+  FreeAndNil(Encoder);
+end;
+
+function DecodeB64(const Text: AnsiString): AnsiString;
+var
+  Decoder : TIdDecoderMime;
+begin
+  Decoder := TIdDecoderMime.Create(nil);
+  Result := Decoder.DecodeString(Text);
+  FreeAndNil(Decoder)
 end;
 
 end.
