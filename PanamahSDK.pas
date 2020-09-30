@@ -245,7 +245,7 @@ uses
 procedure TPanamahStream.Init(AConfig: IPanamahStreamConfig);
 begin
   FConfig := AConfig;
-  if not {$IFDEF UNICODE}FProcessor.Started{$ELSE}not FProcessor.Suspended{$ENDIF} then
+  if {$IFDEF UNICODE}not FProcessor.Started{$ELSE}FProcessor.Suspended{$ENDIF} then
     FProcessor.Start(FConfig);
 end;
 
