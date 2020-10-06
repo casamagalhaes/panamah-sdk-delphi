@@ -64,6 +64,7 @@ type
   public
     procedure Init(AConfig: IPanamahAdminConfig); overload;
     procedure Init(const AAuthorizationToken: string); overload;
+    function GetSerie(const ASerie: string): IPanamahSerieQueryResponse;
     function GetAssinante(const AAssinanteId: string): IPanamahAssinante;
     function GenerateKey(const AAssinanteId: string): string;
     function ResetKey(const AAssinanteId, AOldKey: string): string;
@@ -1101,6 +1102,16 @@ begin
   if not Assigned(_PanamahAdminInstance) then
     _PanamahAdminInstance := TPanamahAdmin.Create;
   Result := _PanamahAdminInstance;
+end;
+
+function TPanamahAdmin.GetSerie(
+  const ASerie: string): IPanamahSerieQueryResponse;
+var
+  RawResponse: IPanamahResponse;
+begin
+  RawResponse := FClient.Get(Format('/admin/series/%s', [ASerie]), nil, nil);
+  if RawResponse.Status = 200 then
+    Result := TPanamahSerieQueryResponse.Create(RawResponse.Content);
 end;
 
 procedure TPanamahAdmin.Init(const AAuthorizationToken: string);

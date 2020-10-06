@@ -95,6 +95,16 @@ type
     property BatchMaxCount: Integer read GetBatchMaxCount;
   end;
 
+  IPanamahSerieQueryResponse = interface
+    ['{186000E6-4A94-4901-92AD-9468B2D2B87F}']
+    function GetChave: string;
+    function GetDataAtivacao: TDateTime;
+    procedure SetChave(const AChave: string);
+    procedure SetDataAtivacao(const ADataAtivacao: TDateTime);
+    property Chave: string read GetChave write SetChave;
+    property DataAtivacao: TDateTime read GetDataAtivacao write SetDataAtivacao;
+  end;
+
   TMethod = (mtGET, mtPOST, mtPUT, mtDELETE);
 
   IPanamahStringValueList = interface(IJSONSerializable)
@@ -159,6 +169,21 @@ type
     destructor Destroy; override;
     function GetAggregate: IPanamahValidationResult;
     property Items[AIndex: Integer]: IPanamahValidationResult read GetItem write SetItem; default;
+  end;
+
+  TPanamahSerieQueryResponse = class(TInterfacedObject, IPanamahSerieQueryResponse)
+  private
+    FChave: string;
+    FDataAtivacao: TDateTime;
+    function GetChave: string;
+    function GetDataAtivacao: TDateTime;
+    procedure SetChave(const AChave: string);
+    procedure SetDataAtivacao(const ADataAtivacao: TDateTime);
+  public
+    property Chave: string read GetChave write SetChave;
+    property DataAtivacao: TDateTime read GetDataAtivacao write SetDataAtivacao;
+    constructor Create; overload;
+    constructor Create(const AJSON: string); overload;
   end;
 
   {Exceptions}
@@ -548,6 +573,51 @@ begin
   Decoder := TIdDecoderMime.Create(nil);
   Result := Decoder.DecodeString(Text);
   FreeAndNil(Decoder)
+end;
+
+{ TPanamahSerieQueryResponse }
+
+constructor TPanamahSerieQueryResponse.Create;
+begin
+  inherited Create;
+end;
+
+constructor TPanamahSerieQueryResponse.Create(const AJSON: string);
+var
+  JsonObject: TlkJSONobject;
+begin
+  inherited Create;
+  JsonObject := TlkJSON.ParseText(AJSON) as TlkJSONobject;
+  try
+    with JsonObject.Field['assinante'] as TlkJSONobject do
+    begin
+      FChave := Field['chave'].Value;
+      FDataAtivacao := ISO8601ToDateTime(Field['dataAtivacao'].Value);
+    end;
+  finally
+    JsonObject.Free;
+  end;
+end;
+
+function TPanamahSerieQueryResponse.GetChave: string;
+begin
+  Result := FChave;
+end;
+
+function TPanamahSerieQueryResponse.GetDataAtivacao: TDateTime;
+begin
+  Result := FDataAtivacao;
+end;
+
+procedure TPanamahSerieQueryResponse.SetChave(const AChave: string);
+begin
+  FChave := AChave;
+end;
+
+procedure TPanamahSerieQueryResponse.SetDataAtivacao(
+  const ADataAtivacao: TDateTime);
+begin
+  FDataAtivacao := ADataAtivacao;
 end;
 
 end.
